@@ -74,6 +74,10 @@ var _fileLoader = __webpack_require__(2);
 
 var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
+var _numberRecogniser = __webpack_require__(4);
+
+var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
+
 var _songPlayer = __webpack_require__(1);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
@@ -81,9 +85,10 @@ var _songPlayer2 = _interopRequireDefault(_songPlayer);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var songUrlInput = document.getElementById('songUrl');
-var loadSongButton = document.getElementById('loadSong');
+var startBarkeepButton = document.getElementById('startBarkeep');
+var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
-loadSongButton.onclick = function () {
+startBarkeepButton.onclick = function () {
     var fileLoader = new _fileLoader2.default();
     fileLoader.loadByUrl(songUrlInput.value).then(function (fileData) {
         var songPlayer = new _songPlayer2.default(fileData);
@@ -91,6 +96,12 @@ loadSongButton.onclick = function () {
             return songPlayer.play();
         });
     });
+
+    var onNumberRecognised = function onNumberRecognised(n) {
+        recognisedNumberDisplayElement.innerHTML = n;
+    };
+    var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
+    numberRecogniser.startListening();
 };
 
 /***/ }),
@@ -194,6 +205,67 @@ var FileLoader = function () {
 }();
 
 exports.default = FileLoader;
+
+/***/ }),
+/* 3 */,
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NumberRecogniser = function () {
+    function NumberRecogniser(onNumberRecognised) {
+        _classCallCheck(this, NumberRecogniser);
+
+        this.onNumberRecognised = onNumberRecognised;
+    }
+
+    _createClass(NumberRecogniser, [{
+        key: 'startListening',
+        value: function startListening() {
+            var _this = this;
+
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // recognition.continuous = true;
+            // TODO: other languages?
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+            recognition.start();
+
+            recognition.onaudioend = function (ev) {
+                // start listening again after audio ends
+                _this.startListening();
+            };
+
+            recognition.onresult = function (ev) {
+                var results = ev.results[0];
+                for (var i = 0; i < results.length; i++) {
+                    var candidateNumber = Number.parseInt(results[i].transcript);
+                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
+                        _this.onNumberRecognised(candidateNumber);
+                        // keep listening for more
+                        _this.startListening();
+                        break;
+                    }
+                }
+            };
+        }
+    }]);
+
+    return NumberRecogniser;
+}();
+
+exports.default = NumberRecogniser;
 
 /***/ })
 /******/ ]);

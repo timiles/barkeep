@@ -3,3 +3,7 @@ body {
     max-width: 600px;
     margin: auto;
 }
+
+#recognisedNumberDisplay {
+    font-size: xx-large;
+}

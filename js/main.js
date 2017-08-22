@@ -1,10 +1,12 @@
 import FileLoader from './file-loader'
+import NumberRecogniser from './number-recogniser'
 import SongPlayer from './song-player'
 
 let songUrlInput = document.getElementById('songUrl');
-let loadSongButton = document.getElementById('loadSong');
+let startBarkeepButton = document.getElementById('startBarkeep');
+let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
-loadSongButton.onclick = () => {
+startBarkeepButton.onclick = () => {
     let fileLoader = new FileLoader();
     fileLoader.loadByUrl(songUrlInput.value)
         .then(fileData => {
@@ -12,5 +14,10 @@ loadSongButton.onclick = () => {
             songPlayer.init()
                 .then(() => songPlayer.play());
         });
+    
+    let onNumberRecognised = (n) => {
+        recognisedNumberDisplayElement.innerHTML = n;
+    }
+    let numberRecogniser = new NumberRecogniser(onNumberRecognised);
+    numberRecogniser.startListening();
 }
-
