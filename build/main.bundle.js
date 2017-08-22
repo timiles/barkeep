@@ -70,7 +70,130 @@
 "use strict";
 
 
-alert('hello world');
+var _fileLoader = __webpack_require__(2);
+
+var _fileLoader2 = _interopRequireDefault(_fileLoader);
+
+var _songPlayer = __webpack_require__(1);
+
+var _songPlayer2 = _interopRequireDefault(_songPlayer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var songUrlInput = document.getElementById('songUrl');
+var loadSongButton = document.getElementById('loadSong');
+
+loadSongButton.onclick = function () {
+    var fileLoader = new _fileLoader2.default();
+    fileLoader.loadByUrl(songUrlInput.value).then(function (fileData) {
+        var songPlayer = new _songPlayer2.default(fileData);
+        songPlayer.init().then(function () {
+            return songPlayer.play();
+        });
+    });
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongPlayer = function () {
+    function SongPlayer(fileData) {
+        var _this = this;
+
+        _classCallCheck(this, SongPlayer);
+
+        this.fileData = fileData;
+
+        this.init = function () {
+            return new Promise(function (resolve, reject) {
+                _this.context = new (window.AudioContext || window.webkitAudioContext)();
+
+                var self = _this;
+                _this.context.decodeAudioData(_this.fileData, function (buffer) {
+                    self.buffer = buffer;
+                    resolve();
+                }, function (e) {
+                    console.error(e);
+                    reject();
+                });
+            });
+        };
+    }
+
+    _createClass(SongPlayer, [{
+        key: "play",
+        value: function play() {
+            var source = this.context.createBufferSource();
+            source.buffer = this.buffer;
+            source.connect(this.context.destination);
+            source.start(0);
+        }
+    }]);
+
+    return SongPlayer;
+}();
+
+exports.default = SongPlayer;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileLoader = function () {
+    function FileLoader() {
+        _classCallCheck(this, FileLoader);
+    }
+
+    _createClass(FileLoader, [{
+        key: 'loadByUrl',
+        value: function loadByUrl(url) {
+            return new Promise(function (resolve, reject) {
+                var _this = this;
+
+                var request = new XMLHttpRequest();
+                request.open('GET', url);
+                request.responseType = 'arraybuffer';
+                request.onload = function () {
+                    resolve(request.response);
+                };
+                request.onerror = function () {
+                    reject({
+                        status: _this.status,
+                        statusText: request.statusText
+                    });
+                };
+                request.send();
+            });
+        }
+    }]);
+
+    return FileLoader;
+}();
+
+exports.default = FileLoader;
 
 /***/ })
 /******/ ]);
