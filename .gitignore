@@ -1,1 +1,4 @@
 node_modules
+
+audio/*
+!audio/not just jazz.mp3
