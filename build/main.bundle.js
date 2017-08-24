@@ -70,46 +70,179 @@
 "use strict";
 
 
-var _fileLoader = __webpack_require__(2);
+var _fileLoader = __webpack_require__(1);
 
 var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
-var _numberRecogniser = __webpack_require__(4);
+var _numberRecogniser = __webpack_require__(2);
 
 var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
 
-var _songPlayer = __webpack_require__(1);
+var _songPlayer = __webpack_require__(3);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var songUrlInput = document.getElementById('songUrl');
-var beatsPerMinuteInput = document.getElementById('beatsPerMinute');
-var beatsPerBarInput = document.getElementById('beatsPerBar');
-var startBarkeepButton = document.getElementById('startBarkeep');
-var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
+if (_numberRecogniser2.default.checkCompatibility()) {
+    init();
+}
 
-startBarkeepButton.onclick = function () {
-    var songPlayer = void 0;
-    var fileLoader = new _fileLoader2.default();
-    fileLoader.loadByUrl(songUrlInput.value).then(function (fileData) {
-        songPlayer = new _songPlayer2.default(fileData, beatsPerMinuteInput.value, beatsPerBarInput.value);
-        songPlayer.init().then(function () {
-            songPlayer.play();
+function init() {
+    var songUrlInput = document.getElementById('songUrl');
+    var beatsPerMinuteInput = document.getElementById('beatsPerMinute');
+    var beatsPerBarInput = document.getElementById('beatsPerBar');
+    var startBarkeepButton = document.getElementById('startBarkeep');
+    var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
+
+    startBarkeepButton.onclick = function () {
+        var songPlayer = void 0;
+        var fileLoader = new _fileLoader2.default();
+        fileLoader.loadByUrl(songUrlInput.value).then(function (fileData) {
+            songPlayer = new _songPlayer2.default(fileData, beatsPerMinuteInput.value, beatsPerBarInput.value);
+            songPlayer.init().then(function () {
+                songPlayer.play();
+            });
         });
-    });
 
-    var onNumberRecognised = function onNumberRecognised(n) {
-        recognisedNumberDisplayElement.innerHTML = n;
-        songPlayer.play(n);
+        var onNumberRecognised = function onNumberRecognised(n) {
+            recognisedNumberDisplayElement.innerHTML = n;
+            songPlayer.play(n);
+        };
+        var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
+        numberRecogniser.startListening();
     };
-    var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
-    numberRecogniser.startListening();
-};
+}
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileLoader = function () {
+    function FileLoader() {
+        _classCallCheck(this, FileLoader);
+    }
+
+    _createClass(FileLoader, [{
+        key: 'loadByUrl',
+        value: function loadByUrl(url) {
+            return new Promise(function (resolve, reject) {
+                var _this = this;
+
+                var request = new XMLHttpRequest();
+                request.open('GET', url);
+                request.responseType = 'arraybuffer';
+                request.onload = function () {
+                    resolve(request.response);
+                };
+                request.onerror = function () {
+                    reject({
+                        status: _this.status,
+                        statusText: request.statusText
+                    });
+                };
+                request.send();
+            });
+        }
+    }]);
+
+    return FileLoader;
+}();
+
+exports.default = FileLoader;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NumberRecogniser = function () {
+    function NumberRecogniser(onNumberRecognised) {
+        _classCallCheck(this, NumberRecogniser);
+
+        this.onNumberRecognised = onNumberRecognised;
+    }
+
+    _createClass(NumberRecogniser, [{
+        key: 'startListening',
+        value: function startListening() {
+            var _this = this;
+
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // recognition.continuous = true;
+            // TODO: other languages?
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+            recognition.start();
+
+            recognition.onaudioend = function (ev) {
+                // start listening again after audio ends
+                _this.startListening();
+            };
+
+            recognition.onresult = function (ev) {
+                var results = ev.results[0];
+                for (var i = 0; i < results.length; i++) {
+                    var candidateNumber = Number.parseInt(results[i].transcript);
+                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
+                        _this.onNumberRecognised(candidateNumber);
+                        // keep listening for more
+                        _this.startListening();
+                        break;
+                    }
+                }
+            };
+        }
+    }], [{
+        key: 'checkCompatibility',
+        value: function checkCompatibility() {
+            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
+                return false;
+            }
+            var isLocalhost = location.host.startsWith('localhost');
+            if (isLocalhost) {
+                return true;
+            }
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            if (isChrome && location.protocol !== 'https:') {
+                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
+                location.protocol = 'https:';
+                return false;
+            }
+            return true;
+        }
+    }]);
+
+    return NumberRecogniser;
+}();
+
+exports.default = NumberRecogniser;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -180,115 +313,6 @@ var SongPlayer = function () {
 }();
 
 exports.default = SongPlayer;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileLoader = function () {
-    function FileLoader() {
-        _classCallCheck(this, FileLoader);
-    }
-
-    _createClass(FileLoader, [{
-        key: 'loadByUrl',
-        value: function loadByUrl(url) {
-            return new Promise(function (resolve, reject) {
-                var _this = this;
-
-                var request = new XMLHttpRequest();
-                request.open('GET', url);
-                request.responseType = 'arraybuffer';
-                request.onload = function () {
-                    resolve(request.response);
-                };
-                request.onerror = function () {
-                    reject({
-                        status: _this.status,
-                        statusText: request.statusText
-                    });
-                };
-                request.send();
-            });
-        }
-    }]);
-
-    return FileLoader;
-}();
-
-exports.default = FileLoader;
-
-/***/ }),
-/* 3 */,
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var NumberRecogniser = function () {
-    function NumberRecogniser(onNumberRecognised) {
-        _classCallCheck(this, NumberRecogniser);
-
-        this.onNumberRecognised = onNumberRecognised;
-    }
-
-    _createClass(NumberRecogniser, [{
-        key: 'startListening',
-        value: function startListening() {
-            var _this = this;
-
-            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            // recognition.continuous = true;
-            // TODO: other languages?
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 5;
-            recognition.start();
-
-            recognition.onaudioend = function (ev) {
-                // start listening again after audio ends
-                _this.startListening();
-            };
-
-            recognition.onresult = function (ev) {
-                var results = ev.results[0];
-                for (var i = 0; i < results.length; i++) {
-                    var candidateNumber = Number.parseInt(results[i].transcript);
-                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
-                        _this.onNumberRecognised(candidateNumber);
-                        // keep listening for more
-                        _this.startListening();
-                        break;
-                    }
-                }
-            };
-        }
-    }]);
-
-    return NumberRecogniser;
-}();
-
-exports.default = NumberRecogniser;
 
 /***/ })
 /******/ ]);
