@@ -11,7 +11,7 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 
 ## TODO
 - [x] play audio from bar number using voice recognition
-- [ ] stretch audio for slower practice
+- [x] stretch audio for slower practice
 - [ ] load files via drag & drop
 - [ ] persist settings per audio track; import/export
 - [ ] multiple tracks, also voice controlled#
@@ -19,3 +19,5 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 ## Credits
 
 Demo track: [Not Just Jazz by Snowdrop](https://soundcloud.com/snowdrop_jpn/not-just-jazz)
+
+[Kali](https://github.com/Infinity/Kali) to time stretch samples without pitch shifting

@@ -1,3 +1,4 @@
+import BufferLoader from './buffer-loader'
 import FileLoader from './file-loader'
 import NumberRecogniser from './number-recogniser'
 import SongPlayer from './song-player'
@@ -10,19 +11,22 @@ function init() {
     let songUrlInput = document.getElementById('songUrl');
     let beatsPerMinuteInput = document.getElementById('beatsPerMinute');
     let beatsPerBarInput = document.getElementById('beatsPerBar');
+    let playbackRateInput = document.getElementById('playbackRate');
     let startBarkeepButton = document.getElementById('startBarkeep');
+    let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
     startBarkeepButton.onclick = () => {
         let songPlayer;
         let fileLoader = new FileLoader();
+        let playbackRate = Number.parseInt(playbackRateInput.value) / 100;
         fileLoader.loadByUrl(songUrlInput.value)
             .then(fileData => {
-                songPlayer = new SongPlayer(fileData, beatsPerMinuteInput.value, beatsPerBarInput.value);
-                songPlayer.init()
-                    .then(() => {
-                        songPlayer.play();
-                    });
+                return BufferLoader.loadBuffer(fileData, playbackRate, p => { console.log(p); });
+            })
+            .then(buffer => {
+                songPlayer = new SongPlayer(buffer, playbackRate, beatsPerMinuteInput.value, beatsPerBarInput.value);
+                songPlayer.play();
             });
 
         let onNumberRecognised = (n) => {

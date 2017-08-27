@@ -1,23 +1,11 @@
 export default class SongPlayer {
 
-    constructor(fileData, bpm, beatsPerBar) {
-        this.fileData = fileData;
+    constructor(buffer, bufferRate, bpm, beatsPerBar) {
+        this.buffer = buffer;
         this.bpm = bpm;
         this.beatsPerBar = beatsPerBar;
-        this.secondsPerBar = this.beatsPerBar * 60 / this.bpm;
-
-        this.init = () => new Promise((resolve, reject) => {
-            this.context = new (window.AudioContext || window.webkitAudioContext)();
-
-            var self = this;
-            this.context.decodeAudioData(this.fileData, (buffer) => {
-                self.buffer = buffer;
-                resolve();
-            }, (e) => {
-                console.error(e);
-                reject();
-            });
-        });
+        this.secondsPerBar = this.beatsPerBar * 60 / (bufferRate * bpm);
+        this.context = new (window.AudioContext || window.webkitAudioContext)();        
     }
 
     play(barNumber) {
