@@ -14,7 +14,8 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 - [x] stretch audio for slower practice
 - [ ] load files via drag & drop
 - [ ] persist settings per audio track; import/export
-- [ ] multiple tracks, also voice controlled#
+- [ ] multiple tracks, also voice controlled
+- [ ] UI overhaul
 
 ## Credits
 
