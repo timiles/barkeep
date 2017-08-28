@@ -99,6 +99,8 @@ function init() {
     var playbackRateInput = document.getElementById('playbackRate');
     var startBarkeepButton = document.getElementById('startBarkeep');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
+    var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
+    var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
     startBarkeepButton.onclick = function () {
@@ -114,7 +116,12 @@ function init() {
             songPlayer.play();
         });
 
+        jumpToBarButton.onclick = function (e) {
+            songPlayer.play(Number.parseInt(jumpToBarNumberInput.value));
+        };
         var onNumberRecognised = function onNumberRecognised(n) {
+            recognisedNumberDisplayElement.innerHTML = n;
+            recognisedNumberDisplayElement.innerHTML = n;
             recognisedNumberDisplayElement.innerHTML = n;
             songPlayer.play(n);
         };
