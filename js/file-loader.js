@@ -23,4 +23,15 @@ export default class FileLoader {
             request.send();
         });
     }
+
+    static loadByFileInput(file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = (evt) => {
+                resolve(new SongFile(file.name.split('.')[0], evt.target.result));
+            };
+            reader.onerror = () => reject();
+            reader.readAsArrayBuffer(file);
+        });
+    }
 }

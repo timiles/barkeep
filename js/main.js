@@ -10,6 +10,7 @@ if (NumberRecogniser.checkCompatibility()) {
 function init() {
     let songUrlInput = document.getElementById('songUrl');
     let loadBySongUrlButton = document.getElementById('loadBySongUrl');
+    let filesInput = document.getElementById('files');
     let startBarkeepButton = document.getElementById('startBarkeep');
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
@@ -48,6 +49,13 @@ function init() {
             .then(songFile => { addLoadedSong(songFile); });
     }
     
+    filesInput.onchange = (evt) => {
+        for (var i = 0, f; f = evt.target.files[i]; i++) {
+            FileLoader.loadByFileInput(f)
+                .then(songFile => { addLoadedSong(songFile); });
+        }
+    }
+
     startBarkeepButton.onclick = () => {
         let songPlayer;
         let selectedSong = jtmplModel.loadedSongs.filter(s => s.selected)[0];

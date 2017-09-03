@@ -95,6 +95,7 @@ if (_numberRecogniser2.default.checkCompatibility()) {
 function init() {
     var songUrlInput = document.getElementById('songUrl');
     var loadBySongUrlButton = document.getElementById('loadBySongUrl');
+    var filesInput = document.getElementById('files');
     var startBarkeepButton = document.getElementById('startBarkeep');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
@@ -134,6 +135,14 @@ function init() {
         _fileLoader2.default.loadByUrl(songUrlInput.value).then(function (songFile) {
             addLoadedSong(songFile);
         });
+    };
+
+    filesInput.onchange = function (evt) {
+        for (var i = 0, f; f = evt.target.files[i]; i++) {
+            _fileLoader2.default.loadByFileInput(f).then(function (songFile) {
+                addLoadedSong(songFile);
+            });
+        }
     };
 
     startBarkeepButton.onclick = function () {
@@ -438,6 +447,20 @@ var FileLoader = function () {
                     });
                 };
                 request.send();
+            });
+        }
+    }, {
+        key: 'loadByFileInput',
+        value: function loadByFileInput(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    resolve(new _songFile2.default(file.name.split('.')[0], evt.target.result));
+                };
+                reader.onerror = function () {
+                    return reject();
+                };
+                reader.readAsArrayBuffer(file);
             });
         }
     }]);
