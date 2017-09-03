@@ -1,12 +1,18 @@
+import SongFile from './song-file'
+
 export default class FileLoader {
 
-    loadByUrl(url) {
+    static loadByUrl(url) {
         return new Promise(function (resolve, reject) {
             var request = new XMLHttpRequest();
             request.open('GET', url);
             request.responseType = 'arraybuffer';
             request.onload = () => {
-                resolve(request.response);
+                let urlParts = url.split('/');
+                let fileNamePart = urlParts[urlParts.length - 1];
+                let fileNameWithoutExtension = fileNamePart.split('.')[0];
+                let songFile = new SongFile(fileNameWithoutExtension, request.response);
+                resolve(songFile);
             };
             request.onerror = () => {
                 reject({

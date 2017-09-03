@@ -70,19 +70,19 @@
 "use strict";
 
 
-var _bufferLoader = __webpack_require__(5);
+var _bufferLoader = __webpack_require__(1);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
 
-var _fileLoader = __webpack_require__(1);
+var _fileLoader = __webpack_require__(3);
 
 var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
-var _numberRecogniser = __webpack_require__(2);
+var _numberRecogniser = __webpack_require__(5);
 
 var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
 
-var _songPlayer = __webpack_require__(3);
+var _songPlayer = __webpack_require__(6);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
@@ -94,25 +94,62 @@ if (_numberRecogniser2.default.checkCompatibility()) {
 
 function init() {
     var songUrlInput = document.getElementById('songUrl');
-    var beatsPerMinuteInput = document.getElementById('beatsPerMinute');
-    var beatsPerBarInput = document.getElementById('beatsPerBar');
-    var playbackRateInput = document.getElementById('playbackRate');
+    var loadBySongUrlButton = document.getElementById('loadBySongUrl');
     var startBarkeepButton = document.getElementById('startBarkeep');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
+    var songLibrary = [{
+        name: 'not just jazz',
+        bpm: 102,
+        beatsPerBar: 4,
+        playbackRate: 100
+    }];
+
+    var jtmplModel = {
+        loadedSongs: []
+    };
+    jtmpl('#songsContainer', '#songTemplate', jtmplModel);
+
+    var addLoadedSong = function addLoadedSong(songFile) {
+        var song = songLibrary.filter(function (s) {
+            return s.name === songFile.fileName;
+        })[0];
+        if (!song) {
+            // TODO: add to library?
+            song = {
+                name: songFile.fileName,
+                beatsPerBar: 4,
+                playbackRate: 100
+            };
+        }
+        song.fileData = songFile.fileData;
+        jtmplModel.loadedSongs.push(song);
+        jtmpl('#songsContainer').trigger('change', 'loadedSongs');
+    };
+
+    loadBySongUrlButton.onclick = function () {
+        _fileLoader2.default.loadByUrl(songUrlInput.value).then(function (songFile) {
+            addLoadedSong(songFile);
+        });
+    };
+
     startBarkeepButton.onclick = function () {
         var songPlayer = void 0;
-        var fileLoader = new _fileLoader2.default();
-        var playbackRate = Number.parseInt(playbackRateInput.value) / 100;
-        fileLoader.loadByUrl(songUrlInput.value).then(function (fileData) {
-            return _bufferLoader2.default.loadBuffer(fileData, playbackRate, function (p) {
-                console.log(p);
-            });
+        var selectedSong = jtmplModel.loadedSongs.filter(function (s) {
+            return s.selected;
+        })[0];
+        if (!selectedSong) {
+            alert('Please select a song!');
+            return false;
+        }
+        var playbackRate = selectedSong.playbackRate / 100;
+        _bufferLoader2.default.loadBuffer(selectedSong.fileData, playbackRate, function (p) {
+            console.log(p);
         }).then(function (buffer) {
-            songPlayer = new _songPlayer2.default(buffer, playbackRate, beatsPerMinuteInput.value, beatsPerBarInput.value);
+            songPlayer = new _songPlayer2.default(buffer, playbackRate, selectedSong.bpm, selectedSong.beatsPerBar);
             songPlayer.play();
         });
 
@@ -143,179 +180,102 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+__webpack_require__(2);
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var FileLoader = function () {
-    function FileLoader() {
-        _classCallCheck(this, FileLoader);
+var BufferLoader = function () {
+    function BufferLoader() {
+        _classCallCheck(this, BufferLoader);
     }
 
-    _createClass(FileLoader, [{
-        key: 'loadByUrl',
-        value: function loadByUrl(url) {
-            return new Promise(function (resolve, reject) {
-                var _this = this;
+    _createClass(BufferLoader, null, [{
+        key: 'loadBuffer',
+        value: function loadBuffer(fileData) {
+            var playbackRate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.0;
+            var progressCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
 
-                var request = new XMLHttpRequest();
-                request.open('GET', url);
-                request.responseType = 'arraybuffer';
-                request.onload = function () {
-                    resolve(request.response);
-                };
-                request.onerror = function () {
-                    reject({
-                        status: _this.status,
-                        statusText: request.statusText
-                    });
-                };
-                request.send();
+            return new Promise(function (resolve, reject) {
+                var context = new (window.AudioContext || window.webkitAudioContext)();
+
+                context.decodeAudioData(fileData, function (buffer) {
+                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
+                    resolve(stretchedBuffer);
+                }, function (e) {
+                    console.error(e);
+                    reject();
+                });
             });
+        }
+    }, {
+        key: '_stretch',
+        value: function _stretch(context, buffer, playbackRate, numChannels, bestQuality, progressCallback) {
+
+            if (playbackRate === 1.0) {
+                return buffer;
+            }
+
+            var stretchSampleSize = 4096 * numChannels;
+
+            var inputBufferSize = buffer.getChannelData(0).length;
+            var outputBufferSize = Math.floor(inputBufferSize / playbackRate) + 1;
+
+            var outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
+
+            for (var channel = 0; channel < numChannels; channel++) {
+                var inputData = buffer.getChannelData(channel);
+
+                var kali = new Kali(1);
+                kali.setup(context.sampleRate, playbackRate, !bestQuality);
+
+                var outputData = new Float32Array(outputBufferSize);
+
+                var inputOffset = 0;
+                var completedOffset = 0;
+                var loopCount = 0;
+                var flushed = false;
+
+                while (completedOffset < outputData.length) {
+                    if (progressCallback && loopCount % 100 === 0) {
+                        progressCallback((completedOffset + outputBufferSize * channel) / (outputBufferSize * numChannels));
+                    }
+
+                    // Read stretched samples into outputData array
+                    completedOffset += kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
+
+                    if (inputOffset < inputData.length) {
+                        // If we have more data to write, write it
+                        var dataToInput = inputData.subarray(inputOffset, Math.min(inputOffset + stretchSampleSize, inputData.length));
+                        inputOffset += dataToInput.length;
+
+                        kali.input(dataToInput);
+                        kali.process();
+                    } else if (!flushed) {
+                        kali.flush();
+                        flushed = true;
+                    }
+
+                    loopCount++;
+                }
+
+                outputAudioBuffer.getChannelData(channel).set(outputData);
+            }
+
+            if (progressCallback) {
+                // 100%
+                progressCallback(1);
+            }
+            return outputAudioBuffer;
         }
     }]);
 
-    return FileLoader;
+    return BufferLoader;
 }();
 
-exports.default = FileLoader;
+exports.default = BufferLoader;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var NumberRecogniser = function () {
-    function NumberRecogniser(onNumberRecognised) {
-        _classCallCheck(this, NumberRecogniser);
-
-        this.onNumberRecognised = onNumberRecognised;
-    }
-
-    _createClass(NumberRecogniser, [{
-        key: 'startListening',
-        value: function startListening() {
-            var _this = this;
-
-            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            // recognition.continuous = true;
-            // TODO: other languages?
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 5;
-            recognition.start();
-
-            recognition.onaudioend = function (ev) {
-                // start listening again after audio ends
-                _this.startListening();
-            };
-
-            recognition.onresult = function (ev) {
-                var results = ev.results[0];
-                for (var i = 0; i < results.length; i++) {
-                    var candidateNumber = Number.parseInt(results[i].transcript);
-                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
-                        _this.onNumberRecognised(candidateNumber);
-                        // keep listening for more
-                        _this.startListening();
-                        break;
-                    }
-                }
-            };
-        }
-    }], [{
-        key: 'checkCompatibility',
-        value: function checkCompatibility() {
-            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
-                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
-                return false;
-            }
-            var isLocalhost = location.host.startsWith('localhost');
-            if (isLocalhost) {
-                return true;
-            }
-            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-            if (isChrome && location.protocol !== 'https:') {
-                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
-                location.protocol = 'https:';
-                return false;
-            }
-            return true;
-        }
-    }]);
-
-    return NumberRecogniser;
-}();
-
-exports.default = NumberRecogniser;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SongPlayer = function () {
-    function SongPlayer(buffer, bufferRate, bpm, beatsPerBar) {
-        _classCallCheck(this, SongPlayer);
-
-        this.buffer = buffer;
-        this.bpm = bpm;
-        this.beatsPerBar = beatsPerBar;
-        this.secondsPerBar = this.beatsPerBar * 60 / (bufferRate * bpm);
-        this.context = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    _createClass(SongPlayer, [{
-        key: "play",
-        value: function play(barNumber) {
-            this.stop();
-            var source = this.context.createBufferSource();
-            source.buffer = this.buffer;
-            source.connect(this.context.destination);
-            var startTime = this.getStartTimeInSeconds(barNumber || 0);
-            source.start(0, startTime);
-            this.currentSource = source;
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            if (this.currentSource) {
-                this.currentSource.stop();
-            }
-        }
-    }, {
-        key: "getStartTimeInSeconds",
-        value: function getStartTimeInSeconds(barNumber) {
-            var startTimeInSeconds = (barNumber - 1) * this.secondsPerBar;
-            return Math.max(0, startTimeInSeconds);
-        }
-    }]);
-
-    return SongPlayer;
-}();
-
-exports.default = SongPlayer;
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -430,6 +390,86 @@ exports.default = SongPlayer;
 }]);
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _songFile = __webpack_require__(4);
+
+var _songFile2 = _interopRequireDefault(_songFile);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileLoader = function () {
+    function FileLoader() {
+        _classCallCheck(this, FileLoader);
+    }
+
+    _createClass(FileLoader, null, [{
+        key: 'loadByUrl',
+        value: function loadByUrl(url) {
+            return new Promise(function (resolve, reject) {
+                var _this = this;
+
+                var request = new XMLHttpRequest();
+                request.open('GET', url);
+                request.responseType = 'arraybuffer';
+                request.onload = function () {
+                    var urlParts = url.split('/');
+                    var fileNamePart = urlParts[urlParts.length - 1];
+                    var fileNameWithoutExtension = fileNamePart.split('.')[0];
+                    var songFile = new _songFile2.default(fileNameWithoutExtension, request.response);
+                    resolve(songFile);
+                };
+                request.onerror = function () {
+                    reject({
+                        status: _this.status,
+                        statusText: request.statusText
+                    });
+                };
+                request.send();
+            });
+        }
+    }]);
+
+    return FileLoader;
+}();
+
+exports.default = FileLoader;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongFile = function SongFile(fileName, fileData) {
+    _classCallCheck(this, SongFile);
+
+    this.fileName = fileName;
+    this.fileData = fileData;
+};
+
+exports.default = SongFile;
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -442,99 +482,128 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(4);
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var BufferLoader = function () {
-    function BufferLoader() {
-        _classCallCheck(this, BufferLoader);
+var NumberRecogniser = function () {
+    function NumberRecogniser(onNumberRecognised) {
+        _classCallCheck(this, NumberRecogniser);
+
+        this.onNumberRecognised = onNumberRecognised;
     }
 
-    _createClass(BufferLoader, null, [{
-        key: 'loadBuffer',
-        value: function loadBuffer(fileData) {
-            var playbackRate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.0;
-            var progressCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+    _createClass(NumberRecogniser, [{
+        key: 'startListening',
+        value: function startListening() {
+            var _this = this;
 
-            return new Promise(function (resolve, reject) {
-                var context = new (window.AudioContext || window.webkitAudioContext)();
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // recognition.continuous = true;
+            // TODO: other languages?
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+            recognition.start();
 
-                context.decodeAudioData(fileData, function (buffer) {
-                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
-                    resolve(stretchedBuffer);
-                }, function (e) {
-                    console.error(e);
-                    reject();
-                });
-            });
-        }
-    }, {
-        key: '_stretch',
-        value: function _stretch(context, buffer, playbackRate, numChannels, bestQuality, progressCallback) {
+            recognition.onaudioend = function (ev) {
+                // start listening again after audio ends
+                _this.startListening();
+            };
 
-            if (playbackRate === 1.0) {
-                return buffer;
-            }
-
-            var stretchSampleSize = 4096 * numChannels;
-
-            var inputBufferSize = buffer.getChannelData(0).length;
-            var outputBufferSize = Math.floor(inputBufferSize / playbackRate) + 1;
-
-            var outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
-
-            for (var channel = 0; channel < numChannels; channel++) {
-                var inputData = buffer.getChannelData(channel);
-
-                var kali = new Kali(1);
-                kali.setup(context.sampleRate, playbackRate, !bestQuality);
-
-                var outputData = new Float32Array(outputBufferSize);
-
-                var inputOffset = 0;
-                var completedOffset = 0;
-                var loopCount = 0;
-                var flushed = false;
-
-                while (completedOffset < outputData.length) {
-                    if (progressCallback && loopCount % 100 === 0) {
-                        progressCallback((completedOffset + outputBufferSize * channel) / (outputBufferSize * numChannels));
+            recognition.onresult = function (ev) {
+                var results = ev.results[0];
+                for (var i = 0; i < results.length; i++) {
+                    var candidateNumber = Number.parseInt(results[i].transcript);
+                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
+                        _this.onNumberRecognised(candidateNumber);
+                        // keep listening for more
+                        _this.startListening();
+                        break;
                     }
-
-                    // Read stretched samples into outputData array
-                    completedOffset += kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
-
-                    if (inputOffset < inputData.length) {
-                        // If we have more data to write, write it
-                        var dataToInput = inputData.subarray(inputOffset, Math.min(inputOffset + stretchSampleSize, inputData.length));
-                        inputOffset += dataToInput.length;
-
-                        kali.input(dataToInput);
-                        kali.process();
-                    } else if (!flushed) {
-                        kali.flush();
-                        flushed = true;
-                    }
-
-                    loopCount++;
                 }
-
-                outputAudioBuffer.getChannelData(channel).set(outputData);
+            };
+        }
+    }], [{
+        key: 'checkCompatibility',
+        value: function checkCompatibility() {
+            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
+                return false;
             }
-
-            if (progressCallback) {
-                // 100%
-                progressCallback(1);
+            var isLocalhost = location.host.startsWith('localhost');
+            if (isLocalhost) {
+                return true;
             }
-            return outputAudioBuffer;
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            if (isChrome && location.protocol !== 'https:') {
+                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
+                location.protocol = 'https:';
+                return false;
+            }
+            return true;
         }
     }]);
 
-    return BufferLoader;
+    return NumberRecogniser;
 }();
 
-exports.default = BufferLoader;
+exports.default = NumberRecogniser;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongPlayer = function () {
+    function SongPlayer(buffer, bufferRate, bpm, beatsPerBar) {
+        _classCallCheck(this, SongPlayer);
+
+        this.buffer = buffer;
+        this.bpm = bpm;
+        this.beatsPerBar = beatsPerBar;
+        this.secondsPerBar = this.beatsPerBar * 60 / (bufferRate * bpm);
+        this.context = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    _createClass(SongPlayer, [{
+        key: "play",
+        value: function play(barNumber) {
+            this.stop();
+            var source = this.context.createBufferSource();
+            source.buffer = this.buffer;
+            source.connect(this.context.destination);
+            var startTime = this.getStartTimeInSeconds(barNumber || 0);
+            source.start(0, startTime);
+            this.currentSource = source;
+        }
+    }, {
+        key: "stop",
+        value: function stop() {
+            if (this.currentSource) {
+                this.currentSource.stop();
+            }
+        }
+    }, {
+        key: "getStartTimeInSeconds",
+        value: function getStartTimeInSeconds(barNumber) {
+            var startTimeInSeconds = (barNumber - 1) * this.secondsPerBar;
+            return Math.max(0, startTimeInSeconds);
+        }
+    }]);
+
+    return SongPlayer;
+}();
+
+exports.default = SongPlayer;
 
 /***/ })
 /******/ ]);

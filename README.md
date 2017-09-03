@@ -12,9 +12,11 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 ## TODO
 - [x] play audio from bar number using voice recognition
 - [x] stretch audio for slower practice
-- [ ] multiple tracks, also voice controlled
-- [ ] persist settings per audio track; import/export
+- [x] enable loading multiple tracks
 - [ ] load files via drag & drop
+- [ ] persist settings per audio track
+- [ ] import/export settings
+- [ ] play track using voice recognition
 - [ ] UI overhaul
 
 ## Credits

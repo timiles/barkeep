@@ -14,19 +14,35 @@
     <div>
         <label for="songUrl">URL:</label>
         <input type="text" id="songUrl" value="audio/not just jazz.mp3" />
+        <button id="loadBySongUrl">Load song</button>
     </div>
-    <div>
-        <label>BPM:</label>
-        <input type="number" id="beatsPerMinute" value="102" />
-    </div>
-    <div>
-        <label>Beats per bar:</label>
-        <input type="number" id="beatsPerBar" value="4" />
-    </div>
-    <div>
-        <label>Playback rate (%):</label>
-        <input type="number" id="playbackRate" value="100" />
-    </div>
+
+    <div id="songsContainer"></div>
+    <script id="songTemplate" type="text/template">
+        {{#loadedSongs}}
+        <div class="song">
+            <h2>
+                {{name}}
+            </h2>
+            <div>
+                <label>Selected:</label>
+                <input type="radio" name="selected-song" checked="{{selected}}" />
+            </div>
+            <div>
+                <label>BPM:</label>
+                <input type="number" value="{{bpm}}" />
+            </div>
+            <div>
+                <label>Beats per bar:</label>
+                <input type="number" value="{{beatsPerBar}}" />
+            </div>
+            <div>
+                <label>Playback rate (%):</label>
+                <input type="number" value="{{playbackRate}}" />
+            </div>
+        </div>
+        {{/}}
+    </script>
 
     <button id="startBarkeep">Start barkeep</button>
 
@@ -39,6 +55,7 @@
         </p>
     </div>
 
+    <script src="https://cdn.rawgit.com/atmin/jtmpl/v1.1.0/jtmpl.min.js"></script>
     <script src="build/main.bundle.js"></script>
 </body>
 

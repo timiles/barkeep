@@ -9,25 +9,56 @@ if (NumberRecogniser.checkCompatibility()) {
 
 function init() {
     let songUrlInput = document.getElementById('songUrl');
-    let beatsPerMinuteInput = document.getElementById('beatsPerMinute');
-    let beatsPerBarInput = document.getElementById('beatsPerBar');
-    let playbackRateInput = document.getElementById('playbackRate');
+    let loadBySongUrlButton = document.getElementById('loadBySongUrl');
     let startBarkeepButton = document.getElementById('startBarkeep');
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
+    let songLibrary = [{
+        name: 'not just jazz',
+        bpm: 102,
+        beatsPerBar: 4,
+        playbackRate: 100
+    }];
+
+    let jtmplModel = {
+        loadedSongs: []
+    };
+    jtmpl('#songsContainer', '#songTemplate', jtmplModel);
+
+    let addLoadedSong = (songFile) => {
+        let song = songLibrary.filter(s => s.name === songFile.fileName)[0];
+        if (!song) {
+            // TODO: add to library?
+            song = {
+                name: songFile.fileName,
+                beatsPerBar: 4,
+                playbackRate: 100
+            };
+        }
+        song.fileData = songFile.fileData;
+        jtmplModel.loadedSongs.push(song);
+        jtmpl('#songsContainer').trigger('change', 'loadedSongs');
+    }
+    
+    loadBySongUrlButton.onclick = () => {
+        FileLoader.loadByUrl(songUrlInput.value)
+            .then(songFile => { addLoadedSong(songFile); });
+    }
+    
     startBarkeepButton.onclick = () => {
         let songPlayer;
-        let fileLoader = new FileLoader();
-        let playbackRate = Number.parseInt(playbackRateInput.value) / 100;
-        fileLoader.loadByUrl(songUrlInput.value)
-            .then(fileData => {
-                return BufferLoader.loadBuffer(fileData, playbackRate, p => { console.log(p); });
-            })
+        let selectedSong = jtmplModel.loadedSongs.filter(s => s.selected)[0];
+        if (!selectedSong) {
+            alert('Please select a song!');
+            return false;
+        }
+        let playbackRate = selectedSong.playbackRate / 100;
+        BufferLoader.loadBuffer(selectedSong.fileData, playbackRate, p => { console.log(p); })
             .then(buffer => {
-                songPlayer = new SongPlayer(buffer, playbackRate, beatsPerMinuteInput.value, beatsPerBarInput.value);
+                songPlayer = new SongPlayer(buffer, playbackRate, selectedSong.bpm, selectedSong.beatsPerBar);
                 songPlayer.play();
             });
 
