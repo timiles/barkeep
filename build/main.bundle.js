@@ -82,7 +82,15 @@ var _numberRecogniser = __webpack_require__(5);
 
 var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
 
-var _songPlayer = __webpack_require__(6);
+var _songInfo = __webpack_require__(9);
+
+var _songInfo2 = _interopRequireDefault(_songInfo);
+
+var _songLibrary = __webpack_require__(6);
+
+var _songLibrary2 = _interopRequireDefault(_songLibrary);
+
+var _songPlayer = __webpack_require__(7);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
@@ -102,33 +110,29 @@ function init() {
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
-    var songLibrary = [{
-        name: 'not just jazz',
-        bpm: 102,
-        beatsPerBar: 4,
-        playbackRate: 100
-    }];
-
-    var jtmplModel = {
-        loadedSongs: []
-    };
+    var songLibrary = new _songLibrary2.default();
+    var jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
-    var addLoadedSong = function addLoadedSong(songFile) {
-        var song = songLibrary.filter(function (s) {
-            return s.name === songFile.fileName;
-        })[0];
-        if (!song) {
-            // TODO: add to library?
-            song = {
-                name: songFile.fileName,
-                beatsPerBar: 4,
-                playbackRate: 100
-            };
+    var jtmplSongs = jtmpl('#songsContainer');
+    jtmplSongs.on('update', function (prop) {
+        if (prop === 'playlist') {
+            songLibrary.updateSongInfos(jtmplModel.playlist);
         }
-        song.fileData = songFile.fileData;
-        jtmplModel.loadedSongs.push(song);
-        jtmpl('#songsContainer').trigger('change', 'loadedSongs');
+    });
+
+    var addLoadedSong = function addLoadedSong(songFile) {
+        var info = songLibrary.getSongInfoByName(songFile.fileName) || new _songInfo2.default();
+        var songModel = {
+            name: songFile.fileName,
+            bpm: info.bpm,
+            beatsPerBar: info.beatsPerBar,
+            playbackRate: info.playbackRate,
+            fileData: songFile.fileData
+        };
+
+        jtmplModel.playlist.push(songModel);
+        jtmpl('#songsContainer').trigger('change', 'playlist');
     };
 
     loadBySongUrlButton.onclick = function () {
@@ -147,7 +151,7 @@ function init() {
 
     startBarkeepButton.onclick = function () {
         var songPlayer = void 0;
-        var selectedSong = jtmplModel.loadedSongs.filter(function (s) {
+        var selectedSong = jtmplModel.playlist.filter(function (s) {
             return s.selected;
         })[0];
         if (!selectedSong) {
@@ -584,6 +588,77 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _songInfo = __webpack_require__(9);
+
+var _songInfo2 = _interopRequireDefault(_songInfo);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongLibrary = function () {
+    function SongLibrary() {
+        _classCallCheck(this, SongLibrary);
+
+        this.songInfos = this.retrieveFromStorage();
+    }
+
+    _createClass(SongLibrary, [{
+        key: 'getSongInfoByName',
+        value: function getSongInfoByName(name) {
+            return this.songInfos.get(name);
+        }
+    }, {
+        key: 'updateSongInfos',
+        value: function updateSongInfos(songs) {
+            for (var i = 0; i < songs.length; i++) {
+                // add or update
+                this.songInfos.set(songs[i].name, _songInfo2.default.fromObject(songs[i]));
+            }
+            this.persistToStorage();
+        }
+    }, {
+        key: 'persistToStorage',
+        value: function persistToStorage() {
+            // can't serialize Map, so use spread operator to convert to Array
+            var json = JSON.stringify([].concat(_toConsumableArray(this.songInfos)));
+            localStorage.setItem('song-library', json);
+        }
+    }, {
+        key: 'retrieveFromStorage',
+        value: function retrieveFromStorage() {
+            var jsonFromStorage = localStorage.getItem('song-library');
+            if (jsonFromStorage) {
+                return new Map(JSON.parse(jsonFromStorage));
+            } else {
+                // populate with a default song
+                var infos = new Map();
+                infos.set('not just jazz', new _songInfo2.default(102));
+                return infos;
+            }
+        }
+    }]);
+
+    return SongLibrary;
+}();
+
+exports.default = SongLibrary;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SongPlayer = function () {
@@ -627,6 +702,43 @@ var SongPlayer = function () {
 }();
 
 exports.default = SongPlayer;
+
+/***/ }),
+/* 8 */,
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongInfo = function () {
+    function SongInfo(bpm, beatsPerBar, playbackRate) {
+        _classCallCheck(this, SongInfo);
+
+        this.bpm = bpm;
+        this.beatsPerBar = beatsPerBar || 4;
+        this.playbackRate = playbackRate || 100;
+    }
+
+    _createClass(SongInfo, null, [{
+        key: "fromObject",
+        value: function fromObject(song) {
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackRate);
+        }
+    }]);
+
+    return SongInfo;
+}();
+
+exports.default = SongInfo;
 
 /***/ })
 /******/ ]);

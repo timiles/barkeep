@@ -1,6 +1,8 @@
 import BufferLoader from './buffer-loader'
 import FileLoader from './file-loader'
 import NumberRecogniser from './number-recogniser'
+import SongInfo from './song-info'
+import SongLibrary from './song-library'
 import SongPlayer from './song-player'
 
 if (NumberRecogniser.checkCompatibility()) {
@@ -17,38 +19,36 @@ function init() {
     let jumpToBarButton = document.getElementById('jumpToBarButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
 
-    let songLibrary = [{
-        name: 'not just jazz',
-        bpm: 102,
-        beatsPerBar: 4,
-        playbackRate: 100
-    }];
-
-    let jtmplModel = {
-        loadedSongs: []
-    };
+    let songLibrary = new SongLibrary();
+    let jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
-    let addLoadedSong = (songFile) => {
-        let song = songLibrary.filter(s => s.name === songFile.fileName)[0];
-        if (!song) {
-            // TODO: add to library?
-            song = {
-                name: songFile.fileName,
-                beatsPerBar: 4,
-                playbackRate: 100
-            };
+    var jtmplSongs = jtmpl('#songsContainer');
+    jtmplSongs.on('update', (prop) => {
+        if (prop === 'playlist') {
+            songLibrary.updateSongInfos(jtmplModel.playlist);
         }
-        song.fileData = songFile.fileData;
-        jtmplModel.loadedSongs.push(song);
-        jtmpl('#songsContainer').trigger('change', 'loadedSongs');
+    });
+
+    let addLoadedSong = (songFile) => {
+        let info = songLibrary.getSongInfoByName(songFile.fileName) || new SongInfo();
+        let songModel = {
+            name: songFile.fileName,
+            bpm: info.bpm,
+            beatsPerBar: info.beatsPerBar,
+            playbackRate: info.playbackRate,
+            fileData: songFile.fileData
+        };
+
+        jtmplModel.playlist.push(songModel);
+        jtmpl('#songsContainer').trigger('change', 'playlist');
     }
-    
+
     loadBySongUrlButton.onclick = () => {
         FileLoader.loadByUrl(songUrlInput.value)
             .then(songFile => { addLoadedSong(songFile); });
     }
-    
+
     filesInput.onchange = (evt) => {
         for (var i = 0, f; f = evt.target.files[i]; i++) {
             FileLoader.loadByFileInput(f)
@@ -58,7 +58,7 @@ function init() {
 
     startBarkeepButton.onclick = () => {
         let songPlayer;
-        let selectedSong = jtmplModel.loadedSongs.filter(s => s.selected)[0];
+        let selectedSong = jtmplModel.playlist.filter(s => s.selected)[0];
         if (!selectedSong) {
             alert('Please select a song!');
             return false;
