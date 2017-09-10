@@ -20,8 +20,6 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 - [ ] UI overhaul
 
 ## Credits
-
-Demo track: [Not Just Jazz by Snowdrop](https://soundcloud.com/snowdrop_jpn/not-just-jazz)
-
-[Kali](https://github.com/Infinity/Kali) to time stretch samples without pitch shifting
-[jtmpl](https://github.com/atmin/jtmpl) for 2-way templating
+- Demo track: [Not Just Jazz by Snowdrop](https://soundcloud.com/snowdrop_jpn/not-just-jazz)
+- [Kali](https://github.com/Infinity/Kali) to time stretch samples without pitch shifting
+- [jtmpl](https://github.com/atmin/jtmpl) for 2-way templating
