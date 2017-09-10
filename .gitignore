@@ -1,4 +1,5 @@
 node_modules
+npm-debug.log.*
 
 audio/*
 !audio/not just jazz.mp3
