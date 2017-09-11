@@ -157,6 +157,9 @@ function init() {
         filesDropArea.classList.add('droppable');
         return false;
     };
+    filesDropArea.ondragleave = function () {
+        filesDropArea.classList.remove('droppable');
+    };
     filesDropArea.ondrop = function (evt) {
         filesDropArea.classList.remove('droppable');
         loadFiles(evt.dataTransfer.files);
