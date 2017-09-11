@@ -18,7 +18,8 @@ function init() {
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
-
+    let filesDropArea = document.body;
+    
     let songLibrary = new SongLibrary();
     let jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
@@ -49,11 +50,24 @@ function init() {
             .then(songFile => { addLoadedSong(songFile); });
     }
 
-    filesInput.onchange = (evt) => {
-        for (var i = 0, f; f = evt.target.files[i]; i++) {
-            FileLoader.loadByFileInput(f)
+    let loadFiles = (files) => {
+        for (var i = 0, f; f = files[i]; i++) {
+            FileLoader.loadByFileReader(f)
                 .then(songFile => { addLoadedSong(songFile); });
         }
+    }
+    filesInput.onchange = (evt) => {
+        loadFiles(evt.target.files);
+    }
+
+    filesDropArea.ondragover = () => {
+        filesDropArea.classList.add('droppable');
+        return false;
+    }
+    filesDropArea.ondrop = (evt) => {
+        filesDropArea.classList.remove('droppable');
+        loadFiles(evt.dataTransfer.files);
+        return false;
     }
 
     startBarkeepButton.onclick = () => {

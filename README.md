@@ -13,7 +13,7 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 - [x] play audio from bar number using voice recognition
 - [x] stretch audio for slower practice
 - [x] enable loading multiple tracks
-- [ ] load files via drag & drop
+- [x] load files via drag & drop
 - [x] persist settings per audio track
 - [ ] import/export settings
 - [ ] play track using voice recognition

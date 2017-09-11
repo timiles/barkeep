@@ -24,7 +24,7 @@ export default class FileLoader {
         });
     }
 
-    static loadByFileInput(file) {
+    static loadByFileReader(file) {
         return new Promise(function (resolve, reject) {
             var reader = new FileReader();
             reader.onload = (evt) => {

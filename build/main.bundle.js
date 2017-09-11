@@ -109,6 +109,7 @@ function init() {
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
+    var filesDropArea = document.body;
 
     var songLibrary = new _songLibrary2.default();
     var jtmplModel = { playlist: [] };
@@ -141,12 +142,25 @@ function init() {
         });
     };
 
-    filesInput.onchange = function (evt) {
-        for (var i = 0, f; f = evt.target.files[i]; i++) {
-            _fileLoader2.default.loadByFileInput(f).then(function (songFile) {
+    var loadFiles = function loadFiles(files) {
+        for (var i = 0, f; f = files[i]; i++) {
+            _fileLoader2.default.loadByFileReader(f).then(function (songFile) {
                 addLoadedSong(songFile);
             });
         }
+    };
+    filesInput.onchange = function (evt) {
+        loadFiles(evt.target.files);
+    };
+
+    filesDropArea.ondragover = function () {
+        filesDropArea.classList.add('droppable');
+        return false;
+    };
+    filesDropArea.ondrop = function (evt) {
+        filesDropArea.classList.remove('droppable');
+        loadFiles(evt.dataTransfer.files);
+        return false;
     };
 
     startBarkeepButton.onclick = function () {
@@ -454,8 +468,8 @@ var FileLoader = function () {
             });
         }
     }, {
-        key: 'loadByFileInput',
-        value: function loadByFileInput(file) {
+        key: 'loadByFileReader',
+        value: function loadByFileReader(file) {
             return new Promise(function (resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function (evt) {

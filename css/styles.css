@@ -7,3 +7,7 @@ body {
 #recognisedNumberDisplay {
     font-size: xx-large;
 }
+
+.droppable {
+    background-color: hotpink;
+}
