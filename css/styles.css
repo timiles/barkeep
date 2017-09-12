@@ -4,10 +4,14 @@ body {
     margin: auto;
 }
 
-#recognisedNumberDisplay {
-    font-size: xx-large;
-}
-
 .droppable {
     background-color: hotpink;
+}
+
+.highlightable {
+    transition: font .5s linear, text-shadow .5s linear;
+}
+.highlightable.highlight {
+    text-shadow: 0 0 100px limegreen;
+    font-size: 200px;
 }

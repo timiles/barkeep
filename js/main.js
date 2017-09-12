@@ -92,8 +92,8 @@ function init() {
         };
         let onNumberRecognised = (n) => {
             recognisedNumberDisplayElement.innerHTML = n;
-            recognisedNumberDisplayElement.innerHTML = n;
-            recognisedNumberDisplayElement.innerHTML = n;
+            recognisedNumberDisplayElement.classList.add('highlight');
+            setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             songPlayer.play(n);
         }
         let numberRecogniser = new NumberRecogniser(onNumberRecognised);

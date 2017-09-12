@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -70,27 +70,63 @@
 "use strict";
 
 
-var _bufferLoader = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongInfo = function () {
+    function SongInfo(bpm, beatsPerBar, playbackRate) {
+        _classCallCheck(this, SongInfo);
+
+        this.bpm = bpm;
+        this.beatsPerBar = beatsPerBar || 4;
+        this.playbackRate = playbackRate || 100;
+    }
+
+    _createClass(SongInfo, null, [{
+        key: "fromObject",
+        value: function fromObject(song) {
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackRate);
+        }
+    }]);
+
+    return SongInfo;
+}();
+
+exports.default = SongInfo;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _bufferLoader = __webpack_require__(2);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
 
-var _fileLoader = __webpack_require__(3);
+var _fileLoader = __webpack_require__(4);
 
 var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
-var _numberRecogniser = __webpack_require__(5);
+var _numberRecogniser = __webpack_require__(6);
 
 var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
 
-var _songInfo = __webpack_require__(9);
+var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
-var _songLibrary = __webpack_require__(6);
+var _songLibrary = __webpack_require__(7);
 
 var _songLibrary2 = _interopRequireDefault(_songLibrary);
 
-var _songPlayer = __webpack_require__(7);
+var _songPlayer = __webpack_require__(8);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
@@ -188,8 +224,10 @@ function init() {
         };
         var onNumberRecognised = function onNumberRecognised(n) {
             recognisedNumberDisplayElement.innerHTML = n;
-            recognisedNumberDisplayElement.innerHTML = n;
-            recognisedNumberDisplayElement.innerHTML = n;
+            recognisedNumberDisplayElement.classList.add('highlight');
+            setTimeout(function () {
+                recognisedNumberDisplayElement.classList.remove('highlight');
+            }, 1000);
             songPlayer.play(n);
         };
         var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
@@ -198,7 +236,7 @@ function init() {
 }
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -210,7 +248,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(2);
+__webpack_require__(3);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -305,7 +343,7 @@ var BufferLoader = function () {
 exports.default = BufferLoader;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -420,7 +458,7 @@ exports.default = BufferLoader;
 }]);
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -432,7 +470,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _songFile = __webpack_require__(4);
+var _songFile = __webpack_require__(5);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
@@ -492,7 +530,7 @@ var FileLoader = function () {
 exports.default = FileLoader;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -514,7 +552,7 @@ var SongFile = function SongFile(fileName, fileData) {
 exports.default = SongFile;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -593,7 +631,7 @@ var NumberRecogniser = function () {
 exports.default = NumberRecogniser;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -605,7 +643,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _songInfo = __webpack_require__(9);
+var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -664,7 +702,7 @@ var SongLibrary = function () {
 exports.default = SongLibrary;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -719,43 +757,6 @@ var SongPlayer = function () {
 }();
 
 exports.default = SongPlayer;
-
-/***/ }),
-/* 8 */,
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SongInfo = function () {
-    function SongInfo(bpm, beatsPerBar, playbackRate) {
-        _classCallCheck(this, SongInfo);
-
-        this.bpm = bpm;
-        this.beatsPerBar = beatsPerBar || 4;
-        this.playbackRate = playbackRate || 100;
-    }
-
-    _createClass(SongInfo, null, [{
-        key: "fromObject",
-        value: function fromObject(song) {
-            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackRate);
-        }
-    }]);
-
-    return SongInfo;
-}();
-
-exports.default = SongInfo;
 
 /***/ })
 /******/ ]);
