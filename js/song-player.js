@@ -1,11 +1,11 @@
 export default class SongPlayer {
 
-    constructor(buffer, bufferRate, bpm, beatsPerBar) {
+    constructor(context, buffer, bufferRate, bpm, beatsPerBar) {
+        this.context = context;
         this.buffer = buffer;
         this.bpm = bpm;
         this.beatsPerBar = beatsPerBar;
         this.secondsPerBar = this.beatsPerBar * 60 / (bufferRate * bpm);
-        this.context = new (window.AudioContext || window.webkitAudioContext)();        
     }
 
     play(barNumber) {

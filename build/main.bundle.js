@@ -118,6 +118,10 @@ var _numberRecogniser = __webpack_require__(6);
 
 var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
 
+var _playlistManager = __webpack_require__(9);
+
+var _playlistManager2 = _interopRequireDefault(_playlistManager);
+
 var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
@@ -144,10 +148,12 @@ function init() {
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
+    var playSongButton = document.getElementById('playSongButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     var filesDropArea = document.body;
 
     var songLibrary = new _songLibrary2.default();
+    var playlistManager = new _playlistManager2.default(songLibrary);
     var jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
@@ -164,10 +170,10 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackRate: info.playbackRate,
-            fileData: songFile.fileData
+            playbackRate: info.playbackRate
         };
 
+        playlistManager.addSong(songFile.fileName, songFile.fileData);
         jtmplModel.playlist.push(songModel);
         jtmpl('#songsContainer').trigger('change', 'playlist');
     };
@@ -202,8 +208,8 @@ function init() {
         return false;
     };
 
-    startBarkeepButton.onclick = function () {
-        var songPlayer = void 0;
+    // wire up manual controls
+    playSongButton.onclick = function () {
         var selectedSong = jtmplModel.playlist.filter(function (s) {
             return s.selected;
         })[0];
@@ -211,24 +217,20 @@ function init() {
             alert('Please select a song!');
             return false;
         }
-        var playbackRate = selectedSong.playbackRate / 100;
-        _bufferLoader2.default.loadBuffer(selectedSong.fileData, playbackRate, function (p) {
-            console.log(p);
-        }).then(function (buffer) {
-            songPlayer = new _songPlayer2.default(buffer, playbackRate, selectedSong.bpm, selectedSong.beatsPerBar);
-            songPlayer.play();
-        });
+        playlistManager.playSongByName(selectedSong.name);
+    };
+    jumpToBarButton.onclick = function (e) {
+        playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
+    };
 
-        jumpToBarButton.onclick = function (e) {
-            songPlayer.play(Number.parseInt(jumpToBarNumberInput.value));
-        };
+    startBarkeepButton.onclick = function () {
         var onNumberRecognised = function onNumberRecognised(n) {
             recognisedNumberDisplayElement.innerHTML = n;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(function () {
                 recognisedNumberDisplayElement.classList.remove('highlight');
             }, 1000);
-            songPlayer.play(n);
+            playlistManager.jumpToBar(n);
         };
         var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
         numberRecogniser.startListening();
@@ -717,14 +719,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SongPlayer = function () {
-    function SongPlayer(buffer, bufferRate, bpm, beatsPerBar) {
+    function SongPlayer(context, buffer, bufferRate, bpm, beatsPerBar) {
         _classCallCheck(this, SongPlayer);
 
+        this.context = context;
         this.buffer = buffer;
         this.bpm = bpm;
         this.beatsPerBar = beatsPerBar;
         this.secondsPerBar = this.beatsPerBar * 60 / (bufferRate * bpm);
-        this.context = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     _createClass(SongPlayer, [{
@@ -757,6 +759,95 @@ var SongPlayer = function () {
 }();
 
 exports.default = SongPlayer;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _bufferLoader = __webpack_require__(2);
+
+var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
+
+var _songLibrary = __webpack_require__(7);
+
+var _songLibrary2 = _interopRequireDefault(_songLibrary);
+
+var _songPlayer = __webpack_require__(8);
+
+var _songPlayer2 = _interopRequireDefault(_songPlayer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PlaylistManager = function () {
+    function PlaylistManager(songLibrary) {
+        _classCallCheck(this, PlaylistManager);
+
+        this.songLibrary = songLibrary;
+        this.fileDataMap = new Map();
+        this.bufferMap = new Map();
+        this.context = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    _createClass(PlaylistManager, [{
+        key: 'addSong',
+        value: function addSong(name, fileData) {
+            this.fileDataMap.set(name, fileData);
+        }
+    }, {
+        key: 'playSongByName',
+        value: function playSongByName(songName) {
+            var _this = this;
+
+            var songInfo = this.songLibrary.getSongInfoByName(songName);
+            var bufferPlaybackRate = songInfo.playbackRate / 100;
+            var bufferKey = songName + '@' + bufferPlaybackRate;
+            if (this.bufferMap.has(bufferKey)) {
+                var buffer = this.bufferMap.get(bufferKey);
+                this._playBuffer(buffer, songInfo);
+            } else {
+                var fileData = this.fileDataMap.get(songName);
+                _bufferLoader2.default.loadBuffer(fileData, bufferPlaybackRate, function (p) {
+                    console.log('Stretching...', p);
+                }).then(function (buffer) {
+                    _this.bufferMap.set(bufferKey, buffer);
+                    _this._playBuffer(buffer, songInfo);
+                });
+            }
+        }
+    }, {
+        key: 'jumpToBar',
+        value: function jumpToBar(barNumber) {
+            if (this.currentSongPlayer) {
+                this.currentSongPlayer.play(barNumber);
+            }
+        }
+    }, {
+        key: '_playBuffer',
+        value: function _playBuffer(buffer, songInfo) {
+            if (this.currentSongPlayer) {
+                this.currentSongPlayer.stop();
+            }
+            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackRate / 100, songInfo.bpm, songInfo.beatsPerBar);
+            songPlayer.play();
+            this.currentSongPlayer = songPlayer;
+        }
+    }]);
+
+    return PlaylistManager;
+}();
+
+exports.default = PlaylistManager;
 
 /***/ })
 /******/ ]);

@@ -9,10 +9,10 @@
 <body>
     <script>
         (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date(); a = s.createElement(o),
-            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
         })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
         ga('create', 'UA-106226940-1', 'auto');
@@ -58,7 +58,7 @@
         {{/}}
     </script>
 
-    <button id="startBarkeep">Start barkeep</button>
+    <button id="startBarkeep">Start barkeep listening</button>
 
     <div>
         <label>Jump to bar:</label>
@@ -67,6 +67,9 @@
         <p>or say a number:
             <span id="recognisedNumberDisplay" class="highlightable"></span>
         </p>
+    </div>
+    <div>
+        <button id="playSongButton">Play selected song</button>
     </div>
 
     <script src="https://cdn.rawgit.com/atmin/jtmpl/v1.1.0/jtmpl.min.js"></script>

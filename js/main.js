@@ -1,6 +1,7 @@
 import BufferLoader from './buffer-loader'
 import FileLoader from './file-loader'
 import NumberRecogniser from './number-recogniser'
+import PlaylistManager from './playlist-manager'
 import SongInfo from './song-info'
 import SongLibrary from './song-library'
 import SongPlayer from './song-player'
@@ -17,10 +18,12 @@ function init() {
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
+    let playSongButton = document.getElementById('playSongButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     let filesDropArea = document.body;
-    
+
     let songLibrary = new SongLibrary();
+    let playlistManager = new PlaylistManager(songLibrary);
     let jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
@@ -37,10 +40,10 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackRate: info.playbackRate,
-            fileData: songFile.fileData
+            playbackRate: info.playbackRate
         };
 
+        playlistManager.addSong(songFile.fileName, songFile.fileData);
         jtmplModel.playlist.push(songModel);
         jtmpl('#songsContainer').trigger('change', 'playlist');
     }
@@ -65,7 +68,7 @@ function init() {
         return false;
     }
     filesDropArea.ondragleave = () => {
-        filesDropArea.classList.remove('droppable');        
+        filesDropArea.classList.remove('droppable');
     }
     filesDropArea.ondrop = (evt) => {
         filesDropArea.classList.remove('droppable');
@@ -73,28 +76,25 @@ function init() {
         return false;
     }
 
-    startBarkeepButton.onclick = () => {
-        let songPlayer;
+    // wire up manual controls
+    playSongButton.onclick = () => {
         let selectedSong = jtmplModel.playlist.filter(s => s.selected)[0];
         if (!selectedSong) {
             alert('Please select a song!');
             return false;
         }
-        let playbackRate = selectedSong.playbackRate / 100;
-        BufferLoader.loadBuffer(selectedSong.fileData, playbackRate, p => { console.log(p); })
-            .then(buffer => {
-                songPlayer = new SongPlayer(buffer, playbackRate, selectedSong.bpm, selectedSong.beatsPerBar);
-                songPlayer.play();
-            });
+        playlistManager.playSongByName(selectedSong.name);
+    }
+    jumpToBarButton.onclick = (e) => {
+        playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
+    };
 
-        jumpToBarButton.onclick = (e) => {
-            songPlayer.play(Number.parseInt(jumpToBarNumberInput.value));
-        };
+    startBarkeepButton.onclick = () => {
         let onNumberRecognised = (n) => {
             recognisedNumberDisplayElement.innerHTML = n;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
-            songPlayer.play(n);
+            playlistManager.jumpToBar(n);
         }
         let numberRecogniser = new NumberRecogniser(onNumberRecognised);
         numberRecogniser.startListening();
