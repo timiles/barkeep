@@ -63,7 +63,8 @@ function init() {
         loadFiles(evt.target.files);
     }
 
-    filesDropArea.ondragover = () => {
+    filesDropArea.ondragover = (evt) => {
+        evt.dataTransfer.dropEffect = 'copy';
         filesDropArea.classList.add('droppable');
         return false;
     }
