@@ -15,7 +15,27 @@ export default class PlaylistManager {
         this.fileDataMap.set(name, fileData);
     }
 
-    playSongByName(songName) {
+    _getSongNameFromInput(input) {
+        if (this.fileDataMap.has(input)) {
+            return input;
+        }
+        // best guess at name?
+        input = input.toLowerCase();
+        for (let key of this.fileDataMap.keys()) {
+            if (key.toLowerCase().indexOf(input) >= 0) {
+                return key;
+            }
+        }
+        // no match :(
+        return undefined;
+    }
+
+    playSongByName(input) {
+        let songName = this._getSongNameFromInput(input);
+        if (!songName) {
+            throw 'Unrecognised song: ' + input;
+        }
+
         let songInfo = this.songLibrary.getSongInfoByName(songName);
         let bufferPlaybackRate = songInfo.playbackRate / 100;
         let bufferKey = songName + '@' + bufferPlaybackRate;

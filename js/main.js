@@ -1,12 +1,12 @@
 import BufferLoader from './buffer-loader'
 import FileLoader from './file-loader'
-import NumberRecogniser from './number-recogniser'
 import PlaylistManager from './playlist-manager'
 import SongInfo from './song-info'
 import SongLibrary from './song-library'
 import SongPlayer from './song-player'
+import VoiceCommandListener from './voice-command-listener'
 
-if (NumberRecogniser.checkCompatibility()) {
+if (VoiceCommandListener.checkCompatibility()) {
     init();
 }
 
@@ -91,13 +91,16 @@ function init() {
     };
 
     startBarkeepButton.onclick = () => {
-        let onNumberRecognised = (n) => {
-            recognisedNumberDisplayElement.innerHTML = n;
+        let voiceCommandListener = new VoiceCommandListener();
+        voiceCommandListener.onBarCommand = (barNumber) => {
+            recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
-            playlistManager.jumpToBar(n);
+            playlistManager.jumpToBar(barNumber);
         }
-        let numberRecogniser = new NumberRecogniser(onNumberRecognised);
-        numberRecogniser.startListening();
+        voiceCommandListener.onPlayCommand = (songName) => {
+            playlistManager.playSongByName(songName);
+        }
+        voiceCommandListener.startListening();
     }
 }

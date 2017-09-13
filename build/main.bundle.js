@@ -114,10 +114,6 @@ var _fileLoader = __webpack_require__(4);
 
 var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
-var _numberRecogniser = __webpack_require__(6);
-
-var _numberRecogniser2 = _interopRequireDefault(_numberRecogniser);
-
 var _playlistManager = __webpack_require__(9);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
@@ -134,9 +130,13 @@ var _songPlayer = __webpack_require__(8);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
+var _voiceCommandListener = __webpack_require__(10);
+
+var _voiceCommandListener2 = _interopRequireDefault(_voiceCommandListener);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-if (_numberRecogniser2.default.checkCompatibility()) {
+if (_voiceCommandListener2.default.checkCompatibility()) {
     init();
 }
 
@@ -225,16 +225,19 @@ function init() {
     };
 
     startBarkeepButton.onclick = function () {
-        var onNumberRecognised = function onNumberRecognised(n) {
-            recognisedNumberDisplayElement.innerHTML = n;
+        var voiceCommandListener = new _voiceCommandListener2.default();
+        voiceCommandListener.onBarCommand = function (barNumber) {
+            recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(function () {
                 recognisedNumberDisplayElement.classList.remove('highlight');
             }, 1000);
-            playlistManager.jumpToBar(n);
+            playlistManager.jumpToBar(barNumber);
         };
-        var numberRecogniser = new _numberRecogniser2.default(onNumberRecognised);
-        numberRecogniser.startListening();
+        voiceCommandListener.onPlayCommand = function (songName) {
+            playlistManager.playSongByName(songName);
+        };
+        voiceCommandListener.startListening();
     };
 }
 
@@ -555,85 +558,7 @@ var SongFile = function SongFile(fileName, fileData) {
 exports.default = SongFile;
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var NumberRecogniser = function () {
-    function NumberRecogniser(onNumberRecognised) {
-        _classCallCheck(this, NumberRecogniser);
-
-        this.onNumberRecognised = onNumberRecognised;
-    }
-
-    _createClass(NumberRecogniser, [{
-        key: 'startListening',
-        value: function startListening() {
-            var _this = this;
-
-            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            // recognition.continuous = true;
-            // TODO: other languages?
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 5;
-            recognition.start();
-
-            recognition.onaudioend = function (ev) {
-                // start listening again after audio ends
-                _this.startListening();
-            };
-
-            recognition.onresult = function (ev) {
-                var results = ev.results[0];
-                for (var i = 0; i < results.length; i++) {
-                    var candidateNumber = Number.parseInt(results[i].transcript);
-                    if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
-                        _this.onNumberRecognised(candidateNumber);
-                        // keep listening for more
-                        _this.startListening();
-                        break;
-                    }
-                }
-            };
-        }
-    }], [{
-        key: 'checkCompatibility',
-        value: function checkCompatibility() {
-            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
-                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
-                return false;
-            }
-            var isLocalhost = location.host.startsWith('localhost');
-            if (isLocalhost) {
-                return true;
-            }
-            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-            if (isChrome && location.protocol !== 'https:') {
-                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
-                location.protocol = 'https:';
-                return false;
-            }
-            return true;
-        }
-    }]);
-
-    return NumberRecogniser;
-}();
-
-exports.default = NumberRecogniser;
-
-/***/ }),
+/* 6 */,
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -806,9 +731,52 @@ var PlaylistManager = function () {
             this.fileDataMap.set(name, fileData);
         }
     }, {
+        key: '_getSongNameFromInput',
+        value: function _getSongNameFromInput(input) {
+            if (this.fileDataMap.has(input)) {
+                return input;
+            }
+            // best guess at name?
+            input = input.toLowerCase();
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.fileDataMap.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var key = _step.value;
+
+                    if (key.toLowerCase().indexOf(input) >= 0) {
+                        return key;
+                    }
+                }
+                // no match :(
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return undefined;
+        }
+    }, {
         key: 'playSongByName',
-        value: function playSongByName(songName) {
+        value: function playSongByName(input) {
             var _this = this;
+
+            var songName = this._getSongNameFromInput(input);
+            if (!songName) {
+                throw 'Unrecognised song: ' + input;
+            }
 
             var songInfo = this.songLibrary.getSongInfoByName(songName);
             var bufferPlaybackRate = songInfo.playbackRate / 100;
@@ -849,6 +817,99 @@ var PlaylistManager = function () {
 }();
 
 exports.default = PlaylistManager;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var VoiceCommandListener = function () {
+    function VoiceCommandListener() {
+        _classCallCheck(this, VoiceCommandListener);
+    }
+
+    _createClass(VoiceCommandListener, [{
+        key: 'startListening',
+        value: function startListening() {
+            var _this = this;
+
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // recognition.continuous = true;
+            // TODO: other languages?
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+            recognition.start();
+
+            recognition.onaudioend = function (ev) {
+                // start listening again after audio ends
+                _this.startListening();
+            };
+
+            recognition.onresult = function (ev) {
+                var results = ev.results[0];
+                for (var i = 0; i < results.length; i++) {
+                    var command = results[i].transcript.split(' ')[0];
+
+                    switch (command) {
+                        case 'play':
+                            {
+                                if (_this.onPlayCommand) {
+                                    _this.onPlayCommand(results[i].transcript.substring('play '.length));
+                                    // allow multiple commands in case the first song name doesn't match
+                                    break;
+                                }
+                            }
+                        case 'bar':
+                            {
+                                if (_this.onBarCommand) {
+                                    var testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
+                                    if (!Number.isNaN(testBarNumber) && Number.isFinite(testBarNumber)) {
+                                        _this.onBarCommand(testBarNumber);
+                                        // stop on first successful bar command
+                                        return;
+                                    }
+                                }
+                            }
+                    }
+                }
+            };
+        }
+    }], [{
+        key: 'checkCompatibility',
+        value: function checkCompatibility() {
+            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
+                return false;
+            }
+            var isLocalhost = location.host.startsWith('localhost');
+            if (isLocalhost) {
+                return true;
+            }
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            if (isChrome && location.protocol !== 'https:') {
+                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
+                location.protocol = 'https:';
+                return false;
+            }
+            return true;
+        }
+    }]);
+
+    return VoiceCommandListener;
+}();
+
+exports.default = VoiceCommandListener;
 
 /***/ })
 /******/ ]);

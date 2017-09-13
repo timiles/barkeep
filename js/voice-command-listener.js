@@ -1,8 +1,4 @@
-export default class NumberRecogniser {
-
-    constructor(onNumberRecognised) {
-        this.onNumberRecognised = onNumberRecognised;
-    }
+export default class VoiceCommandListener {
 
     static checkCompatibility() {
         if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
@@ -39,12 +35,26 @@ export default class NumberRecogniser {
         recognition.onresult = ev => {
             var results = ev.results[0];
             for (var i = 0; i < results.length; i++) {
-                var candidateNumber = Number.parseInt(results[i].transcript);
-                if (!Number.isNaN(candidateNumber) && Number.isFinite(candidateNumber)) {
-                    this.onNumberRecognised(candidateNumber);
-                    // keep listening for more
-                    this.startListening();
-                    break;
+                let command = results[i].transcript.split(' ')[0];
+
+                switch (command) {
+                    case 'play': {
+                        if (this.onPlayCommand) {
+                            this.onPlayCommand(results[i].transcript.substring('play '.length));
+                            // allow multiple commands in case the first song name doesn't match
+                            break;
+                        }
+                    }
+                    case 'bar': {
+                        if (this.onBarCommand) {
+                            var testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
+                            if (!Number.isNaN(testBarNumber) && Number.isFinite(testBarNumber)) {
+                                this.onBarCommand(testBarNumber);
+                                // stop on first successful bar command
+                                return;
+                            }
+                        }
+                    }
                 }
             }
         };
