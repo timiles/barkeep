@@ -265,13 +265,11 @@ var BufferLoader = function () {
 
     _createClass(BufferLoader, null, [{
         key: 'loadBuffer',
-        value: function loadBuffer(fileData) {
-            var playbackRate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1.0;
-            var progressCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+        value: function loadBuffer(context, fileData) {
+            var playbackRate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1.0;
+            var progressCallback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : undefined;
 
             return new Promise(function (resolve, reject) {
-                var context = new (window.AudioContext || window.webkitAudioContext)();
-
                 context.decodeAudioData(fileData, function (buffer) {
                     var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
                     resolve(stretchedBuffer);
@@ -786,7 +784,7 @@ var PlaylistManager = function () {
                 this._playBuffer(buffer, songInfo);
             } else {
                 var fileData = this.fileDataMap.get(songName);
-                _bufferLoader2.default.loadBuffer(fileData, bufferPlaybackRate, function (p) {
+                _bufferLoader2.default.loadBuffer(this.context, fileData, bufferPlaybackRate, function (p) {
                     console.log('Stretching...', p);
                 }).then(function (buffer) {
                     _this.bufferMap.set(bufferKey, buffer);

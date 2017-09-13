@@ -45,7 +45,7 @@ export default class PlaylistManager {
         }
         else {
             let fileData = this.fileDataMap.get(songName);
-            BufferLoader.loadBuffer(fileData, bufferPlaybackRate, p => { console.log('Stretching...', p); })
+            BufferLoader.loadBuffer(this.context, fileData, bufferPlaybackRate, p => { console.log('Stretching...', p); })
                 .then(buffer => {
                     this.bufferMap.set(bufferKey, buffer);
                     this._playBuffer(buffer, songInfo);

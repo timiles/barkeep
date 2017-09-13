@@ -2,10 +2,8 @@ import './kali.min.js'
 
 export default class BufferLoader {
 
-    static loadBuffer(fileData, playbackRate = 1.0, progressCallback = undefined) {
+    static loadBuffer(context, fileData, playbackRate = 1.0, progressCallback = undefined) {
         return new Promise((resolve, reject) => {
-            let context = new (window.AudioContext || window.webkitAudioContext)();
-
             context.decodeAudioData(fileData, (buffer) => {
                 let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
                 resolve(stretchedBuffer);
