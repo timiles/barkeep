@@ -18,7 +18,6 @@ function init() {
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
-    let playSongButton = document.getElementById('playSongButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     let filesDropArea = document.body;
 
@@ -78,13 +77,8 @@ function init() {
     }
 
     // wire up manual controls
-    playSongButton.onclick = () => {
-        let selectedSong = jtmplModel.playlist.filter(s => s.selected)[0];
-        if (!selectedSong) {
-            alert('Please select a song!');
-            return false;
-        }
-        playlistManager.playSongByName(selectedSong.name);
+    window.barkeep_play = songName => {
+        playlistManager.playSongByName(songName);        
     }
     jumpToBarButton.onclick = (e) => {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));

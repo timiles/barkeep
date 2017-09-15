@@ -39,10 +39,6 @@
                 {{name}}
             </h2>
             <div>
-                <label>Selected:</label>
-                <input type="radio" name="selected-song" checked="{{selected}}" />
-            </div>
-            <div>
                 <label>BPM:</label>
                 <input type="number" value="{{bpm}}" />
             </div>
@@ -53,6 +49,9 @@
             <div>
                 <label>Playback rate (%):</label>
                 <input type="number" value="{{playbackRate}}" />
+            </div>
+            <div>
+                <button class="play" onclick="barkeep_play('{{name}}')">Play</button>
             </div>
         </div>
         {{/}}
@@ -67,9 +66,6 @@
         <p>or say a number:
             <span id="recognisedNumberDisplay" class="highlightable"></span>
         </p>
-    </div>
-    <div>
-        <button id="playSongButton">Play selected song</button>
     </div>
 
     <script src="https://cdn.rawgit.com/atmin/jtmpl/v1.1.0/jtmpl.min.js"></script>
