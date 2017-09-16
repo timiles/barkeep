@@ -462,6 +462,10 @@ function init() {
         voiceCommandListener.onPlayCommand = function (songName) {
             playlistManager.playSongByName(songName);
         };
+        voiceCommandListener.onStopCommand = function () {
+            playlistManager.stop();
+        };
+
         voiceCommandListener.startListening();
     };
 }
@@ -787,6 +791,13 @@ var PlaylistManager = function () {
             }
         }
     }, {
+        key: 'stop',
+        value: function stop() {
+            if (this.currentSongPlayer) {
+                this.currentSongPlayer.stop();
+            }
+        }
+    }, {
         key: 'jumpToBar',
         value: function jumpToBar(barNumber) {
             if (this.currentSongPlayer) {
@@ -860,6 +871,13 @@ var VoiceCommandListener = function () {
                                     _this.onPlayCommand(results[i].transcript.substring('play '.length));
                                     // allow multiple commands in case the first song name doesn't match
                                     break;
+                                }
+                            }
+                        case 'stop':
+                            {
+                                if (_this.onStopCommand) {
+                                    _this.onStopCommand();
+                                    return;
                                 }
                             }
                         case 'bar':

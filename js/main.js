@@ -95,6 +95,10 @@ function init() {
         voiceCommandListener.onPlayCommand = (songName) => {
             playlistManager.playSongByName(songName);
         }
+        voiceCommandListener.onStopCommand = () => {
+            playlistManager.stop();
+        }
+
         voiceCommandListener.startListening();
     }
 }

@@ -56,6 +56,12 @@ export default class PlaylistManager {
         }
     }
 
+    stop() {
+        if (this.currentSongPlayer) {
+            this.currentSongPlayer.stop();
+        }
+    }
+
     jumpToBar(barNumber) {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.play(barNumber);

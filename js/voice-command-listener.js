@@ -45,6 +45,12 @@ export default class VoiceCommandListener {
                             break;
                         }
                     }
+                    case 'stop': {
+                        if (this.onStopCommand) {
+                            this.onStopCommand();
+                            return;
+                        }
+                    }
                     case 'bar': {
                         if (this.onBarCommand) {
                             var testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
@@ -57,7 +63,7 @@ export default class VoiceCommandListener {
                     }
                     default: {
                         console.log('Unrecognised command:', results[i].transcript);
-                    }    
+                    }
                 }
             }
         };
