@@ -40,15 +40,14 @@ export default class PlaylistManager {
         }
 
         let songInfo = this.songLibrary.getSongInfoByName(songName);
-        let bufferPlaybackSpeed = songInfo.playbackSpeedPercent / 100;
-        let bufferKey = songName + '@' + bufferPlaybackSpeed;
+        let bufferKey = songName + '@' + songInfo.playbackSpeed;
         if (this.bufferMap.has(bufferKey)) {
             let buffer = this.bufferMap.get(bufferKey);
             this._playBuffer(buffer, songInfo);
         }
         else {
             let fileData = this.fileDataMap.get(songName);
-            BufferLoader.loadBuffer(this.context, fileData, bufferPlaybackSpeed, p => { console.log('Stretching...', p); })
+            BufferLoader.loadBuffer(this.context, fileData, songInfo.playbackSpeed, p => { console.log('Stretching...', p); })
                 .then(buffer => {
                     this.bufferMap.set(bufferKey, buffer);
                     this._playBuffer(buffer, songInfo);
@@ -72,7 +71,7 @@ export default class PlaylistManager {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
-        let songPlayer = new SongPlayer(this.context, buffer, songInfo.playbackSpeedPercent / 100, songInfo.bpm, songInfo.beatsPerBar);
+        let songPlayer = new SongPlayer(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
         songPlayer.play();
         this.currentSongPlayer = songPlayer;
     }

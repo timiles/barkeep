@@ -42,7 +42,7 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackSpeedPercent: info.playbackSpeedPercent,
+            playbackSpeedPercent: info.playbackSpeed * 100,
             escapedName: function() { return this('name').replace('\'', '\\\''); }
         };
 

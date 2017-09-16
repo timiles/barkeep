@@ -269,18 +269,18 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SongInfo = function () {
-    function SongInfo(bpm, beatsPerBar, playbackSpeedPercent) {
+    function SongInfo(bpm, beatsPerBar, playbackSpeed) {
         _classCallCheck(this, SongInfo);
 
         this.bpm = bpm;
         this.beatsPerBar = beatsPerBar || 4;
-        this.playbackSpeedPercent = playbackSpeedPercent || 100;
+        this.playbackSpeed = playbackSpeed || 1.0;
     }
 
     _createClass(SongInfo, null, [{
         key: "fromObject",
         value: function fromObject(song) {
-            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent);
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent / 100);
         }
     }]);
 
@@ -422,7 +422,7 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackSpeedPercent: info.playbackSpeedPercent,
+            playbackSpeedPercent: info.playbackSpeed * 100,
             escapedName: function escapedName() {
                 return this('name').replace('\'', '\\\'');
             }
@@ -740,14 +740,13 @@ var PlaylistManager = function () {
             }
 
             var songInfo = this.songLibrary.getSongInfoByName(songName);
-            var bufferPlaybackSpeed = songInfo.playbackSpeedPercent / 100;
-            var bufferKey = songName + '@' + bufferPlaybackSpeed;
+            var bufferKey = songName + '@' + songInfo.playbackSpeed;
             if (this.bufferMap.has(bufferKey)) {
                 var buffer = this.bufferMap.get(bufferKey);
                 this._playBuffer(buffer, songInfo);
             } else {
                 var fileData = this.fileDataMap.get(songName);
-                _bufferLoader2.default.loadBuffer(this.context, fileData, bufferPlaybackSpeed, function (p) {
+                _bufferLoader2.default.loadBuffer(this.context, fileData, songInfo.playbackSpeed, function (p) {
                     console.log('Stretching...', p);
                 }).then(function (buffer) {
                     _this.bufferMap.set(bufferKey, buffer);
@@ -775,7 +774,7 @@ var PlaylistManager = function () {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
-            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackSpeedPercent / 100, songInfo.bpm, songInfo.beatsPerBar);
+            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
             songPlayer.play();
             this.currentSongPlayer = songPlayer;
         }
