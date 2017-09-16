@@ -36,4 +36,16 @@ export default class SongLibrary {
             return infos;
         }
     }
+
+    import(json) {
+        console.log(json);
+        const songsToImport = new Map(JSON.parse(json));
+        console.log(songsToImport);
+        this.songInfos = new Map([... this.songInfos, ...songsToImport]);
+        this.persistToStorage();
+    }
+
+    export() {
+        return localStorage.getItem('song-library');
+    }
 }

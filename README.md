@@ -15,7 +15,7 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 - [x] enable loading multiple tracks
 - [x] load files via drag & drop
 - [x] persist settings per audio track
-- [ ] import/export settings
+- [x] import/export settings
 - [x] play track using voice recognition
 - [ ] UI overhaul
 

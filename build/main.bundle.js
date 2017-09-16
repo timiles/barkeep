@@ -232,6 +232,20 @@ var SongLibrary = function () {
                 return infos;
             }
         }
+    }, {
+        key: 'import',
+        value: function _import(json) {
+            console.log(json);
+            var songsToImport = new Map(JSON.parse(json));
+            console.log(songsToImport);
+            this.songInfos = new Map([].concat(_toConsumableArray(this.songInfos), _toConsumableArray(songsToImport)));
+            this.persistToStorage();
+        }
+    }, {
+        key: 'export',
+        value: function _export() {
+            return localStorage.getItem('song-library');
+        }
     }]);
 
     return SongLibrary;
@@ -387,6 +401,8 @@ function init() {
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     var filesDropArea = document.body;
+    var importSongLibraryInput = document.getElementById('importSongLibraryInput');
+    var exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
 
     var songLibrary = new _songLibrary2.default();
     var playlistManager = new _playlistManager2.default(songLibrary);
@@ -423,7 +439,7 @@ function init() {
 
     var loadFiles = function loadFiles(files) {
         for (var i = 0, f; f = files[i]; i++) {
-            _fileHelpers2.default.loadByFileReader(f).then(function (file) {
+            _fileHelpers2.default.readArrayBufferFromFile(f).then(function (file) {
                 var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
                 addLoadedSong(songFile);
             });
@@ -473,6 +489,17 @@ function init() {
         };
 
         voiceCommandListener.startListening();
+    };
+
+    importSongLibraryInput.onchange = function (evt) {
+        _fileHelpers2.default.readTextFromFile(evt.target.files[0]).then(function (file) {
+            songLibrary.import(file.contents);
+            alert('imported!');
+        });
+    };
+    exportSongLibraryButton.onclick = function () {
+        var json = songLibrary.export();
+        _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
 }
 
@@ -904,8 +931,8 @@ var FileHelpers = function () {
             });
         }
     }, {
-        key: 'loadByFileReader',
-        value: function loadByFileReader(file) {
+        key: 'readArrayBufferFromFile',
+        value: function readArrayBufferFromFile(file) {
             return new Promise(function (resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function (evt) {
@@ -916,6 +943,28 @@ var FileHelpers = function () {
                 };
                 reader.readAsArrayBuffer(file);
             });
+        }
+    }, {
+        key: 'readTextFromFile',
+        value: function readTextFromFile(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    resolve({ name: file.name, contents: evt.target.result });
+                };
+                reader.onerror = function () {
+                    return reject();
+                };
+                reader.readAsText(file);
+            });
+        }
+    }, {
+        key: 'downloadFile',
+        value: function downloadFile(name, contents) {
+            var link = document.createElement('a');
+            link.download = name;
+            link.href = URL.createObjectURL(new Blob([contents]));
+            link.click();
         }
     }]);
 

@@ -21,6 +21,8 @@ function init() {
     let jumpToBarButton = document.getElementById('jumpToBarButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     let filesDropArea = document.body;
+    let importSongLibraryInput = document.getElementById('importSongLibraryInput');
+    let exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
 
     let songLibrary = new SongLibrary();
     let playlistManager = new PlaylistManager(songLibrary);
@@ -58,7 +60,7 @@ function init() {
 
     let loadFiles = (files) => {
         for (var i = 0, f; f = files[i]; i++) {
-            FileHelpers.loadByFileReader(f)
+            FileHelpers.readArrayBufferFromFile(f)
                 .then(file => {
                     const songFile = new SongFile(file.name.split('.')[0], file.contents);
                     addLoadedSong(songFile);
@@ -107,5 +109,17 @@ function init() {
         }
 
         voiceCommandListener.startListening();
+    }
+
+    importSongLibraryInput.onchange = (evt) => {
+        FileHelpers.readTextFromFile(evt.target.files[0])
+            .then(file => {
+                songLibrary.import(file.contents);
+                alert('imported!');
+            });
+    }
+    exportSongLibraryButton.onclick = () => {
+        let json = songLibrary.export();
+        FileHelpers.downloadFile('barkeep.json', json);
     }
 }

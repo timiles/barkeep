@@ -20,7 +20,7 @@ export default class FileHelpers {
         });
     }
 
-    static loadByFileReader(file) {
+    static readArrayBufferFromFile(file) {
         return new Promise(function (resolve, reject) {
             var reader = new FileReader();
             reader.onload = (evt) => {
@@ -29,5 +29,23 @@ export default class FileHelpers {
             reader.onerror = () => reject();
             reader.readAsArrayBuffer(file);
         });
+    }
+
+    static readTextFromFile(file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = (evt) => {
+                resolve({ name: file.name, contents: evt.target.result });
+            };
+            reader.onerror = () => reject();
+            reader.readAsText(file);
+        });
+    }
+
+    static downloadFile(name, contents) {
+        var link = document.createElement('a');
+        link.download = name;
+        link.href = URL.createObjectURL(new Blob([contents]));
+        link.click();
     }
 }
