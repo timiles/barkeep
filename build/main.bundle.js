@@ -88,12 +88,12 @@ var BufferLoader = function () {
     _createClass(BufferLoader, null, [{
         key: 'loadBuffer',
         value: function loadBuffer(context, fileData) {
-            var playbackRate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1.0;
+            var playbackSpeed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1.0;
             var progressCallback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : undefined;
 
             return new Promise(function (resolve, reject) {
                 context.decodeAudioData(fileData, function (buffer) {
-                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
+                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressCallback);
                     resolve(stretchedBuffer);
                 }, function (e) {
                     console.error(e);
@@ -103,16 +103,16 @@ var BufferLoader = function () {
         }
     }, {
         key: '_stretch',
-        value: function _stretch(context, buffer, playbackRate, numChannels, bestQuality, progressCallback) {
+        value: function _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressCallback) {
 
-            if (playbackRate === 1.0) {
+            if (playbackSpeed === 1.0) {
                 return buffer;
             }
 
             var stretchSampleSize = 4096 * numChannels;
 
             var inputBufferSize = buffer.getChannelData(0).length;
-            var outputBufferSize = Math.floor(inputBufferSize / playbackRate) + 1;
+            var outputBufferSize = Math.floor(inputBufferSize / playbackSpeed) + 1;
 
             var outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
 
@@ -120,7 +120,7 @@ var BufferLoader = function () {
                 var inputData = buffer.getChannelData(channel);
 
                 var kali = new Kali(1);
-                kali.setup(context.sampleRate, playbackRate, !bestQuality);
+                kali.setup(context.sampleRate, playbackSpeed, !bestQuality);
 
                 var outputData = new Float32Array(outputBufferSize);
 
@@ -255,18 +255,18 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SongInfo = function () {
-    function SongInfo(bpm, beatsPerBar, playbackRate) {
+    function SongInfo(bpm, beatsPerBar, playbackSpeedPercent) {
         _classCallCheck(this, SongInfo);
 
         this.bpm = bpm;
         this.beatsPerBar = beatsPerBar || 4;
-        this.playbackRate = playbackRate || 100;
+        this.playbackSpeedPercent = playbackSpeedPercent || 100;
     }
 
     _createClass(SongInfo, null, [{
         key: "fromObject",
         value: function fromObject(song) {
-            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackRate);
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent);
         }
     }]);
 
@@ -402,7 +402,7 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackRate: info.playbackRate
+            playbackSpeedPercent: info.playbackSpeedPercent
         };
 
         playlistManager.addSong(songFile.fileName, songFile.fileData);
@@ -775,14 +775,14 @@ var PlaylistManager = function () {
             }
 
             var songInfo = this.songLibrary.getSongInfoByName(songName);
-            var bufferPlaybackRate = songInfo.playbackRate / 100;
-            var bufferKey = songName + '@' + bufferPlaybackRate;
+            var bufferPlaybackSpeed = songInfo.playbackSpeedPercent / 100;
+            var bufferKey = songName + '@' + bufferPlaybackSpeed;
             if (this.bufferMap.has(bufferKey)) {
                 var buffer = this.bufferMap.get(bufferKey);
                 this._playBuffer(buffer, songInfo);
             } else {
                 var fileData = this.fileDataMap.get(songName);
-                _bufferLoader2.default.loadBuffer(this.context, fileData, bufferPlaybackRate, function (p) {
+                _bufferLoader2.default.loadBuffer(this.context, fileData, bufferPlaybackSpeed, function (p) {
                     console.log('Stretching...', p);
                 }).then(function (buffer) {
                     _this.bufferMap.set(bufferKey, buffer);
@@ -810,7 +810,7 @@ var PlaylistManager = function () {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
-            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackRate / 100, songInfo.bpm, songInfo.beatsPerBar);
+            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackSpeedPercent / 100, songInfo.bpm, songInfo.beatsPerBar);
             songPlayer.play();
             this.currentSongPlayer = songPlayer;
         }

@@ -2,10 +2,10 @@ import './kali.min.js'
 
 export default class BufferLoader {
 
-    static loadBuffer(context, fileData, playbackRate = 1.0, progressCallback = undefined) {
+    static loadBuffer(context, fileData, playbackSpeed = 1.0, progressCallback = undefined) {
         return new Promise((resolve, reject) => {
             context.decodeAudioData(fileData, (buffer) => {
-                let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackRate, 2, false, progressCallback);
+                let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressCallback);
                 resolve(stretchedBuffer);
             }, (e) => {
                 console.error(e);
@@ -14,16 +14,16 @@ export default class BufferLoader {
         });
     }
 
-    static _stretch(context, buffer, playbackRate, numChannels, bestQuality, progressCallback) {
+    static _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressCallback) {
 
-        if (playbackRate === 1.0) {
+        if (playbackSpeed === 1.0) {
             return buffer;
         }
 
         let stretchSampleSize = 4096 * numChannels;
 
         let inputBufferSize = buffer.getChannelData(0).length;
-        let outputBufferSize = Math.floor(inputBufferSize / playbackRate) + 1;
+        let outputBufferSize = Math.floor(inputBufferSize / playbackSpeed) + 1;
 
         let outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
 
@@ -31,7 +31,7 @@ export default class BufferLoader {
             let inputData = buffer.getChannelData(channel);
 
             let kali = new Kali(1);
-            kali.setup(context.sampleRate, playbackRate, !bestQuality);
+            kali.setup(context.sampleRate, playbackSpeed, !bestQuality);
 
             let outputData = new Float32Array(outputBufferSize);
 

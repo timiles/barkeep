@@ -39,7 +39,7 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackRate: info.playbackRate
+            playbackSpeedPercent: info.playbackSpeedPercent
         };
 
         playlistManager.addSong(songFile.fileName, songFile.fileData);
