@@ -16,6 +16,9 @@ export default class PlaylistManager {
     }
 
     _getSongNameFromInput(input) {
+        if (input.trim().length === 0) {
+            return null;
+        }
         if (this.fileDataMap.has(input)) {
             return input;
         }
@@ -27,7 +30,7 @@ export default class PlaylistManager {
             }
         }
         // no match :(
-        return undefined;
+        return null;
     }
 
     playSongByName(input) {

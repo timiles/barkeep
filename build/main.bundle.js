@@ -722,6 +722,9 @@ var PlaylistManager = function () {
     }, {
         key: '_getSongNameFromInput',
         value: function _getSongNameFromInput(input) {
+            if (input.trim().length === 0) {
+                return null;
+            }
             if (this.fileDataMap.has(input)) {
                 return input;
             }
@@ -755,7 +758,7 @@ var PlaylistManager = function () {
                 }
             }
 
-            return undefined;
+            return null;
         }
     }, {
         key: 'playSongByName',
