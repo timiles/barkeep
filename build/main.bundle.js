@@ -422,7 +422,10 @@ function init() {
             name: songFile.fileName,
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
-            playbackSpeedPercent: info.playbackSpeedPercent
+            playbackSpeedPercent: info.playbackSpeedPercent,
+            escapedName: function escapedName() {
+                return this('name').replace('\'', '\\\'');
+            }
         };
 
         playlistManager.addSong(songFile.fileName, songFile.fileData);
