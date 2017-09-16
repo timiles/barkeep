@@ -55,6 +55,9 @@ export default class VoiceCommandListener {
                             }
                         }
                     }
+                    default: {
+                        console.log('Unrecognised command:', results[i].transcript);
+                    }    
                 }
             }
         };

@@ -870,6 +870,10 @@ var VoiceCommandListener = function () {
                                     }
                                 }
                             }
+                        default:
+                            {
+                                console.log('Unrecognised command:', results[i].transcript);
+                            }
                     }
                 }
             };
