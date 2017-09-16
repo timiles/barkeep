@@ -1,6 +1,7 @@
 import BufferLoader from './buffer-loader'
-import FileLoader from './file-loader'
+import FileHelpers from './file-helpers'
 import PlaylistManager from './playlist-manager'
+import SongFile from './song-file'
 import SongInfo from './song-info'
 import SongLibrary from './song-library'
 import SongPlayer from './song-player'
@@ -48,14 +49,20 @@ function init() {
     }
 
     loadBySongUrlButton.onclick = () => {
-        FileLoader.loadByUrl(songUrlInput.value)
-            .then(songFile => { addLoadedSong(songFile); });
+        FileHelpers.loadByUrl(songUrlInput.value)
+            .then(file => {
+                const songFile = new SongFile(file.name.split('.')[0], file.contents);
+                addLoadedSong(songFile);
+            });
     }
 
     let loadFiles = (files) => {
         for (var i = 0, f; f = files[i]; i++) {
-            FileLoader.loadByFileReader(f)
-                .then(songFile => { addLoadedSong(songFile); });
+            FileHelpers.loadByFileReader(f)
+                .then(file => {
+                    const songFile = new SongFile(file.name.split('.')[0], file.contents);
+                    addLoadedSong(songFile);
+                });
         }
     }
     filesInput.onchange = (evt) => {
@@ -78,7 +85,7 @@ function init() {
 
     // wire up manual controls
     window.barkeep_play = songName => {
-        playlistManager.playSongByName(songName);        
+        playlistManager.playSongByName(songName);
     }
     jumpToBarButton.onclick = (e) => {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));

@@ -343,13 +343,17 @@ var _bufferLoader = __webpack_require__(0);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
 
-var _fileLoader = __webpack_require__(6);
+var _fileHelpers = __webpack_require__(10);
 
-var _fileLoader2 = _interopRequireDefault(_fileLoader);
+var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
 var _playlistManager = __webpack_require__(8);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
+
+var _songFile = __webpack_require__(7);
+
+var _songFile2 = _interopRequireDefault(_songFile);
 
 var _songInfo = __webpack_require__(2);
 
@@ -411,14 +415,16 @@ function init() {
     };
 
     loadBySongUrlButton.onclick = function () {
-        _fileLoader2.default.loadByUrl(songUrlInput.value).then(function (songFile) {
+        _fileHelpers2.default.loadByUrl(songUrlInput.value).then(function (file) {
+            var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
             addLoadedSong(songFile);
         });
     };
 
     var loadFiles = function loadFiles(files) {
         for (var i = 0, f; f = files[i]; i++) {
-            _fileLoader2.default.loadByFileReader(f).then(function (songFile) {
+            _fileHelpers2.default.loadByFileReader(f).then(function (file) {
+                var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
                 addLoadedSong(songFile);
             });
         }
@@ -586,78 +592,7 @@ function init() {
 }]);
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _songFile = __webpack_require__(7);
-
-var _songFile2 = _interopRequireDefault(_songFile);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileLoader = function () {
-    function FileLoader() {
-        _classCallCheck(this, FileLoader);
-    }
-
-    _createClass(FileLoader, null, [{
-        key: 'loadByUrl',
-        value: function loadByUrl(url) {
-            return new Promise(function (resolve, reject) {
-                var _this = this;
-
-                var request = new XMLHttpRequest();
-                request.open('GET', url);
-                request.responseType = 'arraybuffer';
-                request.onload = function () {
-                    var urlParts = url.split('/');
-                    var fileNamePart = urlParts[urlParts.length - 1];
-                    var fileNameWithoutExtension = fileNamePart.split('.')[0];
-                    var songFile = new _songFile2.default(fileNameWithoutExtension, request.response);
-                    resolve(songFile);
-                };
-                request.onerror = function () {
-                    reject({
-                        status: _this.status,
-                        statusText: request.statusText
-                    });
-                };
-                request.send();
-            });
-        }
-    }, {
-        key: 'loadByFileReader',
-        value: function loadByFileReader(file) {
-            return new Promise(function (resolve, reject) {
-                var reader = new FileReader();
-                reader.onload = function (evt) {
-                    resolve(new _songFile2.default(file.name.split('.')[0], evt.target.result));
-                };
-                reader.onerror = function () {
-                    return reject();
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        }
-    }]);
-
-    return FileLoader;
-}();
-
-exports.default = FileLoader;
-
-/***/ }),
+/* 6 */,
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -924,6 +859,70 @@ var VoiceCommandListener = function () {
 }();
 
 exports.default = VoiceCommandListener;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileHelpers = function () {
+    function FileHelpers() {
+        _classCallCheck(this, FileHelpers);
+    }
+
+    _createClass(FileHelpers, null, [{
+        key: 'loadByUrl',
+        value: function loadByUrl(url) {
+            return new Promise(function (resolve, reject) {
+                var _this = this;
+
+                var request = new XMLHttpRequest();
+                request.open('GET', url);
+                request.responseType = 'arraybuffer';
+                request.onload = function () {
+                    var urlParts = url.split('/');
+                    var fileNamePart = urlParts[urlParts.length - 1];
+                    resolve({ name: fileNamePart, contents: request.response });
+                };
+                request.onerror = function () {
+                    reject({
+                        status: _this.status,
+                        statusText: request.statusText
+                    });
+                };
+                request.send();
+            });
+        }
+    }, {
+        key: 'loadByFileReader',
+        value: function loadByFileReader(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    resolve({ name: file.name, contents: evt.target.result });
+                };
+                reader.onerror = function () {
+                    return reject();
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+    }]);
+
+    return FileHelpers;
+}();
+
+exports.default = FileHelpers;
 
 /***/ })
 /******/ ]);

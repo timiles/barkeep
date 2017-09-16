@@ -1,6 +1,4 @@
-import SongFile from './song-file'
-
-export default class FileLoader {
+export default class FileHelpers {
 
     static loadByUrl(url) {
         return new Promise(function (resolve, reject) {
@@ -10,9 +8,7 @@ export default class FileLoader {
             request.onload = () => {
                 let urlParts = url.split('/');
                 let fileNamePart = urlParts[urlParts.length - 1];
-                let fileNameWithoutExtension = fileNamePart.split('.')[0];
-                let songFile = new SongFile(fileNameWithoutExtension, request.response);
-                resolve(songFile);
+                resolve({ name: fileNamePart, contents: request.response });
             };
             request.onerror = () => {
                 reject({
@@ -28,7 +24,7 @@ export default class FileLoader {
         return new Promise(function (resolve, reject) {
             var reader = new FileReader();
             reader.onload = (evt) => {
-                resolve(new SongFile(file.name.split('.')[0], evt.target.result));
+                resolve({ name: file.name, contents: evt.target.result });
             };
             reader.onerror = () => reject();
             reader.readAsArrayBuffer(file);
