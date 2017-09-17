@@ -26,15 +26,7 @@ export default class SongLibrary {
 
     retrieveFromStorage() {
         let jsonFromStorage = localStorage.getItem('song-library');
-        if (jsonFromStorage) {
-            return new Map(JSON.parse(jsonFromStorage));
-        }
-        else {
-            // populate with a default song
-            let infos = new Map();
-            infos.set('not just jazz', new SongInfo(102));
-            return infos;
-        }
+        return new Map(JSON.parse(jsonFromStorage));
     }
 
     import(json) {

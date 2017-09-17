@@ -223,14 +223,7 @@ var SongLibrary = function () {
         key: 'retrieveFromStorage',
         value: function retrieveFromStorage() {
             var jsonFromStorage = localStorage.getItem('song-library');
-            if (jsonFromStorage) {
-                return new Map(JSON.parse(jsonFromStorage));
-            } else {
-                // populate with a default song
-                var infos = new Map();
-                infos.set('not just jazz', new _songInfo2.default(102));
-                return infos;
-            }
+            return new Map(JSON.parse(jsonFromStorage));
         }
     }, {
         key: 'import',
@@ -445,6 +438,7 @@ function init() {
         openTab('playlist');
     };
     loadDemoSongButton.onclick = function () {
+        songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
         loadFileByUrl('audio/not just jazz.mp3');
         openTab('playlist');
     };

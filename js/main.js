@@ -54,16 +54,17 @@ function init() {
 
     let loadFileByUrl = (url) => {
         FileHelpers.loadByUrl(url)
-        .then(file => {
-            const songFile = new SongFile(file.name.split('.')[0], file.contents);
-            addLoadedSong(songFile);
-        });
+            .then(file => {
+                const songFile = new SongFile(file.name.split('.')[0], file.contents);
+                addLoadedSong(songFile);
+            });
     }
     loadBySongUrlButton.onclick = () => {
         loadFileByUrl(songUrlInput.value);
         openTab('playlist');
     }
     loadDemoSongButton.onclick = () => {
+        songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
         loadFileByUrl('audio/not just jazz.mp3');
         openTab('playlist');
     }
