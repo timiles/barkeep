@@ -37,6 +37,7 @@ export default class PlaylistManager {
         let songName = this._getSongNameFromInput(input);
         if (!songName) {
             console.log('Unrecognised song:', input);
+            return;
         }
 
         let songInfo = this.songLibrary.getSongInfoByName(songName);

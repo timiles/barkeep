@@ -775,6 +775,7 @@ var PlaylistManager = function () {
             var songName = this._getSongNameFromInput(input);
             if (!songName) {
                 console.log('Unrecognised song:', input);
+                return;
             }
 
             var songInfo = this.songLibrary.getSongInfoByName(songName);
