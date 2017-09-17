@@ -19,6 +19,9 @@ body {
 .playlist {
     width: 100%;
 }
+.playlist .name {
+    white-space: nowrap;
+}
 .playlist input[type=number] {
     width: 100%;
     text-align: center;
