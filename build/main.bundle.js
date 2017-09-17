@@ -392,10 +392,10 @@ if (_voiceCommandListener2.default.checkCompatibility()) {
 }
 
 function init() {
+    var enableMicButton = document.getElementById('enableMicButton');
     var songUrlInput = document.getElementById('songUrl');
     var loadBySongUrlButton = document.getElementById('loadBySongUrl');
     var filesInput = document.getElementById('files');
-    var startBarkeepButton = document.getElementById('startBarkeep');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
@@ -478,7 +478,7 @@ function init() {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
     };
 
-    startBarkeepButton.onclick = function () {
+    enableMicButton.onclick = function () {
         var voiceCommandListener = new _voiceCommandListener2.default();
         voiceCommandListener.onBarCommand = function (barNumber) {
             recognisedNumberDisplayElement.innerHTML = barNumber;

@@ -4,6 +4,10 @@ body {
     margin: auto;
 }
 
+#enableMicButton {
+    float: right;
+}
+
 .droppable {
     background-color: hotpink;
 }

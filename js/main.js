@@ -12,10 +12,10 @@ if (VoiceCommandListener.checkCompatibility()) {
 }
 
 function init() {
+    let enableMicButton = document.getElementById('enableMicButton');
     let songUrlInput = document.getElementById('songUrl');
     let loadBySongUrlButton = document.getElementById('loadBySongUrl');
     let filesInput = document.getElementById('files');
-    let startBarkeepButton = document.getElementById('startBarkeep');
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
@@ -99,7 +99,7 @@ function init() {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
     };
 
-    startBarkeepButton.onclick = () => {
+    enableMicButton.onclick = () => {
         let voiceCommandListener = new VoiceCommandListener();
         voiceCommandListener.onBarCommand = (barNumber) => {
             recognisedNumberDisplayElement.innerHTML = barNumber;
