@@ -47,9 +47,9 @@
                 <tr>
                     <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
                     <td class="name">{{name}}</td>
-                    <td><input type="number" value="{{bpm}}" /></td>
-                    <td><input type="number" value="{{beatsPerBar}}" /></td>
-                    <td><input type="number" value="{{playbackSpeedPercent}}" /></td>
+                    <td><input type="number" value="{{bpm}}" min="1" /></td>
+                    <td><input type="number" value="{{beatsPerBar}}" min="1" /></td>
+                    <td><input type="number" value="{{playbackSpeedPercent}}" min="50" /></td>
                 </tr>
                 {{/}}
                 {{^playlist}}
