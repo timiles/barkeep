@@ -12,6 +12,48 @@ body {
     background-color: hotpink;
 }
 
+/* tabs */
+ul.tab-links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+    ul.tab-links li {
+        float: left;
+    }
+
+        ul.tab-links li a {
+            display: inline-block;
+            color: black;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+            ul.tab-links li a:hover {
+                background-color: #ddd;
+            }
+
+            ul.tab-links li a:focus, a.active {
+                background-color: #ccc;
+            }
+
+.tab-contents {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+.tab-contents.active {
+    display: block;
+}
+    
 .highlightable {
     transition: font .5s linear, text-shadow .5s linear;
 }

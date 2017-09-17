@@ -438,6 +438,7 @@ function init() {
             var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
             addLoadedSong(songFile);
         });
+        openTab('playlist');
     };
 
     var loadFiles = function loadFiles(files) {
@@ -447,6 +448,7 @@ function init() {
                 addLoadedSong(songFile);
             });
         }
+        openTab('playlist');
     };
     filesInput.onchange = function (evt) {
         loadFiles(evt.target.files);
@@ -512,6 +514,34 @@ function init() {
         var json = songLibrary.export();
         _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
+
+    // tab control
+    var getTargetTabId = function getTargetTabId(tabLink) {
+        return tabLink.getAttribute('href').substring(1);
+    };
+    var openTab = function openTab(targetTabId) {
+        var toggleActive = function toggleActive(tabId, el) {
+            if (tabId === targetTabId) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        };
+        Array.from(document.getElementsByClassName('tab-link')).forEach(function (tabLink) {
+            toggleActive(getTargetTabId(tabLink), tabLink);
+        });
+        Array.from(document.getElementsByClassName('tab-contents')).forEach(function (tabContents) {
+            toggleActive(tabContents.id, tabContents);
+        });
+    };
+
+    Array.from(document.getElementsByClassName('tab-link')).forEach(function (tabLink) {
+        tabLink.onclick = function () {
+            openTab(getTargetTabId(tabLink));
+        };
+    });
+
+    openTab('loadSongs');
 }
 
 /***/ }),

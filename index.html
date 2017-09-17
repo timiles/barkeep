@@ -23,51 +23,61 @@
         <h1>Barkeep</h1>
     </header>
 
-    <div>
-        <label for="songUrl">URL:</label>
-        <input type="text" id="songUrl" value="audio/not just jazz.mp3" />
-        <button id="loadBySongUrl">Load song</button>
-    </div>
-    <div>
-        <input type="file" id="files" name="files[]" multiple />
-    </div>
+    <ul class="tab-links">
+        <li><a class="tab-link" href="#loadSongs">Load songs</a></li>
+        <li><a class="tab-link" href="#playlist">Playlist</a></li>
+        <li><a class="tab-link" href="#importExport">Manage song library</a></li>
+    </ul>
 
-    <div id="songsContainer"></div>
-    <script id="songTemplate" type="text/template">
-        <table class="playlist">
-            <thead>
-                <tr>
-                    <th colspan="2">Song</th>
-                    <th>BPM</th>
-                    <th>Beats per bar</th>
-                    <th>Playback speed&nbsp;(%)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#playlist}}
-                <tr>
-                    <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
-                    <td class="name">{{name}}</td>
-                    <td><input type="number" value="{{bpm}}" min="1" /></td>
-                    <td><input type="number" value="{{beatsPerBar}}" min="1" /></td>
-                    <td><input type="number" value="{{playbackSpeedPercent}}" min="50" /></td>
-                </tr>
-                {{/}}
-            </tbody>
-        </table>
-    </script>
-
-    <div>
-        <label>Jump to bar:</label>
-        <input type="number" id="jumpToBarNumber" value="1" />
-        <button id="jumpToBarButton">Go</button>
-        <p>or say a number:
-            <span id="recognisedNumberDisplay" class="highlightable"></span>
-        </p>
+    <div class="tab-contents" id="loadSongs">
+        <div>
+            <label for="songUrl">URL:</label>
+            <input type="text" id="songUrl" value="audio/not just jazz.mp3" />
+            <button id="loadBySongUrl">Load song</button>
+        </div>
+        <div>
+            <input type="file" id="files" name="files[]" multiple />
+        </div>
     </div>
 
-    <div>
-        <h3>Import/export song library</h3>
+    <div class="tab-contents" id="playlist">
+        <div id="songsContainer"></div>
+        <script id="songTemplate" type="text/template">
+            <table class="playlist">
+                <thead>
+                    <tr>
+                        <th colspan="2">Song</th>
+                        <th>BPM</th>
+                        <th>Beats per bar</th>
+                        <th>Playback speed&nbsp;(%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#playlist}}
+                    <tr>
+                        <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
+                        <td class="name">{{name}}</td>
+                        <td><input type="number" value="{{bpm}}" min="1" /></td>
+                        <td><input type="number" value="{{beatsPerBar}}" min="1" /></td>
+                        <td><input type="number" value="{{playbackSpeedPercent}}" min="50" /></td>
+                    </tr>
+                    {{/}}
+                </tbody>
+            </table>
+        </script>
+
+        <div>
+            <label>Jump to bar:</label>
+            <input type="number" id="jumpToBarNumber" value="1" />
+            <button id="jumpToBarButton">Go</button>
+            <p>or say a number:
+                <span id="recognisedNumberDisplay" class="highlightable"></span>
+            </p>
+        </div>
+    </div>
+
+    <div class="tab-contents" id="importExport">
+        <h3>Import/Export song library</h3>
         <input type="file" id="importSongLibraryInput" />
         <button id="exportSongLibraryButton">Download</button>
     </div>

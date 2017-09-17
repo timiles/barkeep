@@ -57,16 +57,18 @@ function init() {
                 const songFile = new SongFile(file.name.split('.')[0], file.contents);
                 addLoadedSong(songFile);
             });
+        openTab('playlist');
     }
 
     let loadFiles = (files) => {
-        for (var i = 0, f; f = files[i]; i++) {
+        for (let i = 0, f; f = files[i]; i++) {
             FileHelpers.readArrayBufferFromFile(f)
                 .then(file => {
                     const songFile = new SongFile(file.name.split('.')[0], file.contents);
                     addLoadedSong(songFile);
                 });
         }
+        openTab('playlist');
     }
     filesInput.onchange = (evt) => {
         loadFiles(evt.target.files);
@@ -133,4 +135,31 @@ function init() {
         let json = songLibrary.export();
         FileHelpers.downloadFile('barkeep.json', json);
     }
+
+    // tab control
+    let getTargetTabId = (tabLink) => tabLink.getAttribute('href').substring(1);
+    let openTab = (targetTabId) => {
+        let toggleActive = (tabId, el) => {
+            if (tabId === targetTabId) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+        Array.from(document.getElementsByClassName('tab-link')).forEach(
+            tabLink => {
+                toggleActive(getTargetTabId(tabLink), tabLink);
+            });
+        Array.from(document.getElementsByClassName('tab-contents')).forEach(
+            tabContents => {
+                toggleActive(tabContents.id, tabContents);
+            });
+    }
+
+    Array.from(document.getElementsByClassName('tab-link')).forEach(
+        tabLink => {
+            tabLink.onclick = () => { openTab(getTargetTabId(tabLink)); }
+        });
+
+    openTab('loadSongs');
 }
