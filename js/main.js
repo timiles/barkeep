@@ -43,7 +43,7 @@ function init() {
             bpm: info.bpm,
             beatsPerBar: info.beatsPerBar,
             playbackSpeedPercent: info.playbackSpeed * 100,
-            escapedName: function() { return this('name').replace('\'', '\\\''); }
+            escapedName: function () { return this('name').replace('\'', '\\\''); }
         };
 
         playlistManager.addSong(songFile.fileName, songFile.fileData);
@@ -88,7 +88,12 @@ function init() {
 
     // wire up manual controls
     window.barkeep_play = songName => {
-        playlistManager.playSongByName(songName);
+        try {
+            playlistManager.playSongByName(songName);
+        }
+        catch (e) {
+            alert(e);
+        }
     }
     jumpToBarButton.onclick = (e) => {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
@@ -103,7 +108,12 @@ function init() {
             playlistManager.jumpToBar(barNumber);
         }
         voiceCommandListener.onPlayCommand = (songName) => {
-            playlistManager.playSongByName(songName);
+            try {
+                playlistManager.playSongByName(songName);
+            }
+            catch (e) {
+                alert(e);
+            }
         }
         voiceCommandListener.onStopCommand = () => {
             playlistManager.stop();

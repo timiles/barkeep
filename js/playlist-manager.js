@@ -36,10 +36,14 @@ export default class PlaylistManager {
     playSongByName(input) {
         let songName = this._getSongNameFromInput(input);
         if (!songName) {
-            throw 'Unrecognised song: ' + input;
+            console.log('Unrecognised song:', input);
         }
 
         let songInfo = this.songLibrary.getSongInfoByName(songName);
+        if (!songInfo.bpm) {
+            throw 'Please set BPM for ' + songName;
+        }
+
         let bufferKey = songName + '@' + songInfo.playbackSpeed;
         if (this.bufferMap.has(bufferKey)) {
             let buffer = this.bufferMap.get(bufferKey);

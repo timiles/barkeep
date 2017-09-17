@@ -468,7 +468,11 @@ function init() {
 
     // wire up manual controls
     window.barkeep_play = function (songName) {
-        playlistManager.playSongByName(songName);
+        try {
+            playlistManager.playSongByName(songName);
+        } catch (e) {
+            alert(e);
+        }
     };
     jumpToBarButton.onclick = function (e) {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
@@ -485,7 +489,11 @@ function init() {
             playlistManager.jumpToBar(barNumber);
         };
         voiceCommandListener.onPlayCommand = function (songName) {
-            playlistManager.playSongByName(songName);
+            try {
+                playlistManager.playSongByName(songName);
+            } catch (e) {
+                alert(e);
+            }
         };
         voiceCommandListener.onStopCommand = function () {
             playlistManager.stop();
@@ -736,10 +744,14 @@ var PlaylistManager = function () {
 
             var songName = this._getSongNameFromInput(input);
             if (!songName) {
-                throw 'Unrecognised song: ' + input;
+                console.log('Unrecognised song:', input);
             }
 
             var songInfo = this.songLibrary.getSongInfoByName(songName);
+            if (!songInfo.bpm) {
+                throw 'Please set BPM for ' + songName;
+            }
+
             var bufferKey = songName + '@' + songInfo.playbackSpeed;
             if (this.bufferMap.has(bufferKey)) {
                 var buffer = this.bufferMap.get(bufferKey);
