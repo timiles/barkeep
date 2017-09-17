@@ -33,28 +33,32 @@
 
     <div id="songsContainer"></div>
     <script id="songTemplate" type="text/template">
-        {{#playlist}}
-        <div class="song">
-            <h2>
-                {{name}}
-            </h2>
-            <div>
-                <label>BPM:</label>
-                <input type="number" value="{{bpm}}" />
-            </div>
-            <div>
-                <label>Beats per bar:</label>
-                <input type="number" value="{{beatsPerBar}}" />
-            </div>
-            <div>
-                <label>Playback speed (%):</label>
-                <input type="number" value="{{playbackSpeedPercent}}" />
-            </div>
-            <div>
-                <button class="play" onclick="barkeep_play('{{escapedName}}')">Play</button>
-            </div>
-        </div>
-        {{/}}
+        <table class="playlist">
+            <thead>
+                <tr>
+                    <th colspan="2">Song</th>
+                    <th>BPM</th>
+                    <th>Beats per bar</th>
+                    <th>Playback speed&nbsp;(%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#playlist}}
+                <tr>
+                    <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
+                    <td>{{name}}</td>
+                    <td><input type="number" value="{{bpm}}" /></td>
+                    <td><input type="number" value="{{beatsPerBar}}" /></td>
+                    <td><input type="number" value="{{playbackSpeedPercent}}" /></td>
+                </tr>
+                {{/}}
+                {{^playlist}}
+                <tr>
+                    <td colspan="5"><i>No songs loaded</i></td>
+                </tr>
+                {{/}}
+            </tbody>
+        </table>
     </script>
 
     <button id="startBarkeep">Start barkeep listening</button>

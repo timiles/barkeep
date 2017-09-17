@@ -15,3 +15,11 @@ body {
     text-shadow: 0 0 100px limegreen;
     font-size: 200px;
 }
+
+.playlist {
+    width: 100%;
+}
+.playlist input[type=number] {
+    width: 100%;
+    text-align: center;
+}
