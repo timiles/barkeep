@@ -53,7 +53,13 @@ ul.tab-links {
 .tab-contents.active {
     display: block;
 }
-    
+
+.info {
+    border: 1px solid darkgray;
+    margin: 10px 0px;
+    padding: 10px;
+}
+
 .highlightable {
     transition: font .5s linear, text-shadow .5s linear;
 }
@@ -72,3 +78,12 @@ ul.tab-links {
     width: 100%;
     text-align: center;
 }
+
+#loadSongs button, #loadSongs input[type=text] {
+    padding: 10px;
+}
+
+#songUrl {
+    width: 400px;    
+}
+

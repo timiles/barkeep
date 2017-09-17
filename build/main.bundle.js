@@ -395,6 +395,7 @@ function init() {
     var enableMicButton = document.getElementById('enableMicButton');
     var songUrlInput = document.getElementById('songUrl');
     var loadBySongUrlButton = document.getElementById('loadBySongUrl');
+    var loadDemoSongButton = document.getElementById('loadDemoSongButton');
     var filesInput = document.getElementById('files');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
@@ -433,11 +434,18 @@ function init() {
         jtmpl('#songsContainer').trigger('change', 'playlist');
     };
 
-    loadBySongUrlButton.onclick = function () {
-        _fileHelpers2.default.loadByUrl(songUrlInput.value).then(function (file) {
+    var loadFileByUrl = function loadFileByUrl(url) {
+        _fileHelpers2.default.loadByUrl(url).then(function (file) {
             var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
             addLoadedSong(songFile);
         });
+    };
+    loadBySongUrlButton.onclick = function () {
+        loadFileByUrl(songUrlInput.value);
+        openTab('playlist');
+    };
+    loadDemoSongButton.onclick = function () {
+        loadFileByUrl('audio/not just jazz.mp3');
         openTab('playlist');
     };
 
