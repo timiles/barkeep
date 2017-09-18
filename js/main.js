@@ -16,11 +16,16 @@ function init() {
     let enableMicButton = document.getElementById('enableMicButton');
     let loadDemoSongButton = document.getElementById('loadDemoSongButton');
     let filesInput = document.getElementById('files');
+    let filesDropArea = document.body;
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
+
+    let noSongsContainer = document.getElementById('noSongsContainer');
+    let someSongsContainer = document.getElementById('someSongsContainer');
+    let sampleVoiceCommandSongName = document.getElementById('sampleVoiceCommandSongName');
     let jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     let jumpToBarButton = document.getElementById('jumpToBarButton');
     let recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
-    let filesDropArea = document.body;
+
     let importSongLibraryInput = document.getElementById('importSongLibraryInput');
     let exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
 
@@ -32,13 +37,14 @@ function init() {
     let jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
-    var jtmplSongs = jtmpl('#songsContainer');
+    let jtmplSongs = jtmpl('#songsContainer');
     jtmplSongs.on('update', (prop) => {
         if (prop === 'playlist') {
             songLibrary.updateSongInfos(jtmplModel.playlist);
         }
     });
 
+    let anySongsLoaded = false;
     let addLoadedSong = (songFile) => {
         let info = songLibrary.getSongInfoByName(songFile.fileName) || new SongInfo();
         let songModel = {
@@ -52,6 +58,14 @@ function init() {
         playlistManager.addSong(songFile.fileName, songFile.fileData);
         jtmplModel.playlist.push(songModel);
         jtmpl('#songsContainer').trigger('change', 'playlist');
+
+        if (!anySongsLoaded) {
+            noSongsContainer.classList.add('hidden');
+            someSongsContainer.classList.remove('hidden');
+            sampleVoiceCommandSongName.innerText = songModel.name;
+            tabControl.openTab('playlist');
+            anySongsLoaded = true;
+        }
     }
 
     let loadFileByUrl = (url) => {
@@ -64,7 +78,6 @@ function init() {
     loadDemoSongButton.onclick = () => {
         songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
         loadFileByUrl('audio/not just jazz.mp3');
-        tabControl.openTab('playlist');
     }
 
     let loadFiles = (files) => {
@@ -75,7 +88,6 @@ function init() {
                     addLoadedSong(songFile);
                 });
         }
-        tabControl.openTab('playlist');
     }
     filesInput.onchange = (evt) => {
         loadFiles(evt.target.files);

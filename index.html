@@ -39,43 +39,57 @@
         <p>If you want to try out a demo first, <button id="loadDemoSongButton">click here!</button></p>
 
         <div class="info">
-            Don't worry: file data is only used locally, and never leaves your browser.
+            <p>Don't worry: file data is only used locally, and never leaves your browser.</p>
         </div>
     </div>
 
     <div class="tab-pane" id="playlist">
-        <div id="songsContainer"></div>
-        <script id="songTemplate" type="text/template">
-            <table class="playlist">
-                <thead>
-                    <tr>
-                        <th colspan="2">Song</th>
-                        <th>BPM</th>
-                        <th>Beats per bar</th>
-                        <th>Playback speed&nbsp;(%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#playlist}}
-                    <tr>
-                        <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
-                        <td class="name">{{name}}</td>
-                        <td><input type="number" value="{{bpm}}" min="1" /></td>
-                        <td><input type="number" value="{{beatsPerBar}}" min="1" /></td>
-                        <td><input type="number" value="{{playbackSpeedPercent}}" min="50" /></td>
-                    </tr>
-                    {{/}}
-                </tbody>
-            </table>
-        </script>
+        <div id="noSongsContainer">
+            <p><i>Please load some songs first then check back here.</i></p>
+        </div>
+        <div id="someSongsContainer" class="hidden">
+            <div class="info">
+                <p>Great! Now <b>enable microphone</b> above, then try one of the following voice commands:</p>
+                <ul>
+                    <li><i>"Play <b><span id="sampleVoiceCommandSongName"></span></b>"</i></li>
+                    <li><i>"Bar <b>42</b>"</i></li>
+                    <li><i>"Stop!"</i></li>
+                </ul>
+                <p>(You can still do everything with the UI, but voice commands are easier!)</p>
+            </div>
+            <div id="songsContainer"></div>
+            <script id="songTemplate" type="text/template">
+                <table class="playlist">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Song</th>
+                            <th>BPM</th>
+                            <th>Beats per bar</th>
+                            <th>Playback speed&nbsp;(%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#playlist}}
+                        <tr>
+                            <td><button class="play" onclick="barkeep_play('{{escapedName}}')">▶</button></td>
+                            <td class="name">{{name}}</td>
+                            <td><input type="number" value="{{bpm}}" min="1" /></td>
+                            <td><input type="number" value="{{beatsPerBar}}" min="1" /></td>
+                            <td><input type="number" value="{{playbackSpeedPercent}}" min="50" /></td>
+                        </tr>
+                        {{/}}
+                    </tbody>
+                </table>
+            </script>
 
-        <div>
-            <label>Jump to bar:</label>
-            <input type="number" id="jumpToBarNumber" value="1" />
-            <button id="jumpToBarButton">Go</button>
-            <p>or say a number:
-                <span id="recognisedNumberDisplay" class="highlightable"></span>
-            </p>
+            <div>
+                <label>Jump to bar:</label>
+                <input type="number" id="jumpToBarNumber" value="1" />
+                <button id="jumpToBarButton">Go</button>
+                <p>or say a number:
+                    <span id="recognisedNumberDisplay" class="highlightable"></span>
+                </p>
+            </div>
         </div>
     </div>
 

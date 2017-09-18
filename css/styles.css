@@ -4,6 +4,10 @@ body {
     margin: auto;
 }
 
+.hidden {
+    display: none;
+}
+
 #enableMicButton {
     float: right;
 }
