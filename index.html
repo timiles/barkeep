@@ -29,7 +29,7 @@
         <li><a class="tab-link" href="#importExport">Manage song library</a></li>
     </ul>
 
-    <div class="tab-contents" id="loadSongs">
+    <div class="tab-pane" id="loadSongs">
         <h2>Load files from your computer</h2>
         <p>Use the file select control below to select audio files from your local machine:</p>
         <input type="file" id="files" name="files[]" multiple />
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <div class="tab-contents" id="playlist">
+    <div class="tab-pane" id="playlist">
         <div id="songsContainer"></div>
         <script id="songTemplate" type="text/template">
             <table class="playlist">
@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    <div class="tab-contents" id="importExport">
+    <div class="tab-pane" id="importExport">
         <h3>Import/Export song library</h3>
         <input type="file" id="importSongLibraryInput" />
         <button id="exportSongLibraryButton">Download</button>

@@ -5,6 +5,7 @@ import SongFile from './song-file'
 import SongInfo from './song-info'
 import SongLibrary from './song-library'
 import SongPlayer from './song-player'
+import TabControl from './tab-control'
 import VoiceCommandListener from './voice-command-listener'
 
 if (VoiceCommandListener.checkCompatibility()) {
@@ -22,6 +23,9 @@ function init() {
     let filesDropArea = document.body;
     let importSongLibraryInput = document.getElementById('importSongLibraryInput');
     let exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
+
+    let tabControl = new TabControl(document);
+    tabControl.openTab('loadSongs');
 
     let songLibrary = new SongLibrary();
     let playlistManager = new PlaylistManager(songLibrary);
@@ -60,7 +64,7 @@ function init() {
     loadDemoSongButton.onclick = () => {
         songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
         loadFileByUrl('audio/not just jazz.mp3');
-        openTab('playlist');
+        tabControl.openTab('playlist');
     }
 
     let loadFiles = (files) => {
@@ -71,7 +75,7 @@ function init() {
                     addLoadedSong(songFile);
                 });
         }
-        openTab('playlist');
+        tabControl.openTab('playlist');
     }
     filesInput.onchange = (evt) => {
         loadFiles(evt.target.files);
@@ -138,31 +142,4 @@ function init() {
         let json = songLibrary.export();
         FileHelpers.downloadFile('barkeep.json', json);
     }
-
-    // tab control
-    let getTargetTabId = (tabLink) => tabLink.getAttribute('href').substring(1);
-    let openTab = (targetTabId) => {
-        let toggleActive = (tabId, el) => {
-            if (tabId === targetTabId) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        }
-        Array.from(document.getElementsByClassName('tab-link')).forEach(
-            tabLink => {
-                toggleActive(getTargetTabId(tabLink), tabLink);
-            });
-        Array.from(document.getElementsByClassName('tab-contents')).forEach(
-            tabContents => {
-                toggleActive(tabContents.id, tabContents);
-            });
-    }
-
-    Array.from(document.getElementsByClassName('tab-link')).forEach(
-        tabLink => {
-            tabLink.onclick = () => { openTab(getTargetTabId(tabLink)); }
-        });
-
-    openTab('loadSongs');
 }

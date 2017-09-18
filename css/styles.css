@@ -44,13 +44,13 @@ ul.tab-links {
                 background-color: #ccc;
             }
 
-.tab-contents {
+.tab-pane {
     display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
 }
-.tab-contents.active {
+.tab-pane.active {
     display: block;
 }
 

@@ -374,6 +374,10 @@ var _songPlayer = __webpack_require__(3);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
+var _tabControl = __webpack_require__(10);
+
+var _tabControl2 = _interopRequireDefault(_tabControl);
+
 var _voiceCommandListener = __webpack_require__(9);
 
 var _voiceCommandListener2 = _interopRequireDefault(_voiceCommandListener);
@@ -395,6 +399,9 @@ function init() {
     var filesDropArea = document.body;
     var importSongLibraryInput = document.getElementById('importSongLibraryInput');
     var exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
+
+    var tabControl = new _tabControl2.default(document);
+    tabControl.openTab('loadSongs');
 
     var songLibrary = new _songLibrary2.default();
     var playlistManager = new _playlistManager2.default(songLibrary);
@@ -434,7 +441,7 @@ function init() {
     loadDemoSongButton.onclick = function () {
         songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
         loadFileByUrl('audio/not just jazz.mp3');
-        openTab('playlist');
+        tabControl.openTab('playlist');
     };
 
     var loadFiles = function loadFiles(files) {
@@ -444,7 +451,7 @@ function init() {
                 addLoadedSong(songFile);
             });
         }
-        openTab('playlist');
+        tabControl.openTab('playlist');
     };
     filesInput.onchange = function (evt) {
         loadFiles(evt.target.files);
@@ -510,34 +517,6 @@ function init() {
         var json = songLibrary.export();
         _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
-
-    // tab control
-    var getTargetTabId = function getTargetTabId(tabLink) {
-        return tabLink.getAttribute('href').substring(1);
-    };
-    var openTab = function openTab(targetTabId) {
-        var toggleActive = function toggleActive(tabId, el) {
-            if (tabId === targetTabId) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        };
-        Array.from(document.getElementsByClassName('tab-link')).forEach(function (tabLink) {
-            toggleActive(getTargetTabId(tabLink), tabLink);
-        });
-        Array.from(document.getElementsByClassName('tab-contents')).forEach(function (tabContents) {
-            toggleActive(tabContents.id, tabContents);
-        });
-    };
-
-    Array.from(document.getElementsByClassName('tab-link')).forEach(function (tabLink) {
-        tabLink.onclick = function () {
-            openTab(getTargetTabId(tabLink));
-        };
-    });
-
-    openTab('loadSongs');
 }
 
 /***/ }),
@@ -1012,6 +991,66 @@ var VoiceCommandListener = function () {
 }();
 
 exports.default = VoiceCommandListener;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TabControl = function () {
+    function TabControl(document) {
+        var _this = this;
+
+        _classCallCheck(this, TabControl);
+
+        this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
+        this.tabPanes = Array.from(document.getElementsByClassName('tab-pane'));
+
+        this.tabLinks.forEach(function (tabLink) {
+            tabLink.onclick = function () {
+                _this.openTab(TabControl._getTargetTabId(tabLink));
+            };
+        });
+    }
+
+    _createClass(TabControl, [{
+        key: 'openTab',
+        value: function openTab(targetTabId) {
+            var toggleActive = function toggleActive(tabId, el) {
+                if (tabId === targetTabId) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            };
+            this.tabLinks.forEach(function (tabLink) {
+                toggleActive(TabControl._getTargetTabId(tabLink), tabLink);
+            });
+            this.tabPanes.forEach(function (tabContents) {
+                toggleActive(tabContents.id, tabContents);
+            });
+        }
+    }], [{
+        key: '_getTargetTabId',
+        value: function _getTargetTabId(tabLink) {
+            return tabLink.getAttribute('href').substring(1);
+        }
+    }]);
+
+    return TabControl;
+}();
+
+exports.default = TabControl;
 
 /***/ })
 /******/ ]);
