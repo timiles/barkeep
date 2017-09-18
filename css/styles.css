@@ -78,12 +78,3 @@ ul.tab-links {
     width: 100%;
     text-align: center;
 }
-
-#loadSongs button, #loadSongs input[type=text] {
-    padding: 10px;
-}
-
-#songUrl {
-    width: 400px;    
-}
-

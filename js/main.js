@@ -13,8 +13,6 @@ if (VoiceCommandListener.checkCompatibility()) {
 
 function init() {
     let enableMicButton = document.getElementById('enableMicButton');
-    let songUrlInput = document.getElementById('songUrl');
-    let loadBySongUrlButton = document.getElementById('loadBySongUrl');
     let loadDemoSongButton = document.getElementById('loadDemoSongButton');
     let filesInput = document.getElementById('files');
     let loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
@@ -58,10 +56,6 @@ function init() {
                 const songFile = new SongFile(file.name.split('.')[0], file.contents);
                 addLoadedSong(songFile);
             });
-    }
-    loadBySongUrlButton.onclick = () => {
-        loadFileByUrl(songUrlInput.value);
-        openTab('playlist');
     }
     loadDemoSongButton.onclick = () => {
         songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);

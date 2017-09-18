@@ -350,15 +350,15 @@ var _bufferLoader = __webpack_require__(0);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
 
-var _fileHelpers = __webpack_require__(10);
+var _fileHelpers = __webpack_require__(6);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
-var _playlistManager = __webpack_require__(8);
+var _playlistManager = __webpack_require__(7);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
 
-var _songFile = __webpack_require__(7);
+var _songFile = __webpack_require__(8);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
@@ -386,8 +386,6 @@ if (_voiceCommandListener2.default.checkCompatibility()) {
 
 function init() {
     var enableMicButton = document.getElementById('enableMicButton');
-    var songUrlInput = document.getElementById('songUrl');
-    var loadBySongUrlButton = document.getElementById('loadBySongUrl');
     var loadDemoSongButton = document.getElementById('loadDemoSongButton');
     var filesInput = document.getElementById('files');
     var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
@@ -432,10 +430,6 @@ function init() {
             var songFile = new _songFile2.default(file.name.split('.')[0], file.contents);
             addLoadedSong(songFile);
         });
-    };
-    loadBySongUrlButton.onclick = function () {
-        loadFileByUrl(songUrlInput.value);
-        openTab('playlist');
     };
     loadDemoSongButton.onclick = function () {
         songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
@@ -662,8 +656,7 @@ function init() {
 }]);
 
 /***/ }),
-/* 6 */,
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -673,19 +666,83 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var SongFile = function SongFile(fileName, fileData) {
-    _classCallCheck(this, SongFile);
+var FileHelpers = function () {
+    function FileHelpers() {
+        _classCallCheck(this, FileHelpers);
+    }
 
-    this.fileName = fileName;
-    this.fileData = fileData;
-};
+    _createClass(FileHelpers, null, [{
+        key: 'loadByUrl',
+        value: function loadByUrl(url) {
+            return new Promise(function (resolve, reject) {
+                var _this = this;
 
-exports.default = SongFile;
+                var request = new XMLHttpRequest();
+                request.open('GET', url);
+                request.responseType = 'arraybuffer';
+                request.onload = function () {
+                    var urlParts = url.split('/');
+                    var fileNamePart = urlParts[urlParts.length - 1];
+                    resolve({ name: fileNamePart, contents: request.response });
+                };
+                request.onerror = function () {
+                    reject({
+                        status: _this.status,
+                        statusText: request.statusText
+                    });
+                };
+                request.send();
+            });
+        }
+    }, {
+        key: 'readArrayBufferFromFile',
+        value: function readArrayBufferFromFile(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    resolve({ name: file.name, contents: evt.target.result });
+                };
+                reader.onerror = function () {
+                    return reject();
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+    }, {
+        key: 'readTextFromFile',
+        value: function readTextFromFile(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    resolve({ name: file.name, contents: evt.target.result });
+                };
+                reader.onerror = function () {
+                    return reject();
+                };
+                reader.readAsText(file);
+            });
+        }
+    }, {
+        key: 'downloadFile',
+        value: function downloadFile(name, contents) {
+            var link = document.createElement('a');
+            link.download = name;
+            link.href = URL.createObjectURL(new Blob([contents]));
+            link.click();
+        }
+    }]);
+
+    return FileHelpers;
+}();
+
+exports.default = FileHelpers;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -831,6 +888,28 @@ var PlaylistManager = function () {
 exports.default = PlaylistManager;
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongFile = function SongFile(fileName, fileData) {
+    _classCallCheck(this, SongFile);
+
+    this.fileName = fileName;
+    this.fileData = fileData;
+};
+
+exports.default = SongFile;
+
+/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -933,92 +1012,6 @@ var VoiceCommandListener = function () {
 }();
 
 exports.default = VoiceCommandListener;
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileHelpers = function () {
-    function FileHelpers() {
-        _classCallCheck(this, FileHelpers);
-    }
-
-    _createClass(FileHelpers, null, [{
-        key: 'loadByUrl',
-        value: function loadByUrl(url) {
-            return new Promise(function (resolve, reject) {
-                var _this = this;
-
-                var request = new XMLHttpRequest();
-                request.open('GET', url);
-                request.responseType = 'arraybuffer';
-                request.onload = function () {
-                    var urlParts = url.split('/');
-                    var fileNamePart = urlParts[urlParts.length - 1];
-                    resolve({ name: fileNamePart, contents: request.response });
-                };
-                request.onerror = function () {
-                    reject({
-                        status: _this.status,
-                        statusText: request.statusText
-                    });
-                };
-                request.send();
-            });
-        }
-    }, {
-        key: 'readArrayBufferFromFile',
-        value: function readArrayBufferFromFile(file) {
-            return new Promise(function (resolve, reject) {
-                var reader = new FileReader();
-                reader.onload = function (evt) {
-                    resolve({ name: file.name, contents: evt.target.result });
-                };
-                reader.onerror = function () {
-                    return reject();
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        }
-    }, {
-        key: 'readTextFromFile',
-        value: function readTextFromFile(file) {
-            return new Promise(function (resolve, reject) {
-                var reader = new FileReader();
-                reader.onload = function (evt) {
-                    resolve({ name: file.name, contents: evt.target.result });
-                };
-                reader.onerror = function () {
-                    return reject();
-                };
-                reader.readAsText(file);
-            });
-        }
-    }, {
-        key: 'downloadFile',
-        value: function downloadFile(name, contents) {
-            var link = document.createElement('a');
-            link.download = name;
-            link.href = URL.createObjectURL(new Blob([contents]));
-            link.click();
-        }
-    }]);
-
-    return FileHelpers;
-}();
-
-exports.default = FileHelpers;
 
 /***/ })
 /******/ ]);
