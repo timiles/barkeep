@@ -154,4 +154,6 @@ function init() {
         let json = songLibrary.export();
         FileHelpers.downloadFile('barkeep.json', json);
     }
+    window.beep = () => { playlistManager.beep(); }
+    
 }

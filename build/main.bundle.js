@@ -529,6 +529,9 @@ function init() {
         var json = songLibrary.export();
         _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
+    window.beep = function () {
+        playlistManager.beep();
+    };
 }
 
 /***/ }),
@@ -858,8 +861,18 @@ var PlaylistManager = function () {
         key: 'jumpToBar',
         value: function jumpToBar(barNumber) {
             if (this.currentSongPlayer) {
+                this._beep();
                 this.currentSongPlayer.play(barNumber);
             }
+        }
+    }, {
+        key: '_beep',
+        value: function _beep() {
+            var oscillator = this.context.createOscillator();
+            oscillator.frequency.value = 4000;
+            oscillator.connect(this.context.destination);
+            oscillator.start();
+            oscillator.stop(this.context.currentTime + .1);
         }
     }, {
         key: '_playBuffer',

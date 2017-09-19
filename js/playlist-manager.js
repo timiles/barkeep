@@ -68,8 +68,17 @@ export default class PlaylistManager {
 
     jumpToBar(barNumber) {
         if (this.currentSongPlayer) {
+            this._beep();
             this.currentSongPlayer.play(barNumber);
         }
+    }
+
+    _beep() {
+        var oscillator = this.context.createOscillator();
+        oscillator.frequency.value = 4000;
+        oscillator.connect(this.context.destination);
+        oscillator.start();
+        oscillator.stop(this.context.currentTime + .1);
     }
 
     _playBuffer(buffer, songInfo) {
