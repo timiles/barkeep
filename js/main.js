@@ -32,8 +32,10 @@ function init() {
     let tabControl = new TabControl(document);
     tabControl.openTab('loadSongs');
 
+    let context = new (window.AudioContext || window.webkitAudioContext)();
+    
     let songLibrary = new SongLibrary();
-    let playlistManager = new PlaylistManager(songLibrary);
+    let playlistManager = new PlaylistManager(context, songLibrary);
     let jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 

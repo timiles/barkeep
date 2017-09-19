@@ -408,8 +408,10 @@ function init() {
     var tabControl = new _tabControl2.default(document);
     tabControl.openTab('loadSongs');
 
+    var context = new (window.AudioContext || window.webkitAudioContext)();
+
     var songLibrary = new _songLibrary2.default();
-    var playlistManager = new _playlistManager2.default(songLibrary);
+    var playlistManager = new _playlistManager2.default(context, songLibrary);
     var jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
@@ -748,6 +750,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _beeper = __webpack_require__(11);
+
+var _beeper2 = _interopRequireDefault(_beeper);
+
 var _bufferLoader = __webpack_require__(0);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
@@ -765,13 +771,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var PlaylistManager = function () {
-    function PlaylistManager(songLibrary) {
+    function PlaylistManager(context, songLibrary) {
         _classCallCheck(this, PlaylistManager);
 
+        this.context = context;
+        this.beeper = new _beeper2.default(context);
         this.songLibrary = songLibrary;
         this.fileDataMap = new Map();
         this.bufferMap = new Map();
-        this.context = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     _createClass(PlaylistManager, [{
@@ -861,18 +868,9 @@ var PlaylistManager = function () {
         key: 'jumpToBar',
         value: function jumpToBar(barNumber) {
             if (this.currentSongPlayer) {
-                this._beep();
+                this.beeper.beep();
                 this.currentSongPlayer.play(barNumber);
             }
-        }
-    }, {
-        key: '_beep',
-        value: function _beep() {
-            var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = 4000;
-            oscillator.connect(this.context.destination);
-            oscillator.start();
-            oscillator.stop(this.context.currentTime + .1);
         }
     }, {
         key: '_playBuffer',
@@ -1076,6 +1074,44 @@ var TabControl = function () {
 }();
 
 exports.default = TabControl;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Beeper = function () {
+    function Beeper(context) {
+        _classCallCheck(this, Beeper);
+
+        this.context = context;
+    }
+
+    _createClass(Beeper, [{
+        key: "beep",
+        value: function beep() {
+            var oscillator = this.context.createOscillator();
+            oscillator.frequency.value = 4000;
+            oscillator.connect(this.context.destination);
+            oscillator.start();
+            oscillator.stop(this.context.currentTime + .1);
+        }
+    }]);
+
+    return Beeper;
+}();
+
+exports.default = Beeper;
 
 /***/ })
 /******/ ]);

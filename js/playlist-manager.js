@@ -1,14 +1,16 @@
+import Beeper from './beeper'
 import BufferLoader from './buffer-loader'
 import SongLibrary from './song-library'
 import SongPlayer from './song-player'
 
 export default class PlaylistManager {
 
-    constructor(songLibrary) {
+    constructor(context, songLibrary) {
+        this.context = context;
+        this.beeper = new Beeper(context);
         this.songLibrary = songLibrary;
         this.fileDataMap = new Map();
         this.bufferMap = new Map();
-        this.context = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     addSong(name, fileData) {
@@ -68,17 +70,9 @@ export default class PlaylistManager {
 
     jumpToBar(barNumber) {
         if (this.currentSongPlayer) {
-            this._beep();
+            this.beeper.beep();
             this.currentSongPlayer.play(barNumber);
         }
-    }
-
-    _beep() {
-        var oscillator = this.context.createOscillator();
-        oscillator.frequency.value = 4000;
-        oscillator.connect(this.context.destination);
-        oscillator.start();
-        oscillator.stop(this.context.currentTime + .1);
     }
 
     _playBuffer(buffer, songInfo) {
