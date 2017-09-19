@@ -4,7 +4,7 @@ export default class Beeper {
         this.context = context;
     }
 
-    beep() {
+    beep(startSecondsFromNow = 0, durationSeconds = .1) {
         const gainNode = this.context.createGain();
         gainNode.gain.value = .1;
         gainNode.connect(this.context.destination);
@@ -12,7 +12,14 @@ export default class Beeper {
         const oscillator = this.context.createOscillator();
         oscillator.frequency.value = 4000;
         oscillator.connect(gainNode);
-        oscillator.start();
-        oscillator.stop(this.context.currentTime + .1);
+
+        let startWhen = startSecondsFromNow + this.context.currentTime;
+        oscillator.start(startWhen);
+        oscillator.stop(startWhen + durationSeconds);
+    }
+
+    doubleBeep() {
+        this.beep(0, .05);
+        this.beep(.1, .05);
     }
 }

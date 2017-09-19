@@ -868,7 +868,7 @@ var PlaylistManager = function () {
         key: 'jumpToBar',
         value: function jumpToBar(barNumber) {
             if (this.currentSongPlayer) {
-                this.beeper.beep();
+                this.beeper.doubleBeep();
                 this.currentSongPlayer.play(barNumber);
             }
         }
@@ -878,6 +878,7 @@ var PlaylistManager = function () {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
+            this.beeper.beep();
             var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
             songPlayer.play();
             this.currentSongPlayer = songPlayer;
@@ -1100,6 +1101,9 @@ var Beeper = function () {
     _createClass(Beeper, [{
         key: "beep",
         value: function beep() {
+            var startSecondsFromNow = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+            var durationSeconds = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : .1;
+
             var gainNode = this.context.createGain();
             gainNode.gain.value = .1;
             gainNode.connect(this.context.destination);
@@ -1107,8 +1111,16 @@ var Beeper = function () {
             var oscillator = this.context.createOscillator();
             oscillator.frequency.value = 4000;
             oscillator.connect(gainNode);
-            oscillator.start();
-            oscillator.stop(this.context.currentTime + .1);
+
+            var startWhen = startSecondsFromNow + this.context.currentTime;
+            oscillator.start(startWhen);
+            oscillator.stop(startWhen + durationSeconds);
+        }
+    }, {
+        key: "doubleBeep",
+        value: function doubleBeep() {
+            this.beep(0, .05);
+            this.beep(.1, .05);
         }
     }]);
 

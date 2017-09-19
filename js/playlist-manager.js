@@ -70,7 +70,7 @@ export default class PlaylistManager {
 
     jumpToBar(barNumber) {
         if (this.currentSongPlayer) {
-            this.beeper.beep();
+            this.beeper.doubleBeep();
             this.currentSongPlayer.play(barNumber);
         }
     }
@@ -79,6 +79,7 @@ export default class PlaylistManager {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
+        this.beeper.beep();
         let songPlayer = new SongPlayer(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
         songPlayer.play();
         this.currentSongPlayer = songPlayer;
