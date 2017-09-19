@@ -1100,9 +1100,13 @@ var Beeper = function () {
     _createClass(Beeper, [{
         key: "beep",
         value: function beep() {
+            var gainNode = this.context.createGain();
+            gainNode.gain.value = .1;
+            gainNode.connect(this.context.destination);
+
             var oscillator = this.context.createOscillator();
             oscillator.frequency.value = 4000;
-            oscillator.connect(this.context.destination);
+            oscillator.connect(gainNode);
             oscillator.start();
             oscillator.stop(this.context.currentTime + .1);
         }
