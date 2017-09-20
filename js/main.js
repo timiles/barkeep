@@ -78,7 +78,9 @@ function init() {
             });
     }
     loadDemoSongButton.onclick = () => {
-        songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
+        if (!songLibrary.getSongInfoByName('not just jazz')) {
+            songLibrary.updateSongInfos([{ name: 'not just jazz', bpm: 102 }]);
+        }    
         loadFileByUrl('audio/not just jazz.mp3');
     }
 
