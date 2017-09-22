@@ -1,11 +1,11 @@
-import './kali.min.js'
+import './kali.min.js';
 
 export default class BufferLoader {
 
     static loadBuffer(context, fileData, playbackSpeed = 1.0, progressIntervalCount = 12, progressCallback = undefined) {
         return new Promise((resolve, reject) => {
             context.decodeAudioData(fileData, (buffer) => {
-                let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
+                const stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
                 resolve(stretchedBuffer);
             }, (e) => {
                 console.error(e);

@@ -1,4 +1,4 @@
-import NoteConverter from './note-converter'
+import NoteConverter from './note-converter';
 
 export default class Beeper {
 
@@ -22,7 +22,7 @@ export default class Beeper {
         oscillator.frequency.value = NoteConverter.getFrequencyFromNote(options.note);
         oscillator.connect(gainNode);
 
-        let startWhen = options.startSecondsFromNow + this.context.currentTime;
+        const startWhen = options.startSecondsFromNow + this.context.currentTime;
         oscillator.start(startWhen);
         oscillator.stop(startWhen + options.durationSeconds);
     }

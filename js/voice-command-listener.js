@@ -5,11 +5,11 @@ export default class VoiceCommandListener {
             alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
             return false;
         }
-        var isLocalhost = location.host.startsWith('localhost');
+        const isLocalhost = location.host.startsWith('localhost');
         if (isLocalhost) {
             return true;
         }
-        var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+        const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
         if (isChrome && location.protocol !== 'https:') {
             alert('Chrome requires https for SpeechRecognition. Redirecting now!');
             location.protocol = 'https:';
@@ -19,7 +19,7 @@ export default class VoiceCommandListener {
     }
 
     startListening() {
-        var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         // recognition.continuous = true;
         // TODO: other languages?
         recognition.lang = 'en-US';
@@ -27,16 +27,18 @@ export default class VoiceCommandListener {
         recognition.maxAlternatives = 5;
         recognition.start();
 
-        recognition.onaudioend = ev => {
+        recognition.onaudioend = () => {
             // start listening again after audio ends
             this.startListening();
         };
 
         recognition.onresult = ev => {
-            var results = ev.results[0];
-            for (var i = 0; i < results.length; i++) {
-                let command = results[i].transcript.split(' ')[0];
+            const results = ev.results[0];
+            for (let i = 0; i < results.length; i++) {
+                const command = results[i].transcript.split(' ')[0];
 
+                /* eslint-disable no-fallthrough */
+                /* eslint-disable indent */
                 switch (command) {
                     case 'play': {
                         if (this.onPlayCommand) {
@@ -53,7 +55,7 @@ export default class VoiceCommandListener {
                     }
                     case 'bar': {
                         if (this.onBarCommand) {
-                            var testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
+                            const testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
                             if (!Number.isNaN(testBarNumber) && Number.isFinite(testBarNumber)) {
                                 this.onBarCommand(testBarNumber);
                                 // stop on first successful bar command
@@ -65,8 +67,9 @@ export default class VoiceCommandListener {
                         console.log('Unrecognised command:', results[i].transcript);
                     }
                 }
+                /* eslint-enable no-fallthrough */
+                /* eslint-enable indent */
             }
         };
-    };
-
+    }
 }

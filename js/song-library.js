@@ -1,4 +1,4 @@
-import SongInfo from './song-info'
+import SongInfo from './song-info';
 
 export default class SongLibrary {
 
@@ -25,14 +25,12 @@ export default class SongLibrary {
     }
 
     retrieveFromStorage() {
-        let jsonFromStorage = localStorage.getItem('song-library');
+        const jsonFromStorage = localStorage.getItem('song-library');
         return new Map(JSON.parse(jsonFromStorage));
     }
 
     import(json) {
-        console.log(json);
         const songsToImport = new Map(JSON.parse(json));
-        console.log(songsToImport);
         this.songInfos = new Map([... this.songInfos, ...songsToImport]);
         this.persistToStorage();
     }

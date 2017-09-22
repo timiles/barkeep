@@ -6,7 +6,7 @@ export default class TabControl {
 
         this.tabLinks.forEach(
             tabLink => {
-                tabLink.onclick = () => { this.openTab(TabControl._getTargetTabId(tabLink)); }
+                tabLink.onclick = () => { this.openTab(TabControl._getTargetTabId(tabLink)); };
             });
     }
 
@@ -15,13 +15,13 @@ export default class TabControl {
     }
 
     openTab(targetTabId) {
-        let toggleActive = (tabId, el) => {
+        const toggleActive = (tabId, el) => {
             if (tabId === targetTabId) {
                 el.classList.add('active');
             } else {
                 el.classList.remove('active');
             }
-        }
+        };
         this.tabLinks.forEach(
             tabLink => {
                 toggleActive(TabControl._getTargetTabId(tabLink), tabLink);

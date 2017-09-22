@@ -227,9 +227,7 @@ var SongLibrary = function () {
     }, {
         key: 'import',
         value: function _import(json) {
-            console.log(json);
             var songsToImport = new Map(JSON.parse(json));
-            console.log(songsToImport);
             this.songInfos = new Map([].concat(_toConsumableArray(this.songInfos), _toConsumableArray(songsToImport)));
             this.persistToStorage();
         }
@@ -345,10 +343,6 @@ exports.default = SongPlayer;
 "use strict";
 
 
-var _bufferLoader = __webpack_require__(0);
-
-var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
-
 var _fileHelpers = __webpack_require__(6);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
@@ -369,10 +363,6 @@ var _songLibrary = __webpack_require__(1);
 
 var _songLibrary2 = _interopRequireDefault(_songLibrary);
 
-var _songPlayer = __webpack_require__(3);
-
-var _songPlayer2 = _interopRequireDefault(_songPlayer);
-
 var _tabControl = __webpack_require__(10);
 
 var _tabControl2 = _interopRequireDefault(_tabControl);
@@ -392,7 +382,6 @@ function init() {
     var loadDemoSongButton = document.getElementById('loadDemoSongButton');
     var filesInput = document.getElementById('files');
     var filesDropArea = document.body;
-    var loadingSampleProgressBar = document.getElementById('loadingSampleProgressBar');
 
     var noSongsContainer = document.getElementById('noSongsContainer');
     var someSongsContainer = document.getElementById('someSongsContainer');
@@ -494,7 +483,7 @@ function init() {
             alert(e);
         }
     };
-    jumpToBarButton.onclick = function (e) {
+    jumpToBarButton.onclick = function () {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
     };
 
@@ -531,9 +520,6 @@ function init() {
     exportSongLibraryButton.onclick = function () {
         var json = songLibrary.export();
         _fileHelpers2.default.downloadFile('barkeep.json', json);
-    };
-    window.beep = function () {
-        playlistManager.beep();
     };
 }
 
@@ -759,10 +745,6 @@ var _bufferLoader = __webpack_require__(0);
 
 var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
 
-var _songLibrary = __webpack_require__(1);
-
-var _songLibrary2 = _interopRequireDefault(_songLibrary);
-
 var _songPlayer = __webpack_require__(3);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
@@ -949,7 +931,7 @@ var VoiceCommandListener = function () {
             recognition.maxAlternatives = 5;
             recognition.start();
 
-            recognition.onaudioend = function (ev) {
+            recognition.onaudioend = function () {
                 // start listening again after audio ends
                 _this.startListening();
             };
@@ -959,6 +941,8 @@ var VoiceCommandListener = function () {
                 for (var i = 0; i < results.length; i++) {
                     var command = results[i].transcript.split(' ')[0];
 
+                    /* eslint-disable no-fallthrough */
+                    /* eslint-disable indent */
                     switch (command) {
                         case 'play':
                             {
@@ -991,6 +975,8 @@ var VoiceCommandListener = function () {
                                 console.log('Unrecognised command:', results[i].transcript);
                             }
                     }
+                    /* eslint-enable no-fallthrough */
+                    /* eslint-enable indent */
                 }
             };
         }

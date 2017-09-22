@@ -10,10 +10,10 @@ export default class SongPlayer {
 
     play(barNumber) {
         this.stop();
-        let source = this.context.createBufferSource();
+        const source = this.context.createBufferSource();
         source.buffer = this.buffer;
         source.connect(this.context.destination);
-        let startTime = this.getStartTimeInSeconds(barNumber || 0);
+        const startTime = this.getStartTimeInSeconds(barNumber || 0);
         source.start(0, startTime);
         this.currentSource = source;
     }
@@ -25,7 +25,7 @@ export default class SongPlayer {
     }
 
     getStartTimeInSeconds(barNumber) {
-        let startTimeInSeconds = ((barNumber - 1) * this.secondsPerBar);
+        const startTimeInSeconds = ((barNumber - 1) * this.secondsPerBar);
         return Math.max(0, startTimeInSeconds);
     }
 }
