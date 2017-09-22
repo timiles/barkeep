@@ -2,10 +2,10 @@ import './kali.min.js'
 
 export default class BufferLoader {
 
-    static loadBuffer(context, fileData, playbackSpeed = 1.0, progressCallback = undefined) {
+    static loadBuffer(context, fileData, playbackSpeed = 1.0, progressIntervalCount = 12, progressCallback = undefined) {
         return new Promise((resolve, reject) => {
             context.decodeAudioData(fileData, (buffer) => {
-                let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressCallback);
+                let stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
                 resolve(stretchedBuffer);
             }, (e) => {
                 console.error(e);
@@ -14,43 +14,47 @@ export default class BufferLoader {
         });
     }
 
-    static _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressCallback) {
+    static _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressIntervalCount, progressCallback) {
 
         if (playbackSpeed === 1.0) {
             return buffer;
         }
 
-        let stretchSampleSize = 4096 * numChannels;
+        const stretchSampleSize = 4096 * numChannels;
+        const inputBufferSize = buffer.getChannelData(0).length;
+        const outputBufferSize = Math.floor(inputBufferSize / playbackSpeed) + 1;
 
-        let inputBufferSize = buffer.getChannelData(0).length;
-        let outputBufferSize = Math.floor(inputBufferSize / playbackSpeed) + 1;
+        const outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
 
-        let outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
+        let progressCounter = 0;
+        const progressIntervalSize = Math.floor(outputBufferSize * numChannels / progressIntervalCount);
 
         for (let channel = 0; channel < numChannels; channel++) {
-            let inputData = buffer.getChannelData(channel);
+            const inputData = buffer.getChannelData(channel);
 
-            let kali = new Kali(1);
+            const kali = new Kali(1);
             kali.setup(context.sampleRate, playbackSpeed, !bestQuality);
 
-            let outputData = new Float32Array(outputBufferSize);
+            const outputData = new Float32Array(outputBufferSize);
 
             let inputOffset = 0;
             let completedOffset = 0;
-            let loopCount = 0;
             let flushed = false;
 
             while (completedOffset < outputData.length) {
-                if (progressCallback && loopCount % 100 === 0) {
+                while (progressCallback && progressCounter >= progressIntervalSize) {
                     progressCallback((completedOffset + outputBufferSize * channel) / (outputBufferSize * numChannels));
+                    progressCounter -= progressIntervalSize;
                 }
 
                 // Read stretched samples into outputData array
-                completedOffset += kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
+                const framesCompleted = kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
+                completedOffset += framesCompleted;
+                progressCounter += framesCompleted;
 
                 if (inputOffset < inputData.length) {
                     // If we have more data to write, write it
-                    let dataToInput = inputData.subarray(inputOffset, Math.min(inputOffset + stretchSampleSize, inputData.length));
+                    const dataToInput = inputData.subarray(inputOffset, Math.min(inputOffset + stretchSampleSize, inputData.length));
                     inputOffset += dataToInput.length;
 
                     kali.input(dataToInput);
@@ -59,17 +63,11 @@ export default class BufferLoader {
                     kali.flush();
                     flushed = true;
                 }
-
-                loopCount++;
             }
 
             outputAudioBuffer.getChannelData(channel).set(outputData);
         }
 
-        if (progressCallback) {
-            // 100%
-            progressCallback(1);
-        }
         return outputAudioBuffer;
     }
 }

@@ -89,11 +89,12 @@ var BufferLoader = function () {
         key: 'loadBuffer',
         value: function loadBuffer(context, fileData) {
             var playbackSpeed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1.0;
-            var progressCallback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : undefined;
+            var progressIntervalCount = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 12;
+            var progressCallback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
 
             return new Promise(function (resolve, reject) {
                 context.decodeAudioData(fileData, function (buffer) {
-                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressCallback);
+                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
                     resolve(stretchedBuffer);
                 }, function (e) {
                     console.error(e);
@@ -103,18 +104,20 @@ var BufferLoader = function () {
         }
     }, {
         key: '_stretch',
-        value: function _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressCallback) {
+        value: function _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressIntervalCount, progressCallback) {
 
             if (playbackSpeed === 1.0) {
                 return buffer;
             }
 
             var stretchSampleSize = 4096 * numChannels;
-
             var inputBufferSize = buffer.getChannelData(0).length;
             var outputBufferSize = Math.floor(inputBufferSize / playbackSpeed) + 1;
 
             var outputAudioBuffer = context.createBuffer(numChannels, outputBufferSize, context.sampleRate);
+
+            var progressCounter = 0;
+            var progressIntervalSize = Math.floor(outputBufferSize * numChannels / progressIntervalCount);
 
             for (var channel = 0; channel < numChannels; channel++) {
                 var inputData = buffer.getChannelData(channel);
@@ -126,16 +129,18 @@ var BufferLoader = function () {
 
                 var inputOffset = 0;
                 var completedOffset = 0;
-                var loopCount = 0;
                 var flushed = false;
 
                 while (completedOffset < outputData.length) {
-                    if (progressCallback && loopCount % 100 === 0) {
+                    while (progressCallback && progressCounter >= progressIntervalSize) {
                         progressCallback((completedOffset + outputBufferSize * channel) / (outputBufferSize * numChannels));
+                        progressCounter -= progressIntervalSize;
                     }
 
                     // Read stretched samples into outputData array
-                    completedOffset += kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
+                    var framesCompleted = kali.output(outputData.subarray(completedOffset, Math.min(completedOffset + stretchSampleSize, outputData.length)));
+                    completedOffset += framesCompleted;
+                    progressCounter += framesCompleted;
 
                     if (inputOffset < inputData.length) {
                         // If we have more data to write, write it
@@ -148,17 +153,11 @@ var BufferLoader = function () {
                         kali.flush();
                         flushed = true;
                     }
-
-                    loopCount++;
                 }
 
                 outputAudioBuffer.getChannelData(channel).set(outputData);
             }
 
-            if (progressCallback) {
-                // 100%
-                progressCallback(1);
-            }
             return outputAudioBuffer;
         }
     }]);
@@ -851,8 +850,11 @@ var PlaylistManager = function () {
                 this._playBuffer(buffer, songInfo);
             } else {
                 var fileData = this.fileDataMap.get(songName);
-                _bufferLoader2.default.loadBuffer(this.context, fileData, songInfo.playbackSpeed, function (p) {
+                var noteNumber = 96;
+                this.beeper.beep({ note: noteNumber });
+                _bufferLoader2.default.loadBuffer(this.context, fileData, songInfo.playbackSpeed, 12, function (p) {
                     console.log('Stretching...', p);
+                    _this.beeper.beep({ note: ++noteNumber });
                 }).then(function (buffer) {
                     _this.bufferMap.set(bufferKey, buffer);
                     _this._playBuffer(buffer, songInfo);
@@ -1091,6 +1093,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _noteConverter = __webpack_require__(14);
+
+var _noteConverter2 = _interopRequireDefault(_noteConverter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Beeper = function () {
@@ -1101,28 +1109,34 @@ var Beeper = function () {
     }
 
     _createClass(Beeper, [{
-        key: "beep",
+        key: 'beep',
         value: function beep() {
-            var startSecondsFromNow = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-            var durationSeconds = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : .1;
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+            var defaults = {
+                startSecondsFromNow: 0,
+                durationSeconds: .1,
+                note: 108
+            };
+            options = Object.assign({}, defaults, options);
 
             var gainNode = this.context.createGain();
             gainNode.gain.value = .1;
             gainNode.connect(this.context.destination);
 
             var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = 4000;
+            oscillator.frequency.value = _noteConverter2.default.getFrequencyFromNote(options.note);
             oscillator.connect(gainNode);
 
-            var startWhen = startSecondsFromNow + this.context.currentTime;
+            var startWhen = options.startSecondsFromNow + this.context.currentTime;
             oscillator.start(startWhen);
-            oscillator.stop(startWhen + durationSeconds);
+            oscillator.stop(startWhen + options.durationSeconds);
         }
     }, {
-        key: "doubleBeep",
+        key: 'doubleBeep',
         value: function doubleBeep() {
-            this.beep(0, .05);
-            this.beep(.1, .05);
+            this.beep({ startSecondsFromNow: 0, durationSeconds: .05 });
+            this.beep({ startSecondsFromNow: .1, durationSeconds: .05 });
         }
     }]);
 
@@ -1130,6 +1144,45 @@ var Beeper = function () {
 }();
 
 exports.default = Beeper;
+
+/***/ }),
+/* 12 */,
+/* 13 */,
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NoteConverter = function () {
+    function NoteConverter() {
+        _classCallCheck(this, NoteConverter);
+    }
+
+    _createClass(NoteConverter, null, [{
+        key: "getFrequencyFromNote",
+        value: function getFrequencyFromNote(note) {
+            return 440 * Math.pow(2, (note - 69) / 12);
+        }
+    }, {
+        key: "getNoteFromFrequency",
+        value: function getNoteFromFrequency(frequency) {
+            return Math.round(12 * (Math.log(frequency / 440) / Math.log(2))) + 69;
+        }
+    }]);
+
+    return NoteConverter;
+}();
+
+exports.default = NoteConverter;
 
 /***/ })
 /******/ ]);

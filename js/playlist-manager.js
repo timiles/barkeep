@@ -54,7 +54,12 @@ export default class PlaylistManager {
         }
         else {
             let fileData = this.fileDataMap.get(songName);
-            BufferLoader.loadBuffer(this.context, fileData, songInfo.playbackSpeed, p => { console.log('Stretching...', p); })
+            let noteNumber = 96;
+            this.beeper.beep({ note: noteNumber });
+            BufferLoader.loadBuffer(this.context, fileData, songInfo.playbackSpeed, 12, p => {
+                console.log('Stretching...', p);
+                this.beeper.beep({ note: ++noteNumber });
+            })
                 .then(buffer => {
                     this.bufferMap.set(bufferKey, buffer);
                     this._playBuffer(buffer, songInfo);
