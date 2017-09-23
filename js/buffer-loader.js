@@ -1,4 +1,4 @@
-import './kali.min.js';
+import '../vendor/kali.min.js'; /* global Kali */
 
 export default class BufferLoader {
 

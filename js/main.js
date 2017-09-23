@@ -5,6 +5,7 @@ import SongInfo from './song-info';
 import SongLibrary from './song-library';
 import TabControl from './tab-control';
 import VoiceCommandListener from './voice-command-listener';
+import '../vendor/jtmpl-1.1.0.min.js'; /* global jtmpl */
 
 if (VoiceCommandListener.checkCompatibility()) {
     init();
