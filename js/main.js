@@ -82,7 +82,7 @@ function init() {
     };
 
     const loadFiles = (files) => {
-        for (let i = 0, f; f = files[i]; i++) {
+        for (const f of files) {
             FileHelpers.readArrayBufferFromFile(f)
                 .then(file => {
                     const songFile = new SongFile(file.name.split('.')[0], file.contents);
