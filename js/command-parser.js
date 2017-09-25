@@ -6,21 +6,30 @@ export default class CommandParser {
 
     static _getRegex(command) {
         return '^' + command
-            .replace('{words}', '(.*)')
-            .replace('{number}', '(.*)');
+            .replace(/{number}/g, '(.*)')
+            .replace(/{words}/g, '(.*)');
     }
-    static _getType(command) {
-        if (command.indexOf('{words}') >= 0) {
-            return 'words';
-        }
-        if (command.indexOf('{number}') >= 0) {
-            return 'number';
-        }
+    static _getTypes(command) {
+        const indexedTypes = new Map();
+        const indexType = (type) => {
+            let index = command.indexOf(type);
+            while (index >= 0) {
+                indexedTypes.set(index, type);
+                index = command.indexOf(type, index + 1);
+            }
+        };
+        indexType('{number}');
+        indexType('{words}');
+
+        return [...indexedTypes.entries()]
+            .sort((a, b) => a[0] - b[0]) // order by index
+            .map(a => a[1]); // select values
     }
+
     addCommand(command, action) {
         this.commands.push({
             regex: CommandParser._getRegex(command),
-            type: CommandParser._getType(command),
+            types: CommandParser._getTypes(command),
             action: action
         });
     }
@@ -29,21 +38,29 @@ export default class CommandParser {
         for (const command of this.commands) {
             const results = statement.match(command.regex);
             if (results) {
-                if (!command.type) {
-                    return command.action();
-                }
+                const args = [];
+                for (let i = 0; i < command.types.length; i++) {
+                    const type = command.types[i];
+                    const value = results[i + 1];
 
-                const value = results[1];
-                if (command.type === 'words') {
-                    return command.action(value);
-                }
-
-                if (command.type === 'number') {
-                    const valueAsNumber = Number.parseInt(value);
-                    if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
-                        return command.action(valueAsNumber);
+                    switch (type) {
+                        case '{words}': {
+                            args.push(value);
+                            break;
+                        }
+                        case '{number}': {
+                            const valueAsNumber = Number.parseInt(value);
+                            if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
+                                args.push(valueAsNumber);
+                            }
+                            break;
+                        }
+                        default: {
+                            throw 'Unknown command type: ' + type;
+                        }
                     }
-                }    
+                }
+                return command.action(...args);
             }
         }
     }

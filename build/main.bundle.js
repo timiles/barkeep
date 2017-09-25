@@ -1197,6 +1197,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CommandParser = function () {
@@ -1211,7 +1213,7 @@ var CommandParser = function () {
         value: function addCommand(command, action) {
             this.commands.push({
                 regex: CommandParser._getRegex(command),
-                type: CommandParser._getType(command),
+                types: CommandParser._getTypes(command),
                 action: action
             });
         }
@@ -1228,21 +1230,32 @@ var CommandParser = function () {
 
                     var results = statement.match(command.regex);
                     if (results) {
-                        if (!command.type) {
-                            return command.action();
-                        }
+                        var args = [];
+                        for (var i = 0; i < command.types.length; i++) {
+                            var type = command.types[i];
+                            var value = results[i + 1];
 
-                        var value = results[1];
-                        if (command.type === 'words') {
-                            return command.action(value);
-                        }
-
-                        if (command.type === 'number') {
-                            var valueAsNumber = Number.parseInt(value);
-                            if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
-                                return command.action(valueAsNumber);
+                            switch (type) {
+                                case '{words}':
+                                    {
+                                        args.push(value);
+                                        break;
+                                    }
+                                case '{number}':
+                                    {
+                                        var valueAsNumber = Number.parseInt(value);
+                                        if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
+                                            args.push(valueAsNumber);
+                                        }
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        throw 'Unknown command type: ' + type;
+                                    }
                             }
                         }
+                        return command.action.apply(command, args);
                     }
                 }
             } catch (err) {
@@ -1263,17 +1276,28 @@ var CommandParser = function () {
     }], [{
         key: '_getRegex',
         value: function _getRegex(command) {
-            return '^' + command.replace('{words}', '(.*)').replace('{number}', '(.*)');
+            return '^' + command.replace(/{number}/g, '(.*)').replace(/{words}/g, '(.*)');
         }
     }, {
-        key: '_getType',
-        value: function _getType(command) {
-            if (command.indexOf('{words}') >= 0) {
-                return 'words';
-            }
-            if (command.indexOf('{number}') >= 0) {
-                return 'number';
-            }
+        key: '_getTypes',
+        value: function _getTypes(command) {
+            var indexedTypes = new Map();
+            var indexType = function indexType(type) {
+                var index = command.indexOf(type);
+                while (index >= 0) {
+                    indexedTypes.set(index, type);
+                    index = command.indexOf(type, index + 1);
+                }
+            };
+            indexType('{number}');
+            indexType('{words}');
+
+            return [].concat(_toConsumableArray(indexedTypes.entries())).sort(function (a, b) {
+                return a[0] - b[0];
+            }) // order by index
+            .map(function (a) {
+                return a[1];
+            }); // select values
         }
     }]);
 

@@ -45,4 +45,31 @@ describe('CommandParser', () => {
         expect(number).toBe(42);
         expect(result).toBe(true);
     });
+
+    it('should extract 2 numbers', () => {
+        const commandParser = new CommandParser();
+
+        let number0, number1;
+        commandParser.addCommand('test {number} and {number}',
+            (n0, n1) => { number0 = n0; number1 = n1; return true; });
+
+        const result = commandParser.parse('test 42 and 81');
+        expect(number0).toBe(42);
+        expect(number1).toBe(81);
+        expect(result).toBe(true);
+    });
+
+    it('should extract words and numbers', () => {
+        const commandParser = new CommandParser();
+
+        let words, number0, number1;
+        commandParser.addCommand('test {number} and {words} and {number}',
+            (n0, w, n1) => { number0 = n0; words = w; number1 = n1; return true; });
+
+        const result = commandParser.parse('test 42 and hello world and 81');
+        expect(number0).toBe(42);
+        expect(words).toBe('hello world');
+        expect(number1).toBe(81);
+        expect(result).toBe(true);
+    });
 });
