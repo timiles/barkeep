@@ -132,7 +132,7 @@ function init() {
         };
         voiceCommandListener.onPlayCommand = (songName) => {
             try {
-                playlistManager.playSongByName(songName);
+                return playlistManager.playSongByName(songName);
             }
             catch (e) {
                 alert(e);

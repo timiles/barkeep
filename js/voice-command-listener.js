@@ -1,3 +1,5 @@
+import CommandParser from './command-parser';
+
 export default class VoiceCommandListener {
 
     static checkCompatibility() {
@@ -18,6 +20,14 @@ export default class VoiceCommandListener {
         return true;
     }
 
+    constructor() {
+        const commandParser = new CommandParser();
+        commandParser.addCommand('play {words}', (w) => this.onPlayCommand(w));
+        commandParser.addCommand('stop', () => this.onStopCommand());
+        commandParser.addCommand('bar {number}', (n) => this.onBarCommand(n));
+        this.commandParser = commandParser;
+    }
+
     startListening() {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         // recognition.continuous = true;
@@ -35,40 +45,10 @@ export default class VoiceCommandListener {
         recognition.onresult = ev => {
             const results = ev.results[0];
             for (let i = 0; i < results.length; i++) {
-                const command = results[i].transcript.split(' ')[0];
-
-                /* eslint-disable no-fallthrough */
-                /* eslint-disable indent */
-                switch (command) {
-                    case 'play': {
-                        if (this.onPlayCommand) {
-                            this.onPlayCommand(results[i].transcript.substring('play '.length));
-                            // allow multiple commands in case the first song name doesn't match
-                            break;
-                        }
-                    }
-                    case 'stop': {
-                        if (this.onStopCommand) {
-                            this.onStopCommand();
-                            return;
-                        }
-                    }
-                    case 'bar': {
-                        if (this.onBarCommand) {
-                            const testBarNumber = Number.parseInt(results[i].transcript.substring('bar '.length));
-                            if (!Number.isNaN(testBarNumber) && Number.isFinite(testBarNumber)) {
-                                this.onBarCommand(testBarNumber);
-                                // stop on first successful bar command
-                                return;
-                            }
-                        }
-                    }
-                    default: {
-                        console.log('Unrecognised command:', results[i].transcript);
-                    }
+                if (this.commandParser.parse(results[i].transcript)) {
+                    break;
                 }
-                /* eslint-enable no-fallthrough */
-                /* eslint-enable indent */
+                console.log('Unrecognised command:', results[i].transcript);
             }
         };
     }

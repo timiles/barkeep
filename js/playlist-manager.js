@@ -38,7 +38,7 @@ export default class PlaylistManager {
         const songName = this._getSongNameFromInput(input);
         if (!songName) {
             console.log('Unrecognised song:', input);
-            return;
+            return false;
         }
 
         const songInfo = this.songLibrary.getSongInfoByName(songName);
@@ -64,6 +64,7 @@ export default class PlaylistManager {
                     this._playBuffer(buffer, songInfo);
                 });
         }
+        return true;
     }
 
     stop() {
