@@ -19,7 +19,7 @@ function init() {
 
     const noSongsContainer = document.getElementById('noSongsContainer');
     const someSongsContainer = document.getElementById('someSongsContainer');
-    const sampleVoiceCommandSongName = document.getElementById('sampleVoiceCommandSongName');
+    const sampleVoiceCommandSongName = document.getElementsByClassName('sampleVoiceCommandSongName');
     const jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     const jumpToBarButton = document.getElementById('jumpToBarButton');
     const recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
@@ -62,7 +62,7 @@ function init() {
         if (!anySongsLoaded) {
             noSongsContainer.classList.add('hidden');
             someSongsContainer.classList.remove('hidden');
-            sampleVoiceCommandSongName.innerText = songModel.name;
+            Array.from(sampleVoiceCommandSongName).forEach(el => el.innerText = songModel.name);
             tabControl.openTab('playlist');
             anySongsLoaded = true;
         }
@@ -130,9 +130,9 @@ function init() {
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = (songName) => {
+        voiceCommandListener.onPlayCommand = (songName, playbackSpeedPercent) => {
             try {
-                return playlistManager.playSongByName(songName);
+                return playlistManager.playSongByName(songName, playbackSpeedPercent / 100);
             }
             catch (e) {
                 alert(e);

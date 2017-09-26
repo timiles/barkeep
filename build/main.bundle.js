@@ -152,7 +152,7 @@ function init() {
 
     var noSongsContainer = document.getElementById('noSongsContainer');
     var someSongsContainer = document.getElementById('someSongsContainer');
-    var sampleVoiceCommandSongName = document.getElementById('sampleVoiceCommandSongName');
+    var sampleVoiceCommandSongName = document.getElementsByClassName('sampleVoiceCommandSongName');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
@@ -197,7 +197,9 @@ function init() {
         if (!anySongsLoaded) {
             noSongsContainer.classList.add('hidden');
             someSongsContainer.classList.remove('hidden');
-            sampleVoiceCommandSongName.innerText = songModel.name;
+            Array.from(sampleVoiceCommandSongName).forEach(function (el) {
+                return el.innerText = songModel.name;
+            });
             tabControl.openTab('playlist');
             anySongsLoaded = true;
         }
@@ -285,9 +287,9 @@ function init() {
             }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = function (songName) {
+        voiceCommandListener.onPlayCommand = function (songName, playbackSpeedPercent) {
             try {
-                return playlistManager.playSongByName(songName);
+                return playlistManager.playSongByName(songName, playbackSpeedPercent / 100);
             } catch (e) {
                 alert(e);
             }
@@ -485,7 +487,7 @@ var PlaylistManager = function () {
         }
     }, {
         key: 'playSongByName',
-        value: function playSongByName(input) {
+        value: function playSongByName(input, overridePlaybackSpeed) {
             var _this = this;
 
             var songName = this._getSongNameFromInput(input);
@@ -499,20 +501,21 @@ var PlaylistManager = function () {
                 throw 'Please set BPM for ' + songName;
             }
 
-            var bufferKey = songName + '@' + songInfo.playbackSpeed;
+            var playbackSpeed = overridePlaybackSpeed || songInfo.playbackSpeed;
+            var bufferKey = songName + '@' + playbackSpeed;
             if (this.bufferMap.has(bufferKey)) {
                 var buffer = this.bufferMap.get(bufferKey);
-                this._playBuffer(buffer, songInfo);
+                this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
             } else {
                 var fileData = this.fileDataMap.get(songName);
                 var noteNumber = 96;
                 this.beeper.beep({ note: noteNumber });
-                _bufferLoader2.default.loadBuffer(this.context, fileData, songInfo.playbackSpeed, 12, function (p) {
+                _bufferLoader2.default.loadBuffer(this.context, fileData, playbackSpeed, 12, function (p) {
                     console.log('Stretching...', p);
                     _this.beeper.beep({ note: ++noteNumber });
                 }).then(function (buffer) {
                     _this.bufferMap.set(bufferKey, buffer);
-                    _this._playBuffer(buffer, songInfo);
+                    _this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
                 });
             }
             return true;
@@ -534,12 +537,12 @@ var PlaylistManager = function () {
         }
     }, {
         key: '_playBuffer',
-        value: function _playBuffer(buffer, songInfo) {
+        value: function _playBuffer(buffer, playbackSpeed, bpm, beatsPerBar) {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
             this.beeper.beep();
-            var songPlayer = new _songPlayer2.default(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
+            var songPlayer = new _songPlayer2.default(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
             songPlayer.play();
             this.currentSongPlayer = songPlayer;
         }
@@ -1137,6 +1140,9 @@ var VoiceCommandListener = function () {
         _classCallCheck(this, VoiceCommandListener);
 
         var commandParser = new _commandParser2.default();
+        commandParser.addCommand('play {words} at {number}%', function (w, n) {
+            return _this.onPlayCommand(w, n);
+        });
         commandParser.addCommand('play {words}', function (w) {
             return _this.onPlayCommand(w);
         });

@@ -34,7 +34,7 @@ export default class PlaylistManager {
         return null;
     }
 
-    playSongByName(input) {
+    playSongByName(input, overridePlaybackSpeed) {
         const songName = this._getSongNameFromInput(input);
         if (!songName) {
             console.log('Unrecognised song:', input);
@@ -46,22 +46,23 @@ export default class PlaylistManager {
             throw 'Please set BPM for ' + songName;
         }
 
-        const bufferKey = songName + '@' + songInfo.playbackSpeed;
+        const playbackSpeed = overridePlaybackSpeed || songInfo.playbackSpeed;
+        const bufferKey = songName + '@' + playbackSpeed;
         if (this.bufferMap.has(bufferKey)) {
             const buffer = this.bufferMap.get(bufferKey);
-            this._playBuffer(buffer, songInfo);
+            this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
         }
         else {
             const fileData = this.fileDataMap.get(songName);
             let noteNumber = 96;
             this.beeper.beep({ note: noteNumber });
-            BufferLoader.loadBuffer(this.context, fileData, songInfo.playbackSpeed, 12, p => {
+            BufferLoader.loadBuffer(this.context, fileData, playbackSpeed, 12, p => {
                 console.log('Stretching...', p);
                 this.beeper.beep({ note: ++noteNumber });
             })
                 .then(buffer => {
                     this.bufferMap.set(bufferKey, buffer);
-                    this._playBuffer(buffer, songInfo);
+                    this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
                 });
         }
         return true;
@@ -80,12 +81,12 @@ export default class PlaylistManager {
         }
     }
 
-    _playBuffer(buffer, songInfo) {
+    _playBuffer(buffer, playbackSpeed, bpm, beatsPerBar) {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
         this.beeper.beep();
-        const songPlayer = new SongPlayer(this.context, buffer, songInfo.playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
+        const songPlayer = new SongPlayer(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
         songPlayer.play();
         this.currentSongPlayer = songPlayer;
     }
