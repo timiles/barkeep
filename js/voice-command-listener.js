@@ -25,6 +25,8 @@ export default class VoiceCommandListener {
         commandParser.addCommand('play {words}', (w) => this.onPlayCommand(w));
         commandParser.addCommand('stop', () => this.onStopCommand());
         commandParser.addCommand('bar {number}', (n) => this.onBarCommand(n));
+        // sometimes comes through as eg "bar2"
+        commandParser.addCommand('bar{number}', (n) => this.onBarCommand(n));
         this.commandParser = commandParser;
     }
 

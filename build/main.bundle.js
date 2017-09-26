@@ -1146,6 +1146,10 @@ var VoiceCommandListener = function () {
         commandParser.addCommand('bar {number}', function (n) {
             return _this.onBarCommand(n);
         });
+        // sometimes comes through as eg "bar2"
+        commandParser.addCommand('bar{number}', function (n) {
+            return _this.onBarCommand(n);
+        });
         this.commandParser = commandParser;
     }
 

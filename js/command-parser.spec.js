@@ -46,6 +46,17 @@ describe('CommandParser', () => {
         expect(result).toBe(true);
     });
 
+    it('should extract number when part of a word', () => {
+        const commandParser = new CommandParser();
+
+        let number;
+        commandParser.addCommand('test{number}', (n) => { number = n; return true; });
+
+        const result = commandParser.parse('test42');
+        expect(number).toBe(42);
+        expect(result).toBe(true);
+    });
+
     it('should extract 2 numbers', () => {
         const commandParser = new CommandParser();
 
