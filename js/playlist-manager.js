@@ -1,5 +1,5 @@
 import Beeper from './beeper';
-import BufferLoader from './buffer-loader';
+import BufferManager from './buffer-manager';
 import SongPlayer from './song-player';
 
 export default class PlaylistManager {
@@ -8,24 +8,27 @@ export default class PlaylistManager {
         this.context = context;
         this.beeper = new Beeper(context);
         this.songLibrary = songLibrary;
-        this.fileDataMap = new Map();
-        this.bufferMap = new Map();
+        this.bufferManager = new BufferManager(context);
+        this.loadedSongNames = new Array();
     }
 
     addSong(name, fileData) {
-        this.fileDataMap.set(name, fileData);
+        this.bufferManager.loadBuffer(name, fileData)
+            .then(() => {
+                this.loadedSongNames.push(name);
+            });
     }
 
     _getSongNameFromInput(input) {
         if (input.trim().length === 0) {
             return null;
         }
-        if (this.fileDataMap.has(input)) {
+        if (this.loadedSongNames.indexOf(input) >= 0) {
             return input;
         }
         // best guess at name?
         input = input.toLowerCase();
-        for (const key of this.fileDataMap.keys()) {
+        for (const key of this.loadedSongNames) {
             if (key.toLowerCase().indexOf(input) >= 0) {
                 return key;
             }
@@ -47,24 +50,14 @@ export default class PlaylistManager {
         }
 
         const playbackSpeed = overridePlaybackSpeed || songInfo.playbackSpeed;
-        const bufferKey = songName + '@' + playbackSpeed;
-        if (this.bufferMap.has(bufferKey)) {
-            const buffer = this.bufferMap.get(bufferKey);
-            this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
-        }
-        else {
-            const fileData = this.fileDataMap.get(songName);
-            let noteNumber = 96;
-            this.beeper.beep({ note: noteNumber });
-            BufferLoader.loadBuffer(this.context, fileData, playbackSpeed, 12, p => {
-                console.log('Stretching...', p);
-                this.beeper.beep({ note: ++noteNumber });
-            })
-                .then(buffer => {
-                    this.bufferMap.set(bufferKey, buffer);
-                    this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
-                });
-        }
+
+        let noteNumber = 96;
+        const buffer = this.bufferManager.getBuffer(songName, playbackSpeed, 12, p => {
+            console.log('Stretching...', p);
+            this.beeper.beep({ note: noteNumber++ });
+        });
+        this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
+
         return true;
     }
 

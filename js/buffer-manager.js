@@ -1,12 +1,18 @@
 import '../vendor/kali.min.js'; /* global Kali */
 
-export default class BufferLoader {
+export default class BufferManager {
 
-    static loadBuffer(context, fileData, playbackSpeed = 1.0, progressIntervalCount = 12, progressCallback = undefined) {
+    constructor(context) {
+        this.context = context;
+        this.bufferMap = new Map();
+    }
+
+    loadBuffer(songName, fileData) {
         return new Promise((resolve, reject) => {
-            context.decodeAudioData(fileData, (buffer) => {
-                const stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
-                resolve(stretchedBuffer);
+            this.context.decodeAudioData(fileData, (buffer) => {
+                // set original buffer @1 x speed
+                this.bufferMap.set(songName + '@1', buffer);
+                resolve();
             }, (e) => {
                 console.error(e);
                 reject();
@@ -14,10 +20,27 @@ export default class BufferLoader {
         });
     }
 
+    getBuffer(songName, playbackSpeed = 1, progressIntervalCount = 12, progressCallback = undefined) {
+        const bufferKey = songName + '@' + playbackSpeed;
+        if (this.bufferMap.has(bufferKey)) {
+            return this.bufferMap.get(bufferKey);
+        }
+
+        const buffer = BufferManager._stretch(this.context,
+            // retrieve original buffer @1 x speed
+            this.bufferMap.get(songName + '@1'), playbackSpeed, 2, false, progressIntervalCount, progressCallback);
+        this.bufferMap.set(bufferKey, buffer);
+        return buffer;
+    }
+
     static _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressIntervalCount, progressCallback) {
 
         if (playbackSpeed === 1.0) {
             return buffer;
+        }
+
+        if (progressCallback) {
+            progressCallback(0);
         }
 
         const stretchSampleSize = 4096 * numChannels;

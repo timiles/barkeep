@@ -416,9 +416,9 @@ var _beeper = __webpack_require__(4);
 
 var _beeper2 = _interopRequireDefault(_beeper);
 
-var _bufferLoader = __webpack_require__(6);
+var _bufferManager = __webpack_require__(6);
 
-var _bufferLoader2 = _interopRequireDefault(_bufferLoader);
+var _bufferManager2 = _interopRequireDefault(_bufferManager);
 
 var _songPlayer = __webpack_require__(8);
 
@@ -435,14 +435,18 @@ var PlaylistManager = function () {
         this.context = context;
         this.beeper = new _beeper2.default(context);
         this.songLibrary = songLibrary;
-        this.fileDataMap = new Map();
-        this.bufferMap = new Map();
+        this.bufferManager = new _bufferManager2.default(context);
+        this.loadedSongNames = new Array();
     }
 
     _createClass(PlaylistManager, [{
         key: 'addSong',
         value: function addSong(name, fileData) {
-            this.fileDataMap.set(name, fileData);
+            var _this = this;
+
+            this.bufferManager.loadBuffer(name, fileData).then(function () {
+                _this.loadedSongNames.push(name);
+            });
         }
     }, {
         key: '_getSongNameFromInput',
@@ -450,7 +454,7 @@ var PlaylistManager = function () {
             if (input.trim().length === 0) {
                 return null;
             }
-            if (this.fileDataMap.has(input)) {
+            if (this.loadedSongNames.indexOf(input) >= 0) {
                 return input;
             }
             // best guess at name?
@@ -460,7 +464,7 @@ var PlaylistManager = function () {
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = this.fileDataMap.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = this.loadedSongNames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var key = _step.value;
 
                     if (key.toLowerCase().indexOf(input) >= 0) {
@@ -488,7 +492,7 @@ var PlaylistManager = function () {
     }, {
         key: 'playSongByName',
         value: function playSongByName(input, overridePlaybackSpeed) {
-            var _this = this;
+            var _this2 = this;
 
             var songName = this._getSongNameFromInput(input);
             if (!songName) {
@@ -502,22 +506,14 @@ var PlaylistManager = function () {
             }
 
             var playbackSpeed = overridePlaybackSpeed || songInfo.playbackSpeed;
-            var bufferKey = songName + '@' + playbackSpeed;
-            if (this.bufferMap.has(bufferKey)) {
-                var buffer = this.bufferMap.get(bufferKey);
-                this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
-            } else {
-                var fileData = this.fileDataMap.get(songName);
-                var noteNumber = 96;
-                this.beeper.beep({ note: noteNumber });
-                _bufferLoader2.default.loadBuffer(this.context, fileData, playbackSpeed, 12, function (p) {
-                    console.log('Stretching...', p);
-                    _this.beeper.beep({ note: ++noteNumber });
-                }).then(function (buffer) {
-                    _this.bufferMap.set(bufferKey, buffer);
-                    _this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
-                });
-            }
+
+            var noteNumber = 96;
+            var buffer = this.bufferManager.getBuffer(songName, playbackSpeed, 12, function (p) {
+                console.log('Stretching...', p);
+                _this2.beeper.beep({ note: noteNumber++ });
+            });
+            this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
+
             return true;
         }
     }, {
@@ -674,22 +670,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /* global Kali */
 
-var BufferLoader = function () {
-    function BufferLoader() {
-        _classCallCheck(this, BufferLoader);
+var BufferManager = function () {
+    function BufferManager(context) {
+        _classCallCheck(this, BufferManager);
+
+        this.context = context;
+        this.bufferMap = new Map();
     }
 
-    _createClass(BufferLoader, null, [{
+    _createClass(BufferManager, [{
         key: 'loadBuffer',
-        value: function loadBuffer(context, fileData) {
-            var playbackSpeed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1.0;
-            var progressIntervalCount = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 12;
-            var progressCallback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
+        value: function loadBuffer(songName, fileData) {
+            var _this = this;
 
             return new Promise(function (resolve, reject) {
-                context.decodeAudioData(fileData, function (buffer) {
-                    var stretchedBuffer = BufferLoader._stretch(context, buffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
-                    resolve(stretchedBuffer);
+                _this.context.decodeAudioData(fileData, function (buffer) {
+                    // set original buffer @1 x speed
+                    _this.bufferMap.set(songName + '@1', buffer);
+                    resolve();
                 }, function (e) {
                     console.error(e);
                     reject();
@@ -697,11 +695,33 @@ var BufferLoader = function () {
             });
         }
     }, {
+        key: 'getBuffer',
+        value: function getBuffer(songName) {
+            var playbackSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+            var progressIntervalCount = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 12;
+            var progressCallback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : undefined;
+
+            var bufferKey = songName + '@' + playbackSpeed;
+            if (this.bufferMap.has(bufferKey)) {
+                return this.bufferMap.get(bufferKey);
+            }
+
+            var buffer = BufferManager._stretch(this.context,
+            // retrieve original buffer @1 x speed
+            this.bufferMap.get(songName + '@1'), playbackSpeed, 2, false, progressIntervalCount, progressCallback);
+            this.bufferMap.set(bufferKey, buffer);
+            return buffer;
+        }
+    }], [{
         key: '_stretch',
         value: function _stretch(context, buffer, playbackSpeed, numChannels, bestQuality, progressIntervalCount, progressCallback) {
 
             if (playbackSpeed === 1.0) {
                 return buffer;
+            }
+
+            if (progressCallback) {
+                progressCallback(0);
             }
 
             var stretchSampleSize = 4096 * numChannels;
@@ -756,10 +776,10 @@ var BufferLoader = function () {
         }
     }]);
 
-    return BufferLoader;
+    return BufferManager;
 }();
 
-exports.default = BufferLoader;
+exports.default = BufferManager;
 
 /***/ }),
 /* 7 */
