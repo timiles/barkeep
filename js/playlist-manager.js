@@ -23,13 +23,14 @@ export default class PlaylistManager {
             console.log('Stretching...', p);
             this.beeper.beep({ note: noteNumber++ });
         });
-        this._playBuffer(buffer, playbackSpeed, bpm, beatsPerBar);
-    }
 
-    stop() {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
+        
+        this.beeper.beep();
+        this.currentSongPlayer = new SongPlayer(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
+        this.currentSongPlayer.play();
     }
 
     jumpToBar(barNumber) {
@@ -39,13 +40,9 @@ export default class PlaylistManager {
         }
     }
 
-    _playBuffer(buffer, playbackSpeed, bpm, beatsPerBar) {
+    stop() {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
-        this.beeper.beep();
-        const songPlayer = new SongPlayer(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
-        songPlayer.play();
-        this.currentSongPlayer = songPlayer;
     }
 }

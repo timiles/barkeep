@@ -470,14 +470,14 @@ var PlaylistManager = function () {
                 console.log('Stretching...', p);
                 _this.beeper.beep({ note: noteNumber++ });
             });
-            this._playBuffer(buffer, playbackSpeed, bpm, beatsPerBar);
-        }
-    }, {
-        key: 'stop',
-        value: function stop() {
+
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
+
+            this.beeper.beep();
+            this.currentSongPlayer = new _songPlayer2.default(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
+            this.currentSongPlayer.play();
         }
     }, {
         key: 'jumpToBar',
@@ -488,15 +488,11 @@ var PlaylistManager = function () {
             }
         }
     }, {
-        key: '_playBuffer',
-        value: function _playBuffer(buffer, playbackSpeed, bpm, beatsPerBar) {
+        key: 'stop',
+        value: function stop() {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
             }
-            this.beeper.beep();
-            var songPlayer = new _songPlayer2.default(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
-            songPlayer.play();
-            this.currentSongPlayer = songPlayer;
         }
     }]);
 
