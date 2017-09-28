@@ -31,9 +31,9 @@ function init() {
     tabControl.openTab('loadSongs');
 
     const context = new (window.AudioContext || window.webkitAudioContext)();
-    
+
     const songLibrary = new SongLibrary();
-    const playlistManager = new PlaylistManager(context, songLibrary);
+    const playlistManager = new PlaylistManager(context);
     const jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
@@ -112,7 +112,8 @@ function init() {
     // wire up manual controls
     window.barkeep_play = songName => {
         try {
-            playlistManager.playSongByName(songName);
+            const songInfo = songLibrary.getSongInfoByName(songName);
+            playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, songInfo.playbackSpeed);
         }
         catch (e) {
             alert(e);
@@ -130,12 +131,25 @@ function init() {
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = (songName, playbackSpeedPercent) => {
+        voiceCommandListener.onPlayCommand = (input, playbackSpeedPercent) => {
             try {
-                return playlistManager.playSongByName(songName, playbackSpeedPercent / 100);
+                const songName = songLibrary.getSongNameFromInput(input);
+                if (!songName) {
+                    return false;
+                }
+
+                const songInfo = songLibrary.getSongInfoByName(songName);
+                if (!songInfo.bpm) {
+                    throw 'Please set BPM for ' + songName;
+                }
+
+                const playbackSpeed = (playbackSpeedPercent / 100) || songInfo.playbackSpeed;
+                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed);
+                return true;
             }
             catch (e) {
                 alert(e);
+                return false;
             }
         };
         voiceCommandListener.onStopCommand = () => {

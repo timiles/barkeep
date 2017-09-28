@@ -166,7 +166,7 @@ function init() {
     var context = new (window.AudioContext || window.webkitAudioContext)();
 
     var songLibrary = new _songLibrary2.default();
-    var playlistManager = new _playlistManager2.default(context, songLibrary);
+    var playlistManager = new _playlistManager2.default(context);
     var jtmplModel = { playlist: [] };
     jtmpl('#songsContainer', '#songTemplate', jtmplModel);
 
@@ -268,7 +268,8 @@ function init() {
     // wire up manual controls
     window.barkeep_play = function (songName) {
         try {
-            playlistManager.playSongByName(songName);
+            var songInfo = songLibrary.getSongInfoByName(songName);
+            playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, songInfo.playbackSpeed);
         } catch (e) {
             alert(e);
         }
@@ -287,11 +288,24 @@ function init() {
             }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = function (songName, playbackSpeedPercent) {
+        voiceCommandListener.onPlayCommand = function (input, playbackSpeedPercent) {
             try {
-                return playlistManager.playSongByName(songName, playbackSpeedPercent / 100);
+                var songName = songLibrary.getSongNameFromInput(input);
+                if (!songName) {
+                    return false;
+                }
+
+                var songInfo = songLibrary.getSongInfoByName(songName);
+                if (!songInfo.bpm) {
+                    throw 'Please set BPM for ' + songName;
+                }
+
+                var playbackSpeed = playbackSpeedPercent / 100 || songInfo.playbackSpeed;
+                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed);
+                return true;
             } catch (e) {
                 alert(e);
+                return false;
             }
         };
         voiceCommandListener.onStopCommand = function () {
@@ -429,92 +443,34 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var PlaylistManager = function () {
-    function PlaylistManager(context, songLibrary) {
+    function PlaylistManager(context) {
         _classCallCheck(this, PlaylistManager);
 
         this.context = context;
         this.beeper = new _beeper2.default(context);
-        this.songLibrary = songLibrary;
         this.bufferManager = new _bufferManager2.default(context);
-        this.loadedSongNames = new Array();
     }
 
     _createClass(PlaylistManager, [{
         key: 'addSong',
         value: function addSong(name, fileData) {
+            this.bufferManager.loadBuffer(name, fileData).then(function () {
+                // mark as loaded?
+            });
+        }
+    }, {
+        key: 'playSong',
+        value: function playSong(name, bpm, beatsPerBar) {
             var _this = this;
 
-            this.bufferManager.loadBuffer(name, fileData).then(function () {
-                _this.loadedSongNames.push(name);
-            });
-        }
-    }, {
-        key: '_getSongNameFromInput',
-        value: function _getSongNameFromInput(input) {
-            if (input.trim().length === 0) {
-                return null;
-            }
-            if (this.loadedSongNames.indexOf(input) >= 0) {
-                return input;
-            }
-            // best guess at name?
-            input = input.toLowerCase();
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = this.loadedSongNames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var key = _step.value;
-
-                    if (key.toLowerCase().indexOf(input) >= 0) {
-                        return key;
-                    }
-                }
-                // no match :(
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
-
-            return null;
-        }
-    }, {
-        key: 'playSongByName',
-        value: function playSongByName(input, overridePlaybackSpeed) {
-            var _this2 = this;
-
-            var songName = this._getSongNameFromInput(input);
-            if (!songName) {
-                console.log('Unrecognised song:', input);
-                return false;
-            }
-
-            var songInfo = this.songLibrary.getSongInfoByName(songName);
-            if (!songInfo.bpm) {
-                throw 'Please set BPM for ' + songName;
-            }
-
-            var playbackSpeed = overridePlaybackSpeed || songInfo.playbackSpeed;
+            var playbackSpeed = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
 
             var noteNumber = 96;
-            var buffer = this.bufferManager.getBuffer(songName, playbackSpeed, 12, function (p) {
+            var buffer = this.bufferManager.getBuffer(name, playbackSpeed, 12, function (p) {
                 console.log('Stretching...', p);
-                _this2.beeper.beep({ note: noteNumber++ });
+                _this.beeper.beep({ note: noteNumber++ });
             });
-            this._playBuffer(buffer, playbackSpeed, songInfo.bpm, songInfo.beatsPerBar);
-
-            return true;
+            this._playBuffer(buffer, playbackSpeed, bpm, beatsPerBar);
         }
     }, {
         key: 'stop',
@@ -706,9 +662,13 @@ var BufferManager = function () {
                 return this.bufferMap.get(bufferKey);
             }
 
-            var buffer = BufferManager._stretch(this.context,
             // retrieve original buffer @1 x speed
-            this.bufferMap.get(songName + '@1'), playbackSpeed, 2, false, progressIntervalCount, progressCallback);
+            var originalBuffer = this.bufferMap.get(songName + '@1');
+            if (!originalBuffer) {
+                throw 'Song not loaded: ' + songName;
+            }
+
+            var buffer = BufferManager._stretch(this.context, originalBuffer, playbackSpeed, 2, false, progressIntervalCount, progressCallback);
             this.bufferMap.set(bufferKey, buffer);
             return buffer;
         }
@@ -1006,6 +966,48 @@ var SongLibrary = function () {
     }
 
     _createClass(SongLibrary, [{
+        key: 'getSongNameFromInput',
+        value: function getSongNameFromInput(input) {
+            if (input.trim().length === 0) {
+                return null;
+            }
+            // TODO: account for case sensitivity?
+            if (this.songInfos.has(input)) {
+                return input;
+            }
+            // best guess at name?
+            input = input.toLowerCase();
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.songInfos.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var key = _step.value;
+
+                    if (key.toLowerCase().indexOf(input) >= 0) {
+                        return key;
+                    }
+                }
+                // no match :(
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return null;
+        }
+    }, {
         key: 'getSongInfoByName',
         value: function getSongInfoByName(name) {
             return this.songInfos.get(name);

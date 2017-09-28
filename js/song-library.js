@@ -6,6 +6,25 @@ export default class SongLibrary {
         this.songInfos = this.retrieveFromStorage();
     }
 
+    getSongNameFromInput(input) {
+        if (input.trim().length === 0) {
+            return null;
+        }
+        // TODO: account for case sensitivity?
+        if (this.songInfos.has(input)) {
+            return input;
+        }
+        // best guess at name?
+        input = input.toLowerCase();
+        for (const key of this.songInfos.keys()) {
+            if (key.toLowerCase().indexOf(input) >= 0) {
+                return key;
+            }
+        }
+        // no match :(
+        return null;
+    }
+
     getSongInfoByName(name) {
         return this.songInfos.get(name);
     }

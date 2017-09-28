@@ -26,9 +26,14 @@ export default class BufferManager {
             return this.bufferMap.get(bufferKey);
         }
 
-        const buffer = BufferManager._stretch(this.context,
-            // retrieve original buffer @1 x speed
-            this.bufferMap.get(songName + '@1'), playbackSpeed, 2, false, progressIntervalCount, progressCallback);
+        // retrieve original buffer @1 x speed
+        const originalBuffer = this.bufferMap.get(songName + '@1');
+        if (!originalBuffer) {
+            throw 'Song not loaded: ' + songName;            
+        }
+
+        const buffer = BufferManager._stretch(this.context, originalBuffer,
+            playbackSpeed, 2, false, progressIntervalCount, progressCallback);
         this.bufferMap.set(bufferKey, buffer);
         return buffer;
     }
