@@ -1260,7 +1260,7 @@ var CommandParser = function () {
         key: 'addCommand',
         value: function addCommand(command, action) {
             this.commands.push({
-                regex: CommandParser._getRegex(command),
+                regexp: CommandParser._getRegExp(command),
                 types: CommandParser._getTypes(command),
                 action: action
             });
@@ -1276,7 +1276,7 @@ var CommandParser = function () {
                 for (var _iterator = this.commands[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var command = _step.value;
 
-                    var results = statement.match(command.regex);
+                    var results = command.regexp.exec(statement);
                     if (results) {
                         var args = [];
                         for (var i = 0; i < command.types.length; i++) {
@@ -1322,9 +1322,10 @@ var CommandParser = function () {
             }
         }
     }], [{
-        key: '_getRegex',
-        value: function _getRegex(command) {
-            return '^' + command.replace(/{number}/g, '(.*)').replace(/{words}/g, '(.*)');
+        key: '_getRegExp',
+        value: function _getRegExp(command) {
+            var pattern = '^' + command.replace(/{number}/g, '(.*)').replace(/{words}/g, '(.*)');
+            return new RegExp(pattern, 'i');
         }
     }, {
         key: '_getTypes',

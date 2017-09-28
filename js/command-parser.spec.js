@@ -83,4 +83,18 @@ describe('CommandParser', () => {
         expect(number1).toBe(81);
         expect(result).toBe(true);
     });
+
+    it('should extract words and numbers case-insensitive', () => {
+        const commandParser = new CommandParser();
+
+        let words, number0, number1;
+        commandParser.addCommand('test {number} and {words} and {number}',
+            (n0, w, n1) => { number0 = n0; words = w; number1 = n1; return true; });
+
+        const result = commandParser.parse('TEST 42 and Hello World! aNd 81');
+        expect(number0).toBe(42);
+        expect(words).toBe('Hello World!');
+        expect(number1).toBe(81);
+        expect(result).toBe(true);
+    });
 });
