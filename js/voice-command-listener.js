@@ -21,31 +21,32 @@ export default class VoiceCommandListener {
     }
 
     constructor() {
-        const commandParser = new CommandParser();
-        commandParser.addCommand('play {words} at {number}% from bar{number}',
-            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
-        commandParser.addCommand('play {words} at {number}% from BA{number}',
-            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
-        commandParser.addCommand('play {words} from bar{number} at {number}%',
-            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
-        commandParser.addCommand('play {words} from BA{number} at {number}%',
-            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
-        commandParser.addCommand('play {words} from bar{number}',
-            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber));
-        commandParser.addCommand('play {words} from BA{number}',
-            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber));
-        commandParser.addCommand('play {words} at {number}%',
-            (songName, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent));
-        commandParser.addCommand('play {words}',
-            (songName) => this.onPlayCommand(songName));
-        commandParser.addCommand('stop',
-            () => this.onStopCommand());
-        // sometimes comes through as eg "bar2" or "bar 2"
-        commandParser.addCommand('bar{number}',
-            (barNumber) => this.onBarCommand(barNumber));
-        // or BA17
-        commandParser.addCommand('BA{number}',
-            (barNumber) => this.onBarCommand(barNumber));
+        const commandParser = new CommandParser({
+            'play {words} at {number}% from bar{number}':
+            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} at {number}% from BA{number}':
+            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} from bar{number} at {number}%':
+            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} from BA{number} at {number}%':
+            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} from bar{number}':
+            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber),
+            'play {words} from BA{number}':
+            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber),
+            'play {words} at {number}%':
+            (songName, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent),
+            'play {words}':
+            (songName) => this.onPlayCommand(songName),
+            'stop':
+            () => this.onStopCommand(),
+            // sometimes comes through as eg "bar2" or "bar 2"
+            'bar{number}':
+            (barNumber) => this.onBarCommand(barNumber),
+            // or BA17
+            'BA{number}':
+            (barNumber) => this.onBarCommand(barNumber)
+        });
         this.commandParser = commandParser;
     }
 

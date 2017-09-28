@@ -1158,41 +1158,42 @@ var VoiceCommandListener = function () {
 
         _classCallCheck(this, VoiceCommandListener);
 
-        var commandParser = new _commandParser2.default();
-        commandParser.addCommand('play {words} at {number}% from bar{number}', function (songName, playbackSpeedPercent, barNumber) {
-            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-        });
-        commandParser.addCommand('play {words} at {number}% from BA{number}', function (songName, playbackSpeedPercent, barNumber) {
-            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-        });
-        commandParser.addCommand('play {words} from bar{number} at {number}%', function (songName, barNumber, playbackSpeedPercent) {
-            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-        });
-        commandParser.addCommand('play {words} from BA{number} at {number}%', function (songName, barNumber, playbackSpeedPercent) {
-            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-        });
-        commandParser.addCommand('play {words} from bar{number}', function (songName, barNumber) {
-            return _this.onPlayCommand(songName, 100, barNumber);
-        });
-        commandParser.addCommand('play {words} from BA{number}', function (songName, barNumber) {
-            return _this.onPlayCommand(songName, 100, barNumber);
-        });
-        commandParser.addCommand('play {words} at {number}%', function (songName, playbackSpeedPercent) {
-            return _this.onPlayCommand(songName, playbackSpeedPercent);
-        });
-        commandParser.addCommand('play {words}', function (songName) {
-            return _this.onPlayCommand(songName);
-        });
-        commandParser.addCommand('stop', function () {
-            return _this.onStopCommand();
-        });
-        // sometimes comes through as eg "bar2" or "bar 2"
-        commandParser.addCommand('bar{number}', function (barNumber) {
-            return _this.onBarCommand(barNumber);
-        });
-        // or BA17
-        commandParser.addCommand('BA{number}', function (barNumber) {
-            return _this.onBarCommand(barNumber);
+        var commandParser = new _commandParser2.default({
+            'play {words} at {number}% from bar{number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, barNumber) {
+                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+            },
+            'play {words} at {number}% from BA{number}': function playWordsAtNumberFromBANumber(songName, playbackSpeedPercent, barNumber) {
+                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+            },
+            'play {words} from bar{number} at {number}%': function playWordsFromBarNumberAtNumber(songName, barNumber, playbackSpeedPercent) {
+                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+            },
+            'play {words} from BA{number} at {number}%': function playWordsFromBANumberAtNumber(songName, barNumber, playbackSpeedPercent) {
+                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+            },
+            'play {words} from bar{number}': function playWordsFromBarNumber(songName, barNumber) {
+                return _this.onPlayCommand(songName, 100, barNumber);
+            },
+            'play {words} from BA{number}': function playWordsFromBANumber(songName, barNumber) {
+                return _this.onPlayCommand(songName, 100, barNumber);
+            },
+            'play {words} at {number}%': function playWordsAtNumber(songName, playbackSpeedPercent) {
+                return _this.onPlayCommand(songName, playbackSpeedPercent);
+            },
+            'play {words}': function playWords(songName) {
+                return _this.onPlayCommand(songName);
+            },
+            'stop': function stop() {
+                return _this.onStopCommand();
+            },
+            // sometimes comes through as eg "bar2" or "bar 2"
+            'bar{number}': function barNumber(_barNumber) {
+                return _this.onBarCommand(_barNumber);
+            },
+            // or BA17
+            'BA{number}': function BANumber(barNumber) {
+                return _this.onBarCommand(barNumber);
+            }
         });
         this.commandParser = commandParser;
     }
@@ -1250,10 +1251,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CommandParser = function () {
-    function CommandParser() {
+    function CommandParser(initialCommands) {
         _classCallCheck(this, CommandParser);
 
         this.commands = [];
+
+        for (var command in initialCommands) {
+            this.addCommand(command, initialCommands[command]);
+        }
     }
 
     _createClass(CommandParser, [{

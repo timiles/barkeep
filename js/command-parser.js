@@ -1,7 +1,11 @@
 export default class CommandParser {
     
-        constructor() {
+        constructor(initialCommands) {
             this.commands = [];
+
+            for (const command in initialCommands) {
+                this.addCommand(command, initialCommands[command]);
+            }
         }
     
         static _getRegExp(command) {

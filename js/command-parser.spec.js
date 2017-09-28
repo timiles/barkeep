@@ -2,6 +2,16 @@ import CommandParser from './command-parser';
 
 describe('CommandParser', () => {
 
+    it('should initialise by constructor', () => {
+
+        let commandActioned = false;
+        const commandParser = new CommandParser({'test': () => { commandActioned = true; return true; }});
+
+        const result = commandParser.parse('test');
+        expect(commandActioned).toBe(true);
+        expect(result).toBe(true);
+    });
+
     it('should match command', () => {
         const commandParser = new CommandParser();
 
