@@ -17,7 +17,7 @@ export default class PlaylistManager {
             });
     }
 
-    playSong(name, bpm, beatsPerBar, playbackSpeed = 1) {
+    playSong(name, bpm, beatsPerBar, playbackSpeed = 1, fromBarNumber = 1) {
         let noteNumber = 96;
         const buffer = this.bufferManager.getBuffer(name, playbackSpeed, 12, p => {
             console.log('Stretching...', p);
@@ -27,10 +27,10 @@ export default class PlaylistManager {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
         }
-        
+
         this.beeper.beep();
         this.currentSongPlayer = new SongPlayer(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
-        this.currentSongPlayer.play();
+        this.currentSongPlayer.play(fromBarNumber);
     }
 
     jumpToBar(barNumber) {

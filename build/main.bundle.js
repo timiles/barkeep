@@ -288,7 +288,7 @@ function init() {
             }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = function (input, playbackSpeedPercent) {
+        voiceCommandListener.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
             try {
                 var songName = songLibrary.getSongNameFromInput(input);
                 if (!songName) {
@@ -301,7 +301,7 @@ function init() {
                 }
 
                 var playbackSpeed = playbackSpeedPercent / 100 || songInfo.playbackSpeed;
-                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed);
+                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed, fromBarNumber);
                 return true;
             } catch (e) {
                 alert(e);
@@ -464,6 +464,7 @@ var PlaylistManager = function () {
             var _this = this;
 
             var playbackSpeed = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
+            var fromBarNumber = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
             var noteNumber = 96;
             var buffer = this.bufferManager.getBuffer(name, playbackSpeed, 12, function (p) {
@@ -477,7 +478,7 @@ var PlaylistManager = function () {
 
             this.beeper.beep();
             this.currentSongPlayer = new _songPlayer2.default(this.context, buffer, playbackSpeed, bpm, beatsPerBar);
-            this.currentSongPlayer.play();
+            this.currentSongPlayer.play(fromBarNumber);
         }
     }, {
         key: 'jumpToBar',
@@ -1158,21 +1159,40 @@ var VoiceCommandListener = function () {
         _classCallCheck(this, VoiceCommandListener);
 
         var commandParser = new _commandParser2.default();
-        commandParser.addCommand('play {words} at {number}%', function (w, n) {
-            return _this.onPlayCommand(w, n);
+        commandParser.addCommand('play {words} at {number}% from bar{number}', function (songName, playbackSpeedPercent, barNumber) {
+            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
         });
-        commandParser.addCommand('play {words}', function (w) {
-            return _this.onPlayCommand(w);
+        commandParser.addCommand('play {words} at {number}% from BA{number}', function (songName, playbackSpeedPercent, barNumber) {
+            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+        });
+        commandParser.addCommand('play {words} from bar{number} at {number}%', function (songName, barNumber, playbackSpeedPercent) {
+            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+        });
+        commandParser.addCommand('play {words} from BA{number} at {number}%', function (songName, barNumber, playbackSpeedPercent) {
+            return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+        });
+        commandParser.addCommand('play {words} from bar{number}', function (songName, barNumber) {
+            return _this.onPlayCommand(songName, 100, barNumber);
+        });
+        commandParser.addCommand('play {words} from BA{number}', function (songName, barNumber) {
+            return _this.onPlayCommand(songName, 100, barNumber);
+        });
+        commandParser.addCommand('play {words} at {number}%', function (songName, playbackSpeedPercent) {
+            return _this.onPlayCommand(songName, playbackSpeedPercent);
+        });
+        commandParser.addCommand('play {words}', function (songName) {
+            return _this.onPlayCommand(songName);
         });
         commandParser.addCommand('stop', function () {
             return _this.onStopCommand();
         });
-        commandParser.addCommand('bar {number}', function (n) {
-            return _this.onBarCommand(n);
+        // sometimes comes through as eg "bar2" or "bar 2"
+        commandParser.addCommand('bar{number}', function (barNumber) {
+            return _this.onBarCommand(barNumber);
         });
-        // sometimes comes through as eg "bar2"
-        commandParser.addCommand('bar{number}', function (n) {
-            return _this.onBarCommand(n);
+        // or BA17
+        commandParser.addCommand('BA{number}', function (barNumber) {
+            return _this.onBarCommand(barNumber);
         });
         this.commandParser = commandParser;
     }

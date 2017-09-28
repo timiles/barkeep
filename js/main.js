@@ -131,7 +131,7 @@ function init() {
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             playlistManager.jumpToBar(barNumber);
         };
-        voiceCommandListener.onPlayCommand = (input, playbackSpeedPercent) => {
+        voiceCommandListener.onPlayCommand = (input, playbackSpeedPercent, fromBarNumber) => {
             try {
                 const songName = songLibrary.getSongNameFromInput(input);
                 if (!songName) {
@@ -144,7 +144,7 @@ function init() {
                 }
 
                 const playbackSpeed = (playbackSpeedPercent / 100) || songInfo.playbackSpeed;
-                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed);
+                playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed, fromBarNumber);
                 return true;
             }
             catch (e) {

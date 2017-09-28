@@ -22,12 +22,30 @@ export default class VoiceCommandListener {
 
     constructor() {
         const commandParser = new CommandParser();
-        commandParser.addCommand('play {words} at {number}%', (w, n) => this.onPlayCommand(w, n));
-        commandParser.addCommand('play {words}', (w) => this.onPlayCommand(w));
-        commandParser.addCommand('stop', () => this.onStopCommand());
-        commandParser.addCommand('bar {number}', (n) => this.onBarCommand(n));
-        // sometimes comes through as eg "bar2"
-        commandParser.addCommand('bar{number}', (n) => this.onBarCommand(n));
+        commandParser.addCommand('play {words} at {number}% from bar{number}',
+            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
+        commandParser.addCommand('play {words} at {number}% from BA{number}',
+            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
+        commandParser.addCommand('play {words} from bar{number} at {number}%',
+            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
+        commandParser.addCommand('play {words} from BA{number} at {number}%',
+            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber));
+        commandParser.addCommand('play {words} from bar{number}',
+            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber));
+        commandParser.addCommand('play {words} from BA{number}',
+            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber));
+        commandParser.addCommand('play {words} at {number}%',
+            (songName, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent));
+        commandParser.addCommand('play {words}',
+            (songName) => this.onPlayCommand(songName));
+        commandParser.addCommand('stop',
+            () => this.onStopCommand());
+        // sometimes comes through as eg "bar2" or "bar 2"
+        commandParser.addCommand('bar{number}',
+            (barNumber) => this.onBarCommand(barNumber));
+        // or BA17
+        commandParser.addCommand('BA{number}',
+            (barNumber) => this.onBarCommand(barNumber));
         this.commandParser = commandParser;
     }
 
