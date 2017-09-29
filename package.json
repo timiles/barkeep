@@ -6,7 +6,8 @@
   "scripts": {
     "webpack": "webpack --progress --colors --watch",
     "start": "webpack-dev-server --progress --colors",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "lint": "eslint js"
   },
   "author": "",
   "license": "ISC",
