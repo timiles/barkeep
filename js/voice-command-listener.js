@@ -21,31 +21,22 @@ export default class VoiceCommandListener {
     }
 
     constructor() {
+        // Use (bar|BA) option: sometimes comes through as eg "bar2" or "bar 2" or BA17
         const commandParser = new CommandParser({
-            'play {words} at {number}% from bar{number}':
-            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
-            'play {words} at {number}% from BA{number}':
-            (songName, playbackSpeedPercent, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
-            'play {words} from bar{number} at {number}%':
-            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
-            'play {words} from BA{number} at {number}%':
-            (songName, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
-            'play {words} from bar{number}':
-            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber),
-            'play {words} from BA{number}':
-            (songName, barNumber) => this.onPlayCommand(songName, 100, barNumber),
+            'play {words} at {number}% from (bar|BA){number}':
+            (songName, playbackSpeedPercent, o, barNumber) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} from (bar|BA){number} at {number}%':
+            (songName, o, barNumber, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent, barNumber),
+            'play {words} from (bar|BA){number}':
+            (songName, o, barNumber) => this.onPlayCommand(songName, 100, barNumber),
             'play {words} at {number}%':
             (songName, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent),
             'play {words}':
             (songName) => this.onPlayCommand(songName),
             'stop':
             () => this.onStopCommand(),
-            // sometimes comes through as eg "bar2" or "bar 2"
-            'bar{number}':
-            (barNumber) => this.onBarCommand(barNumber),
-            // or BA17
-            'BA{number}':
-            (barNumber) => this.onBarCommand(barNumber)
+            '(bar|BA){number}':
+            (o, barNumber) => this.onBarCommand(barNumber)
         });
         this.commandParser = commandParser;
     }

@@ -1158,23 +1158,15 @@ var VoiceCommandListener = function () {
 
         _classCallCheck(this, VoiceCommandListener);
 
+        // Use (bar|BA) option: sometimes comes through as eg "bar2" or "bar 2" or BA17
         var commandParser = new _commandParser2.default({
-            'play {words} at {number}% from bar{number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, barNumber) {
+            'play {words} at {number}% from (bar|BA){number}': function playWordsAtNumberFromBarBANumber(songName, playbackSpeedPercent, o, barNumber) {
                 return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
             },
-            'play {words} at {number}% from BA{number}': function playWordsAtNumberFromBANumber(songName, playbackSpeedPercent, barNumber) {
+            'play {words} from (bar|BA){number} at {number}%': function playWordsFromBarBANumberAtNumber(songName, o, barNumber, playbackSpeedPercent) {
                 return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
             },
-            'play {words} from bar{number} at {number}%': function playWordsFromBarNumberAtNumber(songName, barNumber, playbackSpeedPercent) {
-                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-            },
-            'play {words} from BA{number} at {number}%': function playWordsFromBANumberAtNumber(songName, barNumber, playbackSpeedPercent) {
-                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-            },
-            'play {words} from bar{number}': function playWordsFromBarNumber(songName, barNumber) {
-                return _this.onPlayCommand(songName, 100, barNumber);
-            },
-            'play {words} from BA{number}': function playWordsFromBANumber(songName, barNumber) {
+            'play {words} from (bar|BA){number}': function playWordsFromBarBANumber(songName, o, barNumber) {
                 return _this.onPlayCommand(songName, 100, barNumber);
             },
             'play {words} at {number}%': function playWordsAtNumber(songName, playbackSpeedPercent) {
@@ -1186,12 +1178,7 @@ var VoiceCommandListener = function () {
             'stop': function stop() {
                 return _this.onStopCommand();
             },
-            // sometimes comes through as eg "bar2" or "bar 2"
-            'bar{number}': function barNumber(_barNumber) {
-                return _this.onBarCommand(_barNumber);
-            },
-            // or BA17
-            'BA{number}': function BANumber(barNumber) {
+            '(bar|BA){number}': function barBANumber(o, barNumber) {
                 return _this.onBarCommand(barNumber);
             }
         });
@@ -1289,12 +1276,17 @@ var CommandParser = function () {
                             var value = results[i + 1];
 
                             switch (type) {
-                                case '{words}':
+                                case 'option':
                                     {
                                         args.push(value);
                                         break;
                                     }
-                                case '{number}':
+                                case 'words':
+                                    {
+                                        args.push(value);
+                                        break;
+                                    }
+                                case 'number':
                                     {
                                         var valueAsNumber = Number.parseInt(value);
                                         if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
@@ -1336,15 +1328,20 @@ var CommandParser = function () {
         key: '_getTypes',
         value: function _getTypes(command) {
             var indexedTypes = new Map();
-            var indexType = function indexType(type) {
-                var index = command.indexOf(type);
-                while (index >= 0) {
+            var indexType = function indexType(type, regexp) {
+                var index = 0;
+                var res = regexp.exec(command);
+                while (res) {
+                    index += res.index;
                     indexedTypes.set(index, type);
-                    index = command.indexOf(type, index + 1);
+                    // skip over the matched result
+                    index += res[0].length;
+                    res = regexp.exec(command.substring(index));
                 }
             };
-            indexType('{number}');
-            indexType('{words}');
+            indexType('option', /\(.+?\)/);
+            indexType('number', /{number}/);
+            indexType('words', /{words}/);
 
             return [].concat(_toConsumableArray(indexedTypes.entries())).sort(function (a, b) {
                 return a[0] - b[0];
