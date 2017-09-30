@@ -5,11 +5,18 @@ describe('CommandParser', () => {
     it('should initialise by constructor', () => {
 
         let commandActioned = false;
-        const commandParser = new CommandParser({ 'test': () => { commandActioned = true; return true; } });
+        const commandParser = new CommandParser({
+            synonyms: {
+                'thing': ['object', 'article', 'item']
+            },
+            commands: {
+                'test [thing]': (o) => { commandActioned = true; return o; }
+            }
+        });
 
-        const result = commandParser.parse('test');
+        const result = commandParser.parse('test object');
         expect(commandActioned).toBe(true);
-        expect(result).toBe(true);
+        expect(result).toBe('object');
     });
 
     it('should match command', () => {
@@ -36,11 +43,47 @@ describe('CommandParser', () => {
 
     it('should not match command if values not extracted', () => {
         const commandParser = new CommandParser({
-            'test {number}': () => { return true; }
+            commands: {
+                'test {number}': () => { return true; }
+            }
         });
 
         const result = commandParser.parse('test not-a-number');
         expect(result).toBeUndefined();
+    });
+
+    it('should handle multiple synonyms', () => {
+        const commandParser = new CommandParser();
+        commandParser.addSynonyms('test', ['foo', 'bar']);
+        commandParser.addCommand('[test] [test] [test]', (o0, o1, o2) => { return [o0, o1, o2]; });
+
+        const result = commandParser.parse('foo test bar');
+        expect(result[0]).toBe('foo');
+        expect(result[1]).toBe('test');
+        expect(result[2]).toBe('bar');
+    });
+
+    it('should handle synonyms of reserved types', () => {
+        const commandParser = new CommandParser();
+        commandParser.addSynonyms('words', ['sentence']);
+        commandParser.addSynonyms('number', ['amount']);
+        commandParser.addCommand('Hamlet: words, [words], {words}! Test [number]: {number}',
+            (v0, v1, v2, v3) => { return [v0, v1, v2, v3]; });
+
+        const result = commandParser.parse('Hamlet: words, sentence, more and more words! Test amount: 42');
+        expect(result[0]).toBe('sentence');
+        expect(result[1]).toBe('more and more words');
+        expect(result[2]).toBe('amount');
+        expect(result[3]).toBe(42);
+    });
+
+    it('should handle whole synonym if possible', () => {
+        const commandParser = new CommandParser();
+        commandParser.addSynonyms('foo', ['foofoo']);
+        commandParser.addCommand('[foo]', (v) => { return v; });
+
+        const result = commandParser.parse('foofoo');
+        expect(result).toBe('foofoo');
     });
 
     it('should extract words', () => {
@@ -118,7 +161,11 @@ describe('CommandParser', () => {
     });
 
     it('should extract value using optional regex', () => {
-        const commandParser = new CommandParser({ '(foo|bar)': (o) => { return o; } });
+        const commandParser = new CommandParser({
+            commands: {
+                '(foo|bar)': (o) => { return o; }
+            }
+        });
         expect(commandParser.parse('foo')).toBe('foo');
         expect(commandParser.parse('BAR')).toBe('BAR');
         expect(commandParser.parse('flomdoo')).toBeUndefined();
@@ -126,8 +173,10 @@ describe('CommandParser', () => {
 
     it('should extract values from multiple optional regexes', () => {
         const commandParser = new CommandParser({
-            'test (foo|bar) (bloop|bleep)':
-            (o0, o1) => { return [o0, o1]; }
+            commands: {
+                'test (foo|bar) (bloop|bleep)':
+                (o0, o1) => { return [o0, o1]; }
+            }
         });
         const result = commandParser.parse('test foo bleep');
         expect(result[0]).toBe('foo');
@@ -136,8 +185,10 @@ describe('CommandParser', () => {
 
     it('should extract values in complicated pattern', () => {
         const commandParser = new CommandParser({
-            'test {words} from (foo|bar){number} at {number}%': (w, o, n0, n1) => {
-                return [w, o, n0, n1];
+            commands: {
+                'test {words} from (foo|bar){number} at {number}%': (w, o, n0, n1) => {
+                    return [w, o, n0, n1];
+                }
             }
         });
 

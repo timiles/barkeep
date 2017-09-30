@@ -1,10 +1,17 @@
 export default class CommandParser {
 
-    constructor(initialCommands) {
-        this.commands = [];
+    constructor(init) {
 
-        for (const command in initialCommands) {
-            this.addCommand(command, initialCommands[command]);
+        this.synonyms = new Map();
+        this.commands = new Array();
+
+        if (init) {
+            for (const key in init.synonyms) {
+                this.addSynonyms(key, init.synonyms[key]);
+            }
+            for (const command in init.commands) {
+                this.addCommand(command, init.commands[command]);
+            }
         }
     }
 
@@ -57,10 +64,29 @@ export default class CommandParser {
         }
     }
 
+    addSynonyms(key, synonyms) {
+        this.synonyms.set(key, synonyms);
+    }
+
+    _expandSynonyms(command) {
+        for (const s of this.synonyms) {
+            const key = s[0];
+            const allSynonyms = s[1].concat(s[0]);
+            // longest first for greediest matching in case of similar substrings
+            const synonymsInDescendingLengthOrder = allSynonyms.sort((a, b) => b.length - a.length);
+            const synonymsPattern = '(' + synonymsInDescendingLengthOrder.join('|') + ')';
+            // escape the square brackets from the regex, 'g' to replace all
+            const keyRegexp = new RegExp(`\\[${key}\\]`, 'g');
+            command = command.replace(keyRegexp, synonymsPattern);
+        }
+        return command;
+    }
+
     addCommand(command, action) {
+        const commandWithSynonymsExpanded = this._expandSynonyms(command);
         this.commands.push({
-            regexp: CommandParser._getRegExp(command),
-            types: CommandParser._getTypes(command),
+            regexp: CommandParser._getRegExp(commandWithSynonymsExpanded),
+            types: CommandParser._getTypes(commandWithSynonymsExpanded),
             action: action
         });
     }

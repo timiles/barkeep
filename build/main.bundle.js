@@ -110,15 +110,15 @@ var _fileHelpers = __webpack_require__(2);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
-var _logger = __webpack_require__(16);
+var _logger = __webpack_require__(3);
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var _playlistManager = __webpack_require__(3);
+var _playlistManager = __webpack_require__(4);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
 
-var _songFile = __webpack_require__(9);
+var _songFile = __webpack_require__(10);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
@@ -126,19 +126,19 @@ var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
-var _songLibrary = __webpack_require__(10);
+var _songLibrary = __webpack_require__(11);
 
 var _songLibrary2 = _interopRequireDefault(_songLibrary);
 
-var _tabControl = __webpack_require__(11);
+var _tabControl = __webpack_require__(12);
 
 var _tabControl2 = _interopRequireDefault(_tabControl);
 
-var _voiceCommandListener = __webpack_require__(12);
+var _voiceCommandListener = __webpack_require__(13);
 
 var _voiceCommandListener2 = _interopRequireDefault(_voiceCommandListener);
 
-__webpack_require__(14);
+__webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -435,15 +435,54 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _beeper = __webpack_require__(4);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Logger = function () {
+    function Logger(outputElement) {
+        _classCallCheck(this, Logger);
+
+        this.outputElement = outputElement;
+    }
+
+    _createClass(Logger, [{
+        key: 'log',
+        value: function log(level, message) {
+            var el = document.createElement('p');
+            el.classList.add('log');
+            el.classList.add('log-' + level);
+            el.innerText = message;
+            // prepend so latest message is always on top. better way?
+            this.outputElement.prepend(el);
+        }
+    }]);
+
+    return Logger;
+}();
+
+exports.default = Logger;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _beeper = __webpack_require__(5);
 
 var _beeper2 = _interopRequireDefault(_beeper);
 
-var _bufferManager = __webpack_require__(6);
+var _bufferManager = __webpack_require__(7);
 
 var _bufferManager2 = _interopRequireDefault(_bufferManager);
 
-var _songPlayer = __webpack_require__(8);
+var _songPlayer = __webpack_require__(9);
 
 var _songPlayer2 = _interopRequireDefault(_songPlayer);
 
@@ -512,7 +551,7 @@ var PlaylistManager = function () {
 exports.default = PlaylistManager;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -524,7 +563,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _noteConverter = __webpack_require__(5);
+var _noteConverter = __webpack_require__(6);
 
 var _noteConverter2 = _interopRequireDefault(_noteConverter);
 
@@ -577,7 +616,7 @@ var Beeper = function () {
 exports.default = Beeper;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -614,7 +653,7 @@ var NoteConverter = function () {
 exports.default = NoteConverter;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -626,7 +665,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(7);
+__webpack_require__(8);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -748,7 +787,7 @@ var BufferManager = function () {
 exports.default = BufferManager;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -863,7 +902,7 @@ exports.default = BufferManager;
 }]);
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -920,7 +959,7 @@ var SongPlayer = function () {
 exports.default = SongPlayer;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -942,7 +981,7 @@ var SongFile = function SongFile(fileName, fileData) {
 exports.default = SongFile;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1060,7 +1099,7 @@ var SongLibrary = function () {
 exports.default = SongLibrary;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1120,7 +1159,7 @@ var TabControl = function () {
 exports.default = TabControl;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1132,7 +1171,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _commandParser = __webpack_require__(13);
+var _commandParser = __webpack_require__(14);
 
 var _commandParser2 = _interopRequireDefault(_commandParser);
 
@@ -1168,28 +1207,33 @@ var VoiceCommandListener = function () {
         _classCallCheck(this, VoiceCommandListener);
 
         this.logger = logger;
-        // Use (bar|BA) option: sometimes comes through as eg "bar2" or "bar 2" or BA17
+        // Regarding [bar] synonym, no space before {number}: sometimes comes through as eg "bar2" or "bar 2" or "BA2"
         var commandParser = new _commandParser2.default({
-            'play {words} at {number}% from (bar|BA){number}': function playWordsAtNumberFromBarBANumber(songName, playbackSpeedPercent, o, barNumber) {
-                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+            synonyms: {
+                'bar': ['ba', 'baar']
             },
-            'play {words} from (bar|BA){number} at {number}%': function playWordsFromBarBANumberAtNumber(songName, o, barNumber, playbackSpeedPercent) {
-                return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
-            },
-            'play {words} from (bar|BA){number}': function playWordsFromBarBANumber(songName, o, barNumber) {
-                return _this.onPlayCommand(songName, 100, barNumber);
-            },
-            'play {words} at {number}%': function playWordsAtNumber(songName, playbackSpeedPercent) {
-                return _this.onPlayCommand(songName, playbackSpeedPercent);
-            },
-            'play {words}': function playWords(songName) {
-                return _this.onPlayCommand(songName);
-            },
-            'stop': function stop() {
-                return _this.onStopCommand();
-            },
-            '(bar|BA){number}': function barBANumber(o, barNumber) {
-                return _this.onBarCommand(barNumber);
+            commands: {
+                'play {words} at {number}% from [bar]{number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, o, barNumber) {
+                    return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+                },
+                'play {words} from [bar]{number} at {number}%': function playWordsFromBarNumberAtNumber(songName, o, barNumber, playbackSpeedPercent) {
+                    return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
+                },
+                'play {words} from [bar]{number}': function playWordsFromBarNumber(songName, o, barNumber) {
+                    return _this.onPlayCommand(songName, 100, barNumber);
+                },
+                'play {words} at {number}%': function playWordsAtNumber(songName, playbackSpeedPercent) {
+                    return _this.onPlayCommand(songName, playbackSpeedPercent);
+                },
+                'play {words}': function playWords(songName) {
+                    return _this.onPlayCommand(songName);
+                },
+                'stop': function stop() {
+                    return _this.onStopCommand();
+                },
+                '[bar]{number}': function barNumber(o, _barNumber) {
+                    return _this.onBarCommand(_barNumber);
+                }
             }
         });
         this.commandParser = commandParser;
@@ -1255,7 +1299,7 @@ var VoiceCommandListener = function () {
 exports.default = VoiceCommandListener;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1272,35 +1316,86 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CommandParser = function () {
-    function CommandParser(initialCommands) {
+    function CommandParser(init) {
         _classCallCheck(this, CommandParser);
 
-        this.commands = [];
+        this.synonyms = new Map();
+        this.commands = new Array();
 
-        for (var command in initialCommands) {
-            this.addCommand(command, initialCommands[command]);
+        if (init) {
+            for (var key in init.synonyms) {
+                this.addSynonyms(key, init.synonyms[key]);
+            }
+            for (var command in init.commands) {
+                this.addCommand(command, init.commands[command]);
+            }
         }
     }
 
     _createClass(CommandParser, [{
+        key: 'addSynonyms',
+        value: function addSynonyms(key, synonyms) {
+            this.synonyms.set(key, synonyms);
+        }
+    }, {
+        key: '_expandSynonyms',
+        value: function _expandSynonyms(command) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.synonyms[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var s = _step.value;
+
+                    var key = s[0];
+                    var allSynonyms = s[1].concat(s[0]);
+                    // longest first for greediest matching in case of similar substrings
+                    var synonymsInDescendingLengthOrder = allSynonyms.sort(function (a, b) {
+                        return b.length - a.length;
+                    });
+                    var synonymsPattern = '(' + synonymsInDescendingLengthOrder.join('|') + ')';
+                    // escape the square brackets from the regex, 'g' to replace all
+                    var keyRegexp = new RegExp('\\[' + key + '\\]', 'g');
+                    command = command.replace(keyRegexp, synonymsPattern);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return command;
+        }
+    }, {
         key: 'addCommand',
         value: function addCommand(command, action) {
+            var commandWithSynonymsExpanded = this._expandSynonyms(command);
             this.commands.push({
-                regexp: CommandParser._getRegExp(command),
-                types: CommandParser._getTypes(command),
+                regexp: CommandParser._getRegExp(commandWithSynonymsExpanded),
+                types: CommandParser._getTypes(commandWithSynonymsExpanded),
                 action: action
             });
         }
     }, {
         key: 'parse',
         value: function parse(statement) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
 
             try {
-                for (var _iterator = this.commands[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var command = _step.value;
+                for (var _iterator2 = this.commands[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var command = _step2.value;
 
                     var results = command.regexp.exec(statement);
                     if (results) {
@@ -1318,16 +1413,16 @@ var CommandParser = function () {
                     }
                 }
             } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
                     }
                 } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
                     }
                 }
             }
@@ -1398,7 +1493,7 @@ var CommandParser = function () {
 exports.default = CommandParser;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1827,46 +1922,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
     }, {}] }, {}, [5])(5);
 });
-
-/***/ }),
-/* 15 */,
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Logger = function () {
-    function Logger(outputElement) {
-        _classCallCheck(this, Logger);
-
-        this.outputElement = outputElement;
-    }
-
-    _createClass(Logger, [{
-        key: 'log',
-        value: function log(level, message) {
-            var el = document.createElement('p');
-            el.classList.add('log');
-            el.classList.add('log-' + level);
-            el.innerText = message;
-            // prepend so latest message is always on top. better way?
-            this.outputElement.prepend(el);
-        }
-    }]);
-
-    return Logger;
-}();
-
-exports.default = Logger;
 
 /***/ })
 /******/ ]);
