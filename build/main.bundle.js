@@ -134,11 +134,15 @@ var _tabControl = __webpack_require__(12);
 
 var _tabControl2 = _interopRequireDefault(_tabControl);
 
-var _voiceCommandListener = __webpack_require__(13);
+var _voiceCommandHandler = __webpack_require__(13);
+
+var _voiceCommandHandler2 = _interopRequireDefault(_voiceCommandHandler);
+
+var _voiceCommandListener = __webpack_require__(15);
 
 var _voiceCommandListener2 = _interopRequireDefault(_voiceCommandListener);
 
-__webpack_require__(15);
+__webpack_require__(16);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -285,9 +289,8 @@ function init() {
     };
 
     enableMicButton.onclick = function () {
-        var logger = new _logger2.default(loggerOutput);
-        var voiceCommandListener = new _voiceCommandListener2.default(logger);
-        voiceCommandListener.onBarCommand = function (barNumber) {
+        var voiceCommandHandler = new _voiceCommandHandler2.default();
+        voiceCommandHandler.onBarCommand = function (barNumber) {
             recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(function () {
@@ -296,7 +299,7 @@ function init() {
             playlistManager.jumpToBar(barNumber);
             return 'Invoked Bar command with barNumber=' + barNumber;
         };
-        voiceCommandListener.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
+        voiceCommandHandler.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
             try {
                 var songName = songLibrary.getSongNameFromInput(input);
                 if (!songName) {
@@ -316,11 +319,13 @@ function init() {
                 return false;
             }
         };
-        voiceCommandListener.onStopCommand = function () {
+        voiceCommandHandler.onStopCommand = function () {
             playlistManager.stop();
             return 'Invoked Stop command';
         };
 
+        var logger = new _logger2.default(loggerOutput);
+        var voiceCommandListener = new _voiceCommandListener2.default(voiceCommandHandler, logger);
         voiceCommandListener.startListening();
     };
 
@@ -1179,36 +1184,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var VoiceCommandListener = function () {
-    _createClass(VoiceCommandListener, null, [{
-        key: 'checkCompatibility',
-        value: function checkCompatibility() {
-            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
-                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
-                return false;
-            }
-            var isLocalhost = location.host.startsWith('localhost');
-            if (isLocalhost) {
-                return true;
-            }
-            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-            if (isChrome && location.protocol !== 'https:') {
-                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
-                location.protocol = 'https:';
-                return false;
-            }
-            return true;
-        }
-    }]);
-
-    function VoiceCommandListener(logger) {
+var VoiceCommandHandler = function () {
+    function VoiceCommandHandler() {
         var _this = this;
 
-        _classCallCheck(this, VoiceCommandListener);
+        _classCallCheck(this, VoiceCommandHandler);
 
-        this.logger = logger;
         // Regarding [bar] synonym, no space before {number}: sometimes comes through as eg "bar2" or "bar 2" or "BA2"
-        var commandParser = new _commandParser2.default({
+        this.commandParser = new _commandParser2.default({
             synonyms: {
                 'bar': ['ba', 'baar']
             },
@@ -1236,67 +1219,19 @@ var VoiceCommandListener = function () {
                 }
             }
         });
-        this.commandParser = commandParser;
     }
 
-    _createClass(VoiceCommandListener, [{
-        key: 'startListening',
-        value: function startListening() {
-            var _this2 = this;
-
-            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            // recognition.continuous = true;
-            // TODO: other languages?
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 5;
-            recognition.start();
-
-            recognition.onaudioend = function () {
-                // start listening again after audio ends
-                _this2.startListening();
-            };
-
-            recognition.onresult = function (ev) {
-                var speechResults = ev.results[0];
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = speechResults[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var speechResult = _step.value;
-
-                        var commandResult = _this2.commandParser.parse(speechResult.transcript);
-                        if (commandResult) {
-                            _this2.logger.log('success', 'Command: "' + speechResult.transcript + '", result: "' + commandResult + '"');
-                            break;
-                        }
-
-                        _this2.logger.log('error', 'Unrecognised command: "' + speechResult.transcript + '"');
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-            };
+    _createClass(VoiceCommandHandler, [{
+        key: 'handle',
+        value: function handle(statement) {
+            return this.commandParser.parse(statement);
         }
     }]);
 
-    return VoiceCommandListener;
+    return VoiceCommandHandler;
 }();
 
-exports.default = VoiceCommandListener;
+exports.default = VoiceCommandHandler;
 
 /***/ }),
 /* 14 */
@@ -1494,6 +1429,109 @@ exports.default = CommandParser;
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var VoiceCommandListener = function () {
+    _createClass(VoiceCommandListener, null, [{
+        key: 'checkCompatibility',
+        value: function checkCompatibility() {
+            if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+                alert('SpeechRecognition is not supported. Please use a compatible browser, eg Chrome.');
+                return false;
+            }
+            var isLocalhost = location.host.startsWith('localhost');
+            if (isLocalhost) {
+                return true;
+            }
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            if (isChrome && location.protocol !== 'https:') {
+                alert('Chrome requires https for SpeechRecognition. Redirecting now!');
+                location.protocol = 'https:';
+                return false;
+            }
+            return true;
+        }
+    }]);
+
+    function VoiceCommandListener(voiceCommandHandler, logger) {
+        _classCallCheck(this, VoiceCommandListener);
+
+        this.voiceCommandHandler = voiceCommandHandler;
+        this.logger = logger;
+    }
+
+    _createClass(VoiceCommandListener, [{
+        key: 'startListening',
+        value: function startListening() {
+            var _this = this;
+
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // recognition.continuous = true;
+            // TODO: other languages?
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+            recognition.start();
+
+            recognition.onaudioend = function () {
+                // start listening again after audio ends
+                _this.startListening();
+            };
+
+            recognition.onresult = function (ev) {
+                var speechResults = ev.results[0];
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = speechResults[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var speechResult = _step.value;
+
+                        var commandResult = _this.voiceCommandHandler.handle(speechResult.transcript);
+                        if (commandResult) {
+                            _this.logger.log('success', 'Command: "' + speechResult.transcript + '", result: "' + commandResult + '"');
+                            break;
+                        }
+
+                        _this.logger.log('error', 'Unrecognised command: "' + speechResult.transcript + '"');
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+            };
+        }
+    }]);
+
+    return VoiceCommandListener;
+}();
+
+exports.default = VoiceCommandListener;
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

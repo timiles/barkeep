@@ -5,6 +5,7 @@ import SongFile from './song-file';
 import SongInfo from './song-info';
 import SongLibrary from './song-library';
 import TabControl from './tab-control';
+import VoiceCommandHandler from './voice-command-handler';
 import VoiceCommandListener from './voice-command-listener';
 import '../vendor/jtmpl-1.1.0.min.js'; /* global jtmpl */
 
@@ -127,16 +128,15 @@ function init() {
     };
 
     enableMicButton.onclick = () => {
-        const logger = new Logger(loggerOutput);
-        const voiceCommandListener = new VoiceCommandListener(logger);
-        voiceCommandListener.onBarCommand = (barNumber) => {
+        const voiceCommandHandler = new VoiceCommandHandler();
+        voiceCommandHandler.onBarCommand = (barNumber) => {
             recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             playlistManager.jumpToBar(barNumber);
             return `Invoked Bar command with barNumber=${barNumber}`;
         };
-        voiceCommandListener.onPlayCommand = (input, playbackSpeedPercent, fromBarNumber) => {
+        voiceCommandHandler.onPlayCommand = (input, playbackSpeedPercent, fromBarNumber) => {
             try {
                 const songName = songLibrary.getSongNameFromInput(input);
                 if (!songName) {
@@ -157,11 +157,13 @@ function init() {
                 return false;
             }
         };
-        voiceCommandListener.onStopCommand = () => {
+        voiceCommandHandler.onStopCommand = () => {
             playlistManager.stop();
             return 'Invoked Stop command';
         };
 
+        const logger = new Logger(loggerOutput);
+        const voiceCommandListener = new VoiceCommandListener(voiceCommandHandler, logger);
         voiceCommandListener.startListening();
     };
 
