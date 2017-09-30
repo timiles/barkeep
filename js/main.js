@@ -1,4 +1,5 @@
 import FileHelpers from './file-helpers';
+import Logger from './logger';
 import PlaylistManager from './playlist-manager';
 import SongFile from './song-file';
 import SongInfo from './song-info';
@@ -26,6 +27,8 @@ function init() {
 
     const importSongLibraryInput = document.getElementById('importSongLibraryInput');
     const exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
+
+    const loggerOutput = document.getElementById('loggerOutput');
 
     const tabControl = new TabControl(document);
     tabControl.openTab('loadSongs');
@@ -124,12 +127,14 @@ function init() {
     };
 
     enableMicButton.onclick = () => {
-        const voiceCommandListener = new VoiceCommandListener();
+        const logger = new Logger(loggerOutput);
+        const voiceCommandListener = new VoiceCommandListener(logger);
         voiceCommandListener.onBarCommand = (barNumber) => {
             recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
             playlistManager.jumpToBar(barNumber);
+            return `Invoked Bar command with barNumber=${barNumber}`;
         };
         voiceCommandListener.onPlayCommand = (input, playbackSpeedPercent, fromBarNumber) => {
             try {
@@ -145,7 +150,7 @@ function init() {
 
                 const playbackSpeed = (playbackSpeedPercent / 100) || songInfo.playbackSpeed;
                 playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed, fromBarNumber);
-                return true;
+                return `Invoked Play command with input=${input}, playbackSpeedPercent=${playbackSpeedPercent}, fromBarNumber=${fromBarNumber}`;
             }
             catch (e) {
                 alert(e);
@@ -154,6 +159,7 @@ function init() {
         };
         voiceCommandListener.onStopCommand = () => {
             playlistManager.stop();
+            return 'Invoked Stop command';
         };
 
         voiceCommandListener.startListening();

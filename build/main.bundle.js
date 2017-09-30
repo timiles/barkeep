@@ -110,6 +110,10 @@ var _fileHelpers = __webpack_require__(2);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
+var _logger = __webpack_require__(16);
+
+var _logger2 = _interopRequireDefault(_logger);
+
 var _playlistManager = __webpack_require__(3);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
@@ -159,6 +163,8 @@ function init() {
 
     var importSongLibraryInput = document.getElementById('importSongLibraryInput');
     var exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
+
+    var loggerOutput = document.getElementById('loggerOutput');
 
     var tabControl = new _tabControl2.default(document);
     tabControl.openTab('loadSongs');
@@ -279,7 +285,8 @@ function init() {
     };
 
     enableMicButton.onclick = function () {
-        var voiceCommandListener = new _voiceCommandListener2.default();
+        var logger = new _logger2.default(loggerOutput);
+        var voiceCommandListener = new _voiceCommandListener2.default(logger);
         voiceCommandListener.onBarCommand = function (barNumber) {
             recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
@@ -287,6 +294,7 @@ function init() {
                 recognisedNumberDisplayElement.classList.remove('highlight');
             }, 1000);
             playlistManager.jumpToBar(barNumber);
+            return 'Invoked Bar command with barNumber=' + barNumber;
         };
         voiceCommandListener.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
             try {
@@ -302,7 +310,7 @@ function init() {
 
                 var playbackSpeed = playbackSpeedPercent / 100 || songInfo.playbackSpeed;
                 playlistManager.playSong(songName, songInfo.bpm, songInfo.beatsPerBar, playbackSpeed, fromBarNumber);
-                return true;
+                return 'Invoked Play command with input=' + input + ', playbackSpeedPercent=' + playbackSpeedPercent + ', fromBarNumber=' + fromBarNumber;
             } catch (e) {
                 alert(e);
                 return false;
@@ -310,6 +318,7 @@ function init() {
         };
         voiceCommandListener.onStopCommand = function () {
             playlistManager.stop();
+            return 'Invoked Stop command';
         };
 
         voiceCommandListener.startListening();
@@ -1153,11 +1162,12 @@ var VoiceCommandListener = function () {
         }
     }]);
 
-    function VoiceCommandListener() {
+    function VoiceCommandListener(logger) {
         var _this = this;
 
         _classCallCheck(this, VoiceCommandListener);
 
+        this.logger = logger;
         // Use (bar|BA) option: sometimes comes through as eg "bar2" or "bar 2" or BA17
         var commandParser = new _commandParser2.default({
             'play {words} at {number}% from (bar|BA){number}': function playWordsAtNumberFromBarBANumber(songName, playbackSpeedPercent, o, barNumber) {
@@ -1204,12 +1214,36 @@ var VoiceCommandListener = function () {
             };
 
             recognition.onresult = function (ev) {
-                var results = ev.results[0];
-                for (var i = 0; i < results.length; i++) {
-                    if (_this2.commandParser.parse(results[i].transcript)) {
-                        break;
+                var speechResults = ev.results[0];
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = speechResults[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var speechResult = _step.value;
+
+                        var commandResult = _this2.commandParser.parse(speechResult.transcript);
+                        if (commandResult) {
+                            _this2.logger.log('success', 'Command: "' + speechResult.transcript + '", result: "' + commandResult + '"');
+                            break;
+                        }
+
+                        _this2.logger.log('error', 'Unrecognised command: "' + speechResult.transcript + '"');
                     }
-                    console.log('Unrecognised command:', results[i].transcript);
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
                 }
             };
         }
@@ -1787,6 +1821,46 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
     }, {}] }, {}, [5])(5);
 });
+
+/***/ }),
+/* 15 */,
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Logger = function () {
+    function Logger(outputElement) {
+        _classCallCheck(this, Logger);
+
+        this.outputElement = outputElement;
+    }
+
+    _createClass(Logger, [{
+        key: 'log',
+        value: function log(level, message) {
+            var el = document.createElement('p');
+            el.classList.add('log');
+            el.classList.add('log-' + level);
+            el.innerText = message;
+            // prepend so latest message is always on top. better way?
+            this.outputElement.prepend(el);
+        }
+    }]);
+
+    return Logger;
+}();
+
+exports.default = Logger;
 
 /***/ })
 /******/ ]);

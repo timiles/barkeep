@@ -82,3 +82,17 @@ ul.tab-links {
     width: 100%;
     text-align: center;
 }
+
+#loggerOutput {
+    height: 400px;
+    overflow: auto;
+}
+.log {
+    font-weight: bold;
+}
+.log.log-success {
+    color: green;
+}
+.log.log-error {
+    color: red;
+}

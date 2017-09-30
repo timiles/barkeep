@@ -20,7 +20,8 @@ export default class VoiceCommandListener {
         return true;
     }
 
-    constructor() {
+    constructor(logger) {
+        this.logger = logger;
         // Use (bar|BA) option: sometimes comes through as eg "bar2" or "bar 2" or BA17
         const commandParser = new CommandParser({
             'play {words} at {number}% from (bar|BA){number}':
@@ -56,12 +57,15 @@ export default class VoiceCommandListener {
         };
 
         recognition.onresult = ev => {
-            const results = ev.results[0];
-            for (let i = 0; i < results.length; i++) {
-                if (this.commandParser.parse(results[i].transcript)) {
+            const speechResults = ev.results[0];
+            for (const speechResult of speechResults) {
+                const commandResult = this.commandParser.parse(speechResult.transcript);
+                if (commandResult) {
+                    this.logger.log('success', `Command: "${speechResult.transcript}", result: "${commandResult}"`);
                     break;
                 }
-                console.log('Unrecognised command:', results[i].transcript);
+
+                this.logger.log('error', `Unrecognised command: "${speechResult.transcript}"`);
             }
         };
     }
