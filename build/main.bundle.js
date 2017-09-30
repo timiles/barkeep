@@ -1304,37 +1304,17 @@ var CommandParser = function () {
 
                     var results = command.regexp.exec(statement);
                     if (results) {
-                        var args = [];
-                        for (var i = 0; i < command.types.length; i++) {
-                            var type = command.types[i];
-                            var value = results[i + 1];
-
-                            switch (type) {
-                                case 'option':
-                                    {
-                                        args.push(value);
-                                        break;
-                                    }
-                                case 'words':
-                                    {
-                                        args.push(value);
-                                        break;
-                                    }
-                                case 'number':
-                                    {
-                                        var valueAsNumber = Number.parseInt(value);
-                                        if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
-                                            args.push(valueAsNumber);
-                                        }
-                                        break;
-                                    }
-                                default:
-                                    {
-                                        throw 'Unknown command type: ' + type;
-                                    }
+                        try {
+                            var args = [];
+                            for (var i = 0; i < command.types.length; i++) {
+                                var type = command.types[i];
+                                var value = CommandParser._getValueForType(type, results[i + 1]);
+                                args.push(value);
                             }
+                            return command.action.apply(command, args);
+                        } catch (e) {
+                            console.log(e);
                         }
-                        return command.action.apply(command, args);
                     }
                 }
             } catch (err) {
@@ -1383,6 +1363,32 @@ var CommandParser = function () {
             .map(function (a) {
                 return a[1];
             }); // select values
+        }
+    }, {
+        key: '_getValueForType',
+        value: function _getValueForType(type, value) {
+            switch (type) {
+                case 'option':
+                    {
+                        return value;
+                    }
+                case 'words':
+                    {
+                        return value;
+                    }
+                case 'number':
+                    {
+                        var valueAsNumber = Number.parseInt(value);
+                        if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
+                            return valueAsNumber;
+                        }
+                        throw 'Expected a number but couldn\'t parse the value: "' + value + '"';
+                    }
+                default:
+                    {
+                        throw 'Unknown command type: "' + type + '"';
+                    }
+            }
         }
     }]);
 

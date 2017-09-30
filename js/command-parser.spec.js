@@ -34,6 +34,15 @@ describe('CommandParser', () => {
         expect(result).not.toBeDefined();
     });
 
+    it('should not match command if values not extracted', () => {
+        const commandParser = new CommandParser({
+            'test {number}': () => { return true; }
+        });
+
+        const result = commandParser.parse('test not-a-number');
+        expect(result).toBeUndefined();
+    });
+
     it('should extract words', () => {
         const commandParser = new CommandParser();
 
@@ -131,7 +140,7 @@ describe('CommandParser', () => {
                 return [w, o, n0, n1];
             }
         });
-        
+
         const result = commandParser.parse('test Hello World! FROM bar 42 at 80%');
         expect(result[0]).toBe('Hello World!');
         expect(result[1]).toBe('bar');

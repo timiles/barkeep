@@ -36,6 +36,27 @@ export default class CommandParser {
             .map(a => a[1]); // select values
     }
 
+    static _getValueForType(type, value) {
+        switch (type) {
+            case 'option': {
+                return value;
+            }
+            case 'words': {
+                return value;
+            }
+            case 'number': {
+                const valueAsNumber = Number.parseInt(value);
+                if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
+                    return valueAsNumber;
+                }
+                throw `Expected a number but couldn't parse the value: "${value}"`;
+            }
+            default: {
+                throw `Unknown command type: "${type}"`;
+            }
+        }
+    }
+
     addCommand(command, action) {
         this.commands.push({
             regexp: CommandParser._getRegExp(command),
@@ -48,33 +69,18 @@ export default class CommandParser {
         for (const command of this.commands) {
             const results = command.regexp.exec(statement);
             if (results) {
-                const args = [];
-                for (let i = 0; i < command.types.length; i++) {
-                    const type = command.types[i];
-                    const value = results[i + 1];
-
-                    switch (type) {
-                        case 'option': {
-                            args.push(value);
-                            break;
-                        }
-                        case 'words': {
-                            args.push(value);
-                            break;
-                        }
-                        case 'number': {
-                            const valueAsNumber = Number.parseInt(value);
-                            if (!Number.isNaN(valueAsNumber) && Number.isFinite(valueAsNumber)) {
-                                args.push(valueAsNumber);
-                            }
-                            break;
-                        }
-                        default: {
-                            throw 'Unknown command type: ' + type;
-                        }
+                try {
+                    const args = [];
+                    for (let i = 0; i < command.types.length; i++) {
+                        const type = command.types[i];
+                        const value = CommandParser._getValueForType(type, results[i + 1]);
+                        args.push(value);
                     }
+                    return command.action(...args);
                 }
-                return command.action(...args);
+                catch (e) {
+                    console.log(e);
+                }
             }
         }
     }
