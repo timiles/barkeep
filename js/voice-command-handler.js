@@ -6,7 +6,8 @@ export default class VoiceCommandHandler {
         // Regarding [bar] synonym, no space before {number}: sometimes comes through as eg "bar2" or "bar 2" or "BA2"
         this.commandParser = new CommandParser({
             synonyms: {
-                'bar': ['ba', 'baar']
+                'bar': ['ba', 'baar'],
+                'loop': ['Luke', 'loot', 'loupe']
             },
             commands: {
                 'play {words} at {number}% from [bar]{number}':
@@ -22,7 +23,11 @@ export default class VoiceCommandHandler {
                 'stop':
                 () => this.onStopCommand(),
                 '[bar]{number}':
-                (o, barNumber) => this.onBarCommand(barNumber)
+                (barSynonym, barNumber) => this.onBarCommand(barNumber),
+                '[loop] from [bar]{number} through to [bar]{number}':
+                (loopSynonym, barSynonym1, fromBarNumber, barSynonym2, toBarNumber) => this.onLoopBarsCommand(fromBarNumber, toBarNumber),
+                '[loop] [bar]{number}':
+                (loopSynonym, barSynonym, barNumber) => this.onLoopBarCommand(barNumber)
             }
         });
     }

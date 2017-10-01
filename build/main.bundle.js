@@ -299,6 +299,14 @@ function init() {
             playlistManager.jumpToBar(barNumber);
             return 'Invoked Bar command with barNumber=' + barNumber;
         };
+        voiceCommandHandler.onLoopBarCommand = function (barNumber) {
+            playlistManager.loopBars(barNumber, barNumber);
+            return 'Invoked LoopBar command with barNumber=' + barNumber;
+        };
+        voiceCommandHandler.onLoopBarsCommand = function (fromBarNumber, toBarNumber) {
+            playlistManager.loopBars(fromBarNumber, toBarNumber);
+            return 'Invoked LoopBars command with fromBarNumber=' + fromBarNumber + ', toBarNumber=' + toBarNumber;
+        };
         voiceCommandHandler.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
             try {
                 var songName = songLibrary.getSongNameFromInput(input);
@@ -539,6 +547,14 @@ var PlaylistManager = function () {
             if (this.currentSongPlayer) {
                 this.beeper.doubleBeep();
                 this.currentSongPlayer.play(barNumber);
+            }
+        }
+    }, {
+        key: 'loopBars',
+        value: function loopBars(fromBarNumber, toBarNumber) {
+            if (this.currentSongPlayer) {
+                this.beeper.doubleBeep();
+                this.currentSongPlayer.loopBars(fromBarNumber, toBarNumber);
             }
         }
     }, {
@@ -944,6 +960,20 @@ var SongPlayer = function () {
             this.currentSource = source;
         }
     }, {
+        key: "loopBars",
+        value: function loopBars(fromBarNumber, toBarNumber) {
+            this.stop();
+            var source = this.context.createBufferSource();
+            source.buffer = this.buffer;
+            source.connect(this.context.destination);
+            source.loop = true;
+            source.loopStart = this.getStartTimeInSeconds(fromBarNumber);
+            // toBarNumber is inclusive, so add 1 to it
+            source.loopEnd = this.getStartTimeInSeconds(toBarNumber + 1);
+            source.start(0, source.loopStart);
+            this.currentSource = source;
+        }
+    }, {
         key: "stop",
         value: function stop() {
             if (this.currentSource) {
@@ -1193,7 +1223,8 @@ var VoiceCommandHandler = function () {
         // Regarding [bar] synonym, no space before {number}: sometimes comes through as eg "bar2" or "bar 2" or "BA2"
         this.commandParser = new _commandParser2.default({
             synonyms: {
-                'bar': ['ba', 'baar']
+                'bar': ['ba', 'baar'],
+                'loop': ['Luke', 'loot', 'loupe']
             },
             commands: {
                 'play {words} at {number}% from [bar]{number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, o, barNumber) {
@@ -1214,8 +1245,14 @@ var VoiceCommandHandler = function () {
                 'stop': function stop() {
                     return _this.onStopCommand();
                 },
-                '[bar]{number}': function barNumber(o, _barNumber) {
+                '[bar]{number}': function barNumber(barSynonym, _barNumber) {
                     return _this.onBarCommand(_barNumber);
+                },
+                '[loop] from [bar]{number} through to [bar]{number}': function loopFromBarNumberThroughToBarNumber(loopSynonym, barSynonym1, fromBarNumber, barSynonym2, toBarNumber) {
+                    return _this.onLoopBarsCommand(fromBarNumber, toBarNumber);
+                },
+                '[loop] [bar]{number}': function loopBarNumber(loopSynonym, barSynonym, barNumber) {
+                    return _this.onLoopBarCommand(barNumber);
                 }
             }
         });

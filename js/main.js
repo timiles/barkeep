@@ -136,6 +136,14 @@ function init() {
             playlistManager.jumpToBar(barNumber);
             return `Invoked Bar command with barNumber=${barNumber}`;
         };
+        voiceCommandHandler.onLoopBarCommand = (barNumber) => {
+            playlistManager.loopBars(barNumber, barNumber);
+            return `Invoked LoopBar command with barNumber=${barNumber}`;
+        };
+        voiceCommandHandler.onLoopBarsCommand = (fromBarNumber, toBarNumber) => {
+            playlistManager.loopBars(fromBarNumber, toBarNumber);
+            return `Invoked LoopBars command with fromBarNumber=${fromBarNumber}, toBarNumber=${toBarNumber}`;
+        };
         voiceCommandHandler.onPlayCommand = (input, playbackSpeedPercent, fromBarNumber) => {
             try {
                 const songName = songLibrary.getSongNameFromInput(input);

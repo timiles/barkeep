@@ -39,6 +39,13 @@ export default class PlaylistManager {
             this.currentSongPlayer.play(barNumber);
         }
     }
+    
+    loopBars(fromBarNumber, toBarNumber) {
+        if (this.currentSongPlayer) {
+            this.beeper.doubleBeep();
+            this.currentSongPlayer.loopBars(fromBarNumber, toBarNumber);
+        }
+    }
 
     stop() {
         if (this.currentSongPlayer) {

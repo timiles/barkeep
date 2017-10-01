@@ -95,6 +95,21 @@ describe('VoiceCommandHandler', () => {
         expect(result).toBe(42);
     });
 
+    it('loop bar 42', () => {
+        voiceCommandHandler.onLoopBarCommand = (barNumber) => barNumber;
+
+        const result = voiceCommandHandler.handle('loop bar 42');
+        expect(result).toBe(42);
+    });
+
+    it('loop from bar 42 through to bar 45', () => {
+        voiceCommandHandler.onLoopBarsCommand = (fromBarNumber, toBarNumber) => [fromBarNumber, toBarNumber];
+
+        const result = voiceCommandHandler.handle('loop from bar 42 through to bar 45');
+        expect(result[0]).toBe(42);
+        expect(result[1]).toBe(45);
+    });
+
     it('stop', () => {
         voiceCommandHandler.onStopCommand = () => { return true; };
 

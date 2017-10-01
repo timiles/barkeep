@@ -18,6 +18,19 @@ export default class SongPlayer {
         this.currentSource = source;
     }
 
+    loopBars(fromBarNumber, toBarNumber) {
+        this.stop();
+        const source = this.context.createBufferSource();
+        source.buffer = this.buffer;
+        source.connect(this.context.destination);
+        source.loop = true;
+        source.loopStart = this.getStartTimeInSeconds(fromBarNumber);
+        // toBarNumber is inclusive, so add 1 to it
+        source.loopEnd = this.getStartTimeInSeconds(toBarNumber + 1);
+        source.start(0, source.loopStart);
+        this.currentSource = source;
+    }
+
     stop() {
         if (this.currentSource) {
             this.currentSource.stop();
