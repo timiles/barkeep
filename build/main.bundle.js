@@ -1220,20 +1220,19 @@ var VoiceCommandHandler = function () {
 
         _classCallCheck(this, VoiceCommandHandler);
 
-        // Regarding [bar] synonym, no space before {number}: sometimes comes through as eg "bar2" or "bar 2" or "BA2"
         this.commandParser = new _commandParser2.default({
             synonyms: {
                 'bar': ['ba', 'baar'],
                 'loop': ['Luke', 'loot', 'loupe']
             },
             commands: {
-                'play {words} at {number}% from [bar]{number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, o, barNumber) {
+                'play {words} at {number}% from [bar] {number}': function playWordsAtNumberFromBarNumber(songName, playbackSpeedPercent, o, barNumber) {
                     return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
                 },
-                'play {words} from [bar]{number} at {number}%': function playWordsFromBarNumberAtNumber(songName, o, barNumber, playbackSpeedPercent) {
+                'play {words} from [bar] {number} at {number}%': function playWordsFromBarNumberAtNumber(songName, o, barNumber, playbackSpeedPercent) {
                     return _this.onPlayCommand(songName, playbackSpeedPercent, barNumber);
                 },
-                'play {words} from [bar]{number}': function playWordsFromBarNumber(songName, o, barNumber) {
+                'play {words} from [bar] {number}': function playWordsFromBarNumber(songName, o, barNumber) {
                     return _this.onPlayCommand(songName, 100, barNumber);
                 },
                 'play {words} at {number}%': function playWordsAtNumber(songName, playbackSpeedPercent) {
@@ -1245,13 +1244,13 @@ var VoiceCommandHandler = function () {
                 'stop': function stop() {
                     return _this.onStopCommand();
                 },
-                '[bar]{number}': function barNumber(barSynonym, _barNumber) {
+                '[bar] {number}': function barNumber(barSynonym, _barNumber) {
                     return _this.onBarCommand(_barNumber);
                 },
-                '[loop] from [bar]{number} through to [bar]{number}': function loopFromBarNumberThroughToBarNumber(loopSynonym, barSynonym1, fromBarNumber, barSynonym2, toBarNumber) {
+                '[loop] from [bar] {number} through to [bar] {number}': function loopFromBarNumberThroughToBarNumber(loopSynonym, barSynonym1, fromBarNumber, barSynonym2, toBarNumber) {
                     return _this.onLoopBarsCommand(fromBarNumber, toBarNumber);
                 },
-                '[loop] [bar]{number}': function loopBarNumber(loopSynonym, barSynonym, barNumber) {
+                '[loop] [bar] {number}': function loopBarNumber(loopSynonym, barSynonym, barNumber) {
                     return _this.onLoopBarCommand(barNumber);
                 }
             }
@@ -1261,6 +1260,8 @@ var VoiceCommandHandler = function () {
     _createClass(VoiceCommandHandler, [{
         key: 'handle',
         value: function handle(statement) {
+            // split "words" like "bar2" into "bar 2"
+            statement = statement.replace(/(\d+)/g, ' $1').trim();
             return this.commandParser.parse(statement);
         }
     }]);
