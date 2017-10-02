@@ -71,10 +71,9 @@ export default class CommandParser {
     _expandSynonyms(command) {
         for (const s of this.synonyms) {
             const key = s[0];
-            const allSynonyms = s[1].concat(s[0]);
-            // longest first for greediest matching in case of similar substrings
-            const synonymsInDescendingLengthOrder = allSynonyms.sort((a, b) => b.length - a.length);
-            const synonymsPattern = '(' + synonymsInDescendingLengthOrder.join('|') + ')';
+            // use \b (escaped) to identify word boundaries
+            const allSynonyms = s[1].concat(s[0]).map(s => `\\b${s}\\b`);
+            const synonymsPattern = '(' + allSynonyms.join('|') + ')';
             // escape the square brackets from the regex, 'g' to replace all
             const keyRegexp = new RegExp(`\\[${key}\\]`, 'g');
             command = command.replace(keyRegexp, synonymsPattern);

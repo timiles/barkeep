@@ -1321,12 +1321,11 @@ var CommandParser = function () {
                     var s = _step.value;
 
                     var key = s[0];
-                    var allSynonyms = s[1].concat(s[0]);
-                    // longest first for greediest matching in case of similar substrings
-                    var synonymsInDescendingLengthOrder = allSynonyms.sort(function (a, b) {
-                        return b.length - a.length;
+                    // use \b (escaped) to identify word boundaries
+                    var allSynonyms = s[1].concat(s[0]).map(function (s) {
+                        return '\\b' + s + '\\b';
                     });
-                    var synonymsPattern = '(' + synonymsInDescendingLengthOrder.join('|') + ')';
+                    var synonymsPattern = '(' + allSynonyms.join('|') + ')';
                     // escape the square brackets from the regex, 'g' to replace all
                     var keyRegexp = new RegExp('\\[' + key + '\\]', 'g');
                     command = command.replace(keyRegexp, synonymsPattern);
