@@ -97,8 +97,7 @@
                     </div>
                     <div>
                         <h4>Loop bars:</h4>
-                        <input id="fromBarNumber" type="number" class="bar-number" value="1" />
-                        to
+                        <input id="fromBarNumber" type="number" class="bar-number" value="1" /> to
                         <input id="toBarNumber" type="number" class="bar-number" value="4" />
                         <button id="loopBarsButton">Go</button>
                     </div>
@@ -113,15 +112,20 @@
 
     <div class="tab-pane" id="importExport">
         <h3>Import/Export song library</h3>
-        <input type="file" id="importSongLibraryInput" />
-        <button id="exportSongLibraryButton">Download</button>
-    </div>
+        <div class="panel-container">
+            <div>
+                <input type="file" id="importSongLibraryInput" />
+            </div>
+            <div>
+                <button id="exportSongLibraryButton">Download</button>
+            </div>
+        </div>
 
-    <div class="tab-pane" id="logs">
-        <div id="loggerOutput">Awaiting logs...</div>
-    </div>
+        <div class="tab-pane" id="logs">
+            <div id="loggerOutput">Awaiting logs...</div>
+        </div>
 
-    <script src="build/main.bundle.js"></script>
+        <script src="build/main.bundle.js"></script>
 </body>
 
 </html>
