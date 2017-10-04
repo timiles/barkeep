@@ -164,6 +164,9 @@ function init() {
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
     var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
+    var fromBarNumberInput = document.getElementById('fromBarNumber');
+    var toBarNumberInput = document.getElementById('toBarNumber');
+    var loopBarsButton = document.getElementById('loopBarsButton');
 
     var importSongLibraryInput = document.getElementById('importSongLibraryInput');
     var exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
@@ -286,6 +289,9 @@ function init() {
     };
     jumpToBarButton.onclick = function () {
         playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
+    };
+    loopBarsButton.onclick = function () {
+        playlistManager.loopBars(Number.parseInt(fromBarNumberInput.value), Number.parseInt(toBarNumberInput.value));
     };
 
     enableMicButton.onclick = function () {

@@ -4,6 +4,26 @@ body {
     margin: auto;
 }
 
+h4 {
+    margin-top: 0;
+}
+
+.panel-container {
+    margin-left: -10px;
+}
+.panel-container::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.panel-container > div {
+    float: left;
+    width: 260px;
+    border: 1px solid lightgrey;
+    margin-left: 10px;
+    padding: 10px;
+}
+
 .hidden {
     display: none;
 }
@@ -14,6 +34,10 @@ body {
 
 .droppable {
     background-color: hotpink;
+}
+
+input.bar-number {
+    width: 50px;
 }
 
 /* tabs */
