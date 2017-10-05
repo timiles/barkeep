@@ -60,47 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SongInfo = function () {
-    function SongInfo(bpm, beatsPerBar, playbackSpeed) {
-        _classCallCheck(this, SongInfo);
-
-        this.bpm = bpm;
-        this.beatsPerBar = beatsPerBar || 4;
-        this.playbackSpeed = playbackSpeed || 1.0;
-    }
-
-    _createClass(SongInfo, null, [{
-        key: "fromObject",
-        value: function fromObject(song) {
-            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent / 100);
-        }
-    }]);
-
-    return SongInfo;
-}();
-
-exports.default = SongInfo;
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -122,7 +86,7 @@ var _songFile = __webpack_require__(10);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
-var _songInfo = __webpack_require__(0);
+var _songInfo = __webpack_require__(1);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -341,6 +305,11 @@ function init() {
         var logger = new _logger2.default(loggerOutput);
         var voiceCommandListener = new _voiceCommandListener2.default(voiceCommandHandler, logger);
         voiceCommandListener.startListening();
+
+        voiceCommandHandler.onStopListeningCommand = function () {
+            voiceCommandListener.stopListening();
+            return 'Invoked StopListening command';
+        };
     };
 
     importSongLibraryInput.onchange = function (evt) {
@@ -354,6 +323,42 @@ function init() {
         _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
 }
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongInfo = function () {
+    function SongInfo(bpm, beatsPerBar, playbackSpeed) {
+        _classCallCheck(this, SongInfo);
+
+        this.bpm = bpm;
+        this.beatsPerBar = beatsPerBar || 4;
+        this.playbackSpeed = playbackSpeed || 1.0;
+    }
+
+    _createClass(SongInfo, null, [{
+        key: "fromObject",
+        value: function fromObject(song) {
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent / 100);
+        }
+    }]);
+
+    return SongInfo;
+}();
+
+exports.default = SongInfo;
 
 /***/ }),
 /* 2 */
@@ -1034,7 +1039,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _songInfo = __webpack_require__(0);
+var _songInfo = __webpack_require__(1);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -1246,6 +1251,9 @@ var VoiceCommandHandler = function () {
                 },
                 'play {words}': function playWords(songName) {
                     return _this.onPlayCommand(songName);
+                },
+                'stop listening': function stopListening() {
+                    return _this.onStopListeningCommand();
                 },
                 'stop': function stop() {
                     return _this.onStopCommand();
@@ -1512,6 +1520,7 @@ var VoiceCommandListener = function () {
 
         this.voiceCommandHandler = voiceCommandHandler;
         this.logger = logger;
+        this.stopped = false;
     }
 
     _createClass(VoiceCommandListener, [{
@@ -1529,7 +1538,9 @@ var VoiceCommandListener = function () {
 
             recognition.onaudioend = function () {
                 // start listening again after audio ends
-                _this.startListening();
+                if (!_this.stopped) {
+                    _this.startListening();
+                }
             };
 
             recognition.onresult = function (ev) {
@@ -1565,6 +1576,16 @@ var VoiceCommandListener = function () {
                     }
                 }
             };
+
+            this.currentSpeechRecognition = recognition;
+        }
+    }, {
+        key: 'stopListening',
+        value: function stopListening() {
+            this.stopped = true;
+            if (this.currentSpeechRecognition) {
+                this.currentSpeechRecognition.stop();
+            }
         }
     }]);
 

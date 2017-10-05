@@ -21,6 +21,7 @@ export default class VoiceCommandListener {
     constructor(voiceCommandHandler, logger) {
         this.voiceCommandHandler = voiceCommandHandler;
         this.logger = logger;
+        this.stopped = false;
     }
 
     startListening() {
@@ -34,7 +35,9 @@ export default class VoiceCommandListener {
 
         recognition.onaudioend = () => {
             // start listening again after audio ends
-            this.startListening();
+            if (!this.stopped) {
+                this.startListening();
+            }
         };
 
         recognition.onresult = ev => {
@@ -49,5 +52,14 @@ export default class VoiceCommandListener {
                 this.logger.log('error', `Unrecognised command: "${speechResult.transcript}"`);
             }
         };
+
+        this.currentSpeechRecognition = recognition;
+    }
+
+    stopListening() {
+        this.stopped = true;
+        if (this.currentSpeechRecognition) {
+            this.currentSpeechRecognition.stop();
+        }
     }
 }

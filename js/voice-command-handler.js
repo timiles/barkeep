@@ -19,6 +19,8 @@ export default class VoiceCommandHandler {
                 (songName, playbackSpeedPercent) => this.onPlayCommand(songName, playbackSpeedPercent),
                 'play {words}':
                 (songName) => this.onPlayCommand(songName),
+                'stop listening':
+                () => this.onStopListeningCommand(),
                 'stop':
                 () => this.onStopCommand(),
                 '[bar] {number}':

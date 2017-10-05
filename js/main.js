@@ -179,6 +179,11 @@ function init() {
         const logger = new Logger(loggerOutput);
         const voiceCommandListener = new VoiceCommandListener(voiceCommandHandler, logger);
         voiceCommandListener.startListening();
+
+        voiceCommandHandler.onStopListeningCommand = () => {
+            voiceCommandListener.stopListening();
+            return 'Invoked StopListening command';
+        }
     };
 
     importSongLibraryInput.onchange = (evt) => {

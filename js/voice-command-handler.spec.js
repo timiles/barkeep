@@ -9,7 +9,9 @@ describe('VoiceCommandHandler', () => {
         // register all handlers to be sure the tested handler is indeed invoked first
         voiceCommandHandler.onPlayCommand = () => true;
         voiceCommandHandler.onStopCommand = () => true;
+        voiceCommandHandler.onStopListeningCommand = () => true;
         voiceCommandHandler.onBarCommand = () => true;
+        voiceCommandHandler.onLoopBarsCommand = () => true;
     });
 
     it('Play My Test Song', () => {
@@ -111,9 +113,16 @@ describe('VoiceCommandHandler', () => {
     });
 
     it('stop', () => {
-        voiceCommandHandler.onStopCommand = () => { return true; };
+        voiceCommandHandler.onStopCommand = () => { return 'stopped'; };
 
         const result = voiceCommandHandler.handle('stop');
-        expect(result).toBe(true);
+        expect(result).toBe('stopped');
+    });
+
+    it('stop listening', () => {
+        voiceCommandHandler.onStopListeningCommand = () => { return 'stopped listening'; };
+
+        const result = voiceCommandHandler.handle('stop listening');
+        expect(result).toBe('stopped listening');
     });
 });
