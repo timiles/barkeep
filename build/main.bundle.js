@@ -60,11 +60,47 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SongInfo = function () {
+    function SongInfo(bpm, beatsPerBar, playbackSpeed) {
+        _classCallCheck(this, SongInfo);
+
+        this.bpm = bpm;
+        this.beatsPerBar = beatsPerBar || 4;
+        this.playbackSpeed = playbackSpeed || 1.0;
+    }
+
+    _createClass(SongInfo, null, [{
+        key: "fromObject",
+        value: function fromObject(song) {
+            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent / 100);
+        }
+    }]);
+
+    return SongInfo;
+}();
+
+exports.default = SongInfo;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -86,7 +122,7 @@ var _songFile = __webpack_require__(10);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
-var _songInfo = __webpack_require__(1);
+var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -98,9 +134,9 @@ var _tabControl = __webpack_require__(12);
 
 var _tabControl2 = _interopRequireDefault(_tabControl);
 
-var _voiceCommandHandler = __webpack_require__(13);
+var _commandHandler = __webpack_require__(13);
 
-var _voiceCommandHandler2 = _interopRequireDefault(_voiceCommandHandler);
+var _commandHandler2 = _interopRequireDefault(_commandHandler);
 
 var _voiceCommandListener = __webpack_require__(15);
 
@@ -259,8 +295,8 @@ function init() {
     };
 
     enableMicButton.onclick = function () {
-        var voiceCommandHandler = new _voiceCommandHandler2.default();
-        voiceCommandHandler.onBarCommand = function (barNumber) {
+        var commandHandler = new _commandHandler2.default();
+        commandHandler.onBarCommand = function (barNumber) {
             recognisedNumberDisplayElement.innerHTML = barNumber;
             recognisedNumberDisplayElement.classList.add('highlight');
             setTimeout(function () {
@@ -269,15 +305,15 @@ function init() {
             playlistManager.jumpToBar(barNumber);
             return 'Invoked Bar command with barNumber=' + barNumber;
         };
-        voiceCommandHandler.onLoopBarCommand = function (barNumber) {
+        commandHandler.onLoopBarCommand = function (barNumber) {
             playlistManager.loopBars(barNumber, barNumber);
             return 'Invoked LoopBar command with barNumber=' + barNumber;
         };
-        voiceCommandHandler.onLoopBarsCommand = function (fromBarNumber, toBarNumber) {
+        commandHandler.onLoopBarsCommand = function (fromBarNumber, toBarNumber) {
             playlistManager.loopBars(fromBarNumber, toBarNumber);
             return 'Invoked LoopBars command with fromBarNumber=' + fromBarNumber + ', toBarNumber=' + toBarNumber;
         };
-        voiceCommandHandler.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
+        commandHandler.onPlayCommand = function (input, playbackSpeedPercent, fromBarNumber) {
             try {
                 var songName = songLibrary.getSongNameFromInput(input);
                 if (!songName) {
@@ -297,16 +333,16 @@ function init() {
                 return false;
             }
         };
-        voiceCommandHandler.onStopCommand = function () {
+        commandHandler.onStopCommand = function () {
             playlistManager.stop();
             return 'Invoked Stop command';
         };
 
         var logger = new _logger2.default(loggerOutput);
-        var voiceCommandListener = new _voiceCommandListener2.default(voiceCommandHandler, logger);
+        var voiceCommandListener = new _voiceCommandListener2.default(commandHandler, logger);
         voiceCommandListener.startListening();
 
-        voiceCommandHandler.onStopListeningCommand = function () {
+        commandHandler.onStopListeningCommand = function () {
             voiceCommandListener.stopListening();
             return 'Invoked StopListening command';
         };
@@ -323,42 +359,6 @@ function init() {
         _fileHelpers2.default.downloadFile('barkeep.json', json);
     };
 }
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SongInfo = function () {
-    function SongInfo(bpm, beatsPerBar, playbackSpeed) {
-        _classCallCheck(this, SongInfo);
-
-        this.bpm = bpm;
-        this.beatsPerBar = beatsPerBar || 4;
-        this.playbackSpeed = playbackSpeed || 1.0;
-    }
-
-    _createClass(SongInfo, null, [{
-        key: "fromObject",
-        value: function fromObject(song) {
-            return new SongInfo(song.bpm, song.beatsPerBar, song.playbackSpeedPercent / 100);
-        }
-    }]);
-
-    return SongInfo;
-}();
-
-exports.default = SongInfo;
 
 /***/ }),
 /* 2 */
@@ -1039,7 +1039,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _songInfo = __webpack_require__(1);
+var _songInfo = __webpack_require__(0);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -1225,11 +1225,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var VoiceCommandHandler = function () {
-    function VoiceCommandHandler() {
+var CommandHandler = function () {
+    function CommandHandler() {
         var _this = this;
 
-        _classCallCheck(this, VoiceCommandHandler);
+        _classCallCheck(this, CommandHandler);
 
         this.commandParser = new _commandParser2.default({
             synonyms: {
@@ -1271,7 +1271,7 @@ var VoiceCommandHandler = function () {
         });
     }
 
-    _createClass(VoiceCommandHandler, [{
+    _createClass(CommandHandler, [{
         key: 'handle',
         value: function handle(statement) {
             // split "words" like "bar2" into "bar 2"
@@ -1280,10 +1280,10 @@ var VoiceCommandHandler = function () {
         }
     }]);
 
-    return VoiceCommandHandler;
+    return CommandHandler;
 }();
 
-exports.default = VoiceCommandHandler;
+exports.default = CommandHandler;
 
 /***/ }),
 /* 14 */

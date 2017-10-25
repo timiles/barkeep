@@ -1,6 +1,6 @@
 import CommandParser from './command-parser';
 
-export default class VoiceCommandHandler {
+export default class CommandHandler {
 
     constructor() {
         this.commandParser = new CommandParser({
