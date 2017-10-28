@@ -1,5 +1,5 @@
 import FileHelpers from './file-helpers';
-import Logger from './logger';
+import Logger from './ui/logger';
 import PlaylistManager from './playlist-manager';
 import SongFile from './song-file';
 import SongInfo from './song-info';

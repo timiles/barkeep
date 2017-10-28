@@ -303,7 +303,7 @@ var _fileHelpers = __webpack_require__(3);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
-var _logger = __webpack_require__(4);
+var _logger = __webpack_require__(20);
 
 var _logger2 = _interopRequireDefault(_logger);
 
@@ -663,45 +663,7 @@ var FileHelpers = function () {
 exports.default = FileHelpers;
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Logger = function () {
-    function Logger(outputElement) {
-        _classCallCheck(this, Logger);
-
-        this.outputElement = outputElement;
-    }
-
-    _createClass(Logger, [{
-        key: 'log',
-        value: function log(level, message) {
-            var el = document.createElement('p');
-            el.classList.add('log');
-            el.classList.add('log-' + level);
-            el.innerText = message;
-            // prepend so latest message is always on top. better way?
-            this.outputElement.prepend(el);
-        }
-    }]);
-
-    return Logger;
-}();
-
-exports.default = Logger;
-
-/***/ }),
+/* 4 */,
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2174,6 +2136,45 @@ var TabController = function () {
 }();
 
 exports.default = TabController;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Logger = function () {
+    function Logger(outputElement) {
+        _classCallCheck(this, Logger);
+
+        this.outputElement = outputElement;
+    }
+
+    _createClass(Logger, [{
+        key: 'log',
+        value: function log(level, message) {
+            var el = document.createElement('p');
+            el.classList.add('log');
+            el.classList.add('log-' + level);
+            el.innerText = message;
+            // prepend so latest message is always on top. better way?
+            this.outputElement.prepend(el);
+        }
+    }]);
+
+    return Logger;
+}();
+
+exports.default = Logger;
 
 /***/ })
 /******/ ]);
