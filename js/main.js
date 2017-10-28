@@ -6,11 +6,20 @@ import SongInfo from './song-info';
 import SongLibrary from './song-library';
 import TabControl from './tab-control';
 import CommandHandler from './voice-handlers/command-handler';
+import WakeWordHandler from './voice-handlers/wake-word-handler';
 import VoiceCommandListener from './voice-command-listener';
 import '../vendor/jtmpl-1.1.0.min.js'; /* global jtmpl */
 
 if (VoiceCommandListener.checkCompatibility()) {
     init();
+}
+
+function setElementClass(el, klass, isSet) {
+    if (isSet) {
+        el.classList.add(klass);
+    } else {
+        el.classList.remove(klass);
+    }
 }
 
 function init() {
@@ -134,6 +143,13 @@ function init() {
     };
 
     enableMicButton.onclick = () => {
+        const wakeWordHandler = new WakeWordHandler();
+        wakeWordHandler.onWakeWord = (activated) => {
+            Array.from(document.getElementsByClassName('wake-word-indicator'))
+                .forEach(el => setElementClass(el, 'wake-word-indicator-on', activated));
+            return true;
+        };
+
         const commandHandler = new CommandHandler();
         commandHandler.onBarCommand = (barNumber) => {
             recognisedNumberDisplayElement.innerHTML = barNumber;
@@ -177,7 +193,7 @@ function init() {
         };
 
         const logger = new Logger(loggerOutput);
-        const voiceCommandListener = new VoiceCommandListener(commandHandler, logger);
+        const voiceCommandListener = new VoiceCommandListener(wakeWordHandler, commandHandler, logger);
         voiceCommandListener.startListening();
 
         commandHandler.onStopListeningCommand = () => {

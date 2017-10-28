@@ -18,10 +18,23 @@ export default class VoiceCommandListener {
         return true;
     }
 
-    constructor(voiceCommandHandler, logger) {
-        this.voiceCommandHandler = voiceCommandHandler;
+    constructor(wakeWordHandler, commandHandler, logger) {
+        this.wakeWordHandler = wakeWordHandler;
+        this.commandHandler = commandHandler;
         this.logger = logger;
         this.stopped = false;
+    }
+
+    setWakeWordActive(active) {
+        if (active) {
+            this.logger.log('info', 'Wake word activated');            
+            this.wakeWordActive = true;
+            this.wakeWordActivatedAt = new Date();
+        } else {
+            this.logger.log('info', 'Wake word deactivated');
+            this.wakeWordActive = false;
+            this.wakeWordHandler.onWakeWord(false);
+        }    
     }
 
     startListening() {
@@ -43,13 +56,24 @@ export default class VoiceCommandListener {
         recognition.onresult = ev => {
             const speechResults = ev.results[0];
             for (const speechResult of speechResults) {
-                const commandResult = this.voiceCommandHandler.handle(speechResult.transcript);
-                if (commandResult) {
-                    this.logger.log('success', `Command: "${speechResult.transcript}", result: "${commandResult}"`);
-                    break;
-                }
 
-                this.logger.log('error', `Unrecognised command: "${speechResult.transcript}"`);
+                if (!this.wakeWordActive) {
+                    if (this.wakeWordHandler.handle(speechResult.transcript)) {
+                        this.setWakeWordActive(true);
+                        recognition.stop();
+                        this.startListening();
+                        break;
+                    }
+                } else {
+                    const commandResult = this.commandHandler.handle(speechResult.transcript);
+                    if (commandResult) {
+                        this.logger.log('success', `Command: "${speechResult.transcript}", result: "${commandResult}"`);
+                        this.setWakeWordActive(false);
+                        break;
+                    }
+
+                    this.logger.log('error', `Unrecognised command: "${speechResult.transcript}"`);
+                }
             }
         };
 

@@ -117,6 +117,13 @@ ul.tab-links {
 .log.log-success {
     color: green;
 }
+.log.log-info {
+    color: lightblue;
+}
 .log.log-error {
+    color: red;
+}
+
+.wake-word-indicator.wake-word-indicator-on {
     color: red;
 }
