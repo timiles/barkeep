@@ -1489,6 +1489,8 @@ var CommandHandler = function () {
         value: function handle(statement) {
             // split "words" like "bar2" into "bar 2"
             statement = statement.replace(/(\d+)/g, ' $1').trim();
+            // fix "110 percent" -> "110%"
+            statement = statement.replace(/( percent)/g, '%').trim();
             return this.commandParser.parse(statement);
         }
     }]);

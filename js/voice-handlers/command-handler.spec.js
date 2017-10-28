@@ -69,6 +69,16 @@ describe('CommandHandler', () => {
         expect(result[2]).toBe(42);
     });
 
+    it('Play My Test Song at 110 percent', () => {
+        commandHandler.onPlayCommand = (input, playbackSpeedPercent) => {
+            return [input, playbackSpeedPercent];
+        };
+
+        const result = commandHandler.handle('Play My Test Song at 110 percent');
+        expect(result[0]).toBe('My Test Song');
+        expect(result[1]).toBe(110);
+    });
+
     it('Bar 42', () => {
         commandHandler.onBarCommand = (barNumber) => { return barNumber; };
 
