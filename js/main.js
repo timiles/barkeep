@@ -5,6 +5,7 @@ import SongFile from './song-file';
 import SongInfo from './song-info';
 import SongLibrary from './song-library';
 import TabControl from './tab-control';
+import ToastController from './ui/toast-controller';
 import CommandHandler from './voice-handlers/command-handler';
 import WakeWordHandler from './voice-handlers/wake-word-handler';
 import VoiceCommandListener from './voice-command-listener';
@@ -33,7 +34,6 @@ function init() {
     const sampleVoiceCommandSongName = document.getElementsByClassName('sampleVoiceCommandSongName');
     const jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     const jumpToBarButton = document.getElementById('jumpToBarButton');
-    const recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     const fromBarNumberInput = document.getElementById('fromBarNumber');
     const toBarNumberInput = document.getElementById('toBarNumber');
     const loopBarsButton = document.getElementById('loopBarsButton');
@@ -46,6 +46,8 @@ function init() {
     const tabControl = new TabControl(document);
     tabControl.openTab('loadSongs');
 
+    const toastController = new ToastController(document);
+    
     const context = new (window.AudioContext || window.webkitAudioContext)();
 
     const songLibrary = new SongLibrary();
@@ -136,7 +138,9 @@ function init() {
         }
     };
     jumpToBarButton.onclick = () => {
-        playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
+        const barNumber = Number.parseInt(jumpToBarNumberInput.value);
+        toastController.show(`Bar ${barNumber}`);
+        playlistManager.jumpToBar(barNumber);
     };
     loopBarsButton.onclick = () => {
         playlistManager.loopBars(Number.parseInt(fromBarNumberInput.value), Number.parseInt(toBarNumberInput.value));
@@ -152,9 +156,7 @@ function init() {
 
         const commandHandler = new CommandHandler();
         commandHandler.onBarCommand = (barNumber) => {
-            recognisedNumberDisplayElement.innerHTML = barNumber;
-            recognisedNumberDisplayElement.classList.add('highlight');
-            setTimeout(() => { recognisedNumberDisplayElement.classList.remove('highlight'); }, 1000);
+            toastController.show(`Bar ${barNumber}`);
             playlistManager.jumpToBar(barNumber);
             return `Invoked Bar command with barNumber=${barNumber}`;
         };

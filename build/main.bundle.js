@@ -327,6 +327,10 @@ var _tabControl = __webpack_require__(13);
 
 var _tabControl2 = _interopRequireDefault(_tabControl);
 
+var _toastController = __webpack_require__(18);
+
+var _toastController2 = _interopRequireDefault(_toastController);
+
 var _commandHandler = __webpack_require__(14);
 
 var _commandHandler2 = _interopRequireDefault(_commandHandler);
@@ -368,7 +372,6 @@ function init() {
     var sampleVoiceCommandSongName = document.getElementsByClassName('sampleVoiceCommandSongName');
     var jumpToBarNumberInput = document.getElementById('jumpToBarNumber');
     var jumpToBarButton = document.getElementById('jumpToBarButton');
-    var recognisedNumberDisplayElement = document.getElementById('recognisedNumberDisplay');
     var fromBarNumberInput = document.getElementById('fromBarNumber');
     var toBarNumberInput = document.getElementById('toBarNumber');
     var loopBarsButton = document.getElementById('loopBarsButton');
@@ -380,6 +383,8 @@ function init() {
 
     var tabControl = new _tabControl2.default(document);
     tabControl.openTab('loadSongs');
+
+    var toastController = new _toastController2.default(document);
 
     var context = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -493,7 +498,9 @@ function init() {
         }
     };
     jumpToBarButton.onclick = function () {
-        playlistManager.jumpToBar(Number.parseInt(jumpToBarNumberInput.value));
+        var barNumber = Number.parseInt(jumpToBarNumberInput.value);
+        toastController.show('Bar ' + barNumber);
+        playlistManager.jumpToBar(barNumber);
     };
     loopBarsButton.onclick = function () {
         playlistManager.loopBars(Number.parseInt(fromBarNumberInput.value), Number.parseInt(toBarNumberInput.value));
@@ -510,11 +517,7 @@ function init() {
 
         var commandHandler = new _commandHandler2.default();
         commandHandler.onBarCommand = function (barNumber) {
-            recognisedNumberDisplayElement.innerHTML = barNumber;
-            recognisedNumberDisplayElement.classList.add('highlight');
-            setTimeout(function () {
-                recognisedNumberDisplayElement.classList.remove('highlight');
-            }, 1000);
+            toastController.show('Bar ' + barNumber);
             playlistManager.jumpToBar(barNumber);
             return 'Invoked Bar command with barNumber=' + barNumber;
         };
@@ -2125,6 +2128,51 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
     }, {}] }, {}, [5])(5);
 });
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ToastController = function () {
+    function ToastController(document) {
+        _classCallCheck(this, ToastController);
+
+        var toastElement = document.createElement('div');
+        toastElement.classList.add('toast');
+        document.body.appendChild(toastElement);
+        this.toastElement = toastElement;
+    }
+
+    _createClass(ToastController, [{
+        key: 'show',
+        value: function show(message) {
+            var _this = this;
+
+            var durationMilliseconds = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3000;
+
+            this.toastElement.innerHTML = message;
+            this.toastElement.classList.add('show');
+            setTimeout(function () {
+                _this.toastElement.classList.remove('show');
+            }, durationMilliseconds);
+        }
+    }]);
+
+    return ToastController;
+}();
+
+exports.default = ToastController;
 
 /***/ })
 /******/ ]);
