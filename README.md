@@ -10,13 +10,7 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 [Click here for a demo!](https://barkeep.github.io)
 
 ## TODO
-- [x] play audio from bar number using voice recognition
-- [x] stretch audio for slower practice
-- [x] enable loading multiple tracks
-- [x] load files via drag & drop
-- [x] persist settings per audio track
-- [x] import/export settings
-- [x] play track using voice recognition
+- [ ] Customisable wake word & language
 - [ ] UI overhaul
 
 ## Credits
