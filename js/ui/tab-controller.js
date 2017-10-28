@@ -1,4 +1,4 @@
-export default class TabControl {
+export default class TabController {
 
     constructor(document) {
         this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
@@ -6,7 +6,7 @@ export default class TabControl {
 
         this.tabLinks.forEach(
             tabLink => {
-                tabLink.onclick = () => { this.openTab(TabControl._getTargetTabId(tabLink)); };
+                tabLink.onclick = () => { this.openTab(TabController._getTargetTabId(tabLink)); };
             });
     }
 
@@ -24,7 +24,7 @@ export default class TabControl {
         };
         this.tabLinks.forEach(
             tabLink => {
-                toggleActive(TabControl._getTargetTabId(tabLink), tabLink);
+                toggleActive(TabController._getTargetTabId(tabLink), tabLink);
             });
         this.tabPanes.forEach(
             tabContents => {

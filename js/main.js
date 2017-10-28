@@ -4,7 +4,7 @@ import PlaylistManager from './playlist-manager';
 import SongFile from './song-file';
 import SongInfo from './song-info';
 import SongLibrary from './song-library';
-import TabControl from './tab-control';
+import TabController from './ui/tab-controller';
 import ToastController from './ui/toast-controller';
 import CommandHandler from './voice-handlers/command-handler';
 import WakeWordHandler from './voice-handlers/wake-word-handler';
@@ -43,8 +43,8 @@ function init() {
 
     const loggerOutput = document.getElementById('loggerOutput');
 
-    const tabControl = new TabControl(document);
-    tabControl.openTab('loadSongs');
+    const tabController = new TabController(document);
+    tabController.openTab('loadSongs');
 
     const toastController = new ToastController(document);
     
@@ -81,7 +81,7 @@ function init() {
             noSongsContainer.classList.add('hidden');
             someSongsContainer.classList.remove('hidden');
             Array.from(sampleVoiceCommandSongName).forEach(el => el.innerText = songModel.name);
-            tabControl.openTab('playlist');
+            tabController.openTab('playlist');
             anySongsLoaded = true;
         }
     };

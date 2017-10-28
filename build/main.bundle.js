@@ -323,9 +323,9 @@ var _songLibrary = __webpack_require__(12);
 
 var _songLibrary2 = _interopRequireDefault(_songLibrary);
 
-var _tabControl = __webpack_require__(13);
+var _tabController = __webpack_require__(19);
 
-var _tabControl2 = _interopRequireDefault(_tabControl);
+var _tabController2 = _interopRequireDefault(_tabController);
 
 var _toastController = __webpack_require__(18);
 
@@ -381,8 +381,8 @@ function init() {
 
     var loggerOutput = document.getElementById('loggerOutput');
 
-    var tabControl = new _tabControl2.default(document);
-    tabControl.openTab('loadSongs');
+    var tabController = new _tabController2.default(document);
+    tabController.openTab('loadSongs');
 
     var toastController = new _toastController2.default(document);
 
@@ -423,7 +423,7 @@ function init() {
             Array.from(sampleVoiceCommandSongName).forEach(function (el) {
                 return el.innerText = songModel.name;
             });
-            tabControl.openTab('playlist');
+            tabController.openTab('playlist');
             anySongsLoaded = true;
         }
     };
@@ -1361,66 +1361,7 @@ var SongLibrary = function () {
 exports.default = SongLibrary;
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var TabControl = function () {
-    function TabControl(document) {
-        var _this = this;
-
-        _classCallCheck(this, TabControl);
-
-        this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
-        this.tabPanes = Array.from(document.getElementsByClassName('tab-pane'));
-
-        this.tabLinks.forEach(function (tabLink) {
-            tabLink.onclick = function () {
-                _this.openTab(TabControl._getTargetTabId(tabLink));
-            };
-        });
-    }
-
-    _createClass(TabControl, [{
-        key: 'openTab',
-        value: function openTab(targetTabId) {
-            var toggleActive = function toggleActive(tabId, el) {
-                if (tabId === targetTabId) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                }
-            };
-            this.tabLinks.forEach(function (tabLink) {
-                toggleActive(TabControl._getTargetTabId(tabLink), tabLink);
-            });
-            this.tabPanes.forEach(function (tabContents) {
-                toggleActive(tabContents.id, tabContents);
-            });
-        }
-    }], [{
-        key: '_getTargetTabId',
-        value: function _getTargetTabId(tabLink) {
-            return tabLink.getAttribute('href').substring(1);
-        }
-    }]);
-
-    return TabControl;
-}();
-
-exports.default = TabControl;
-
-/***/ }),
+/* 13 */,
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2173,6 +2114,66 @@ var ToastController = function () {
 }();
 
 exports.default = ToastController;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TabController = function () {
+    function TabController(document) {
+        var _this = this;
+
+        _classCallCheck(this, TabController);
+
+        this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
+        this.tabPanes = Array.from(document.getElementsByClassName('tab-pane'));
+
+        this.tabLinks.forEach(function (tabLink) {
+            tabLink.onclick = function () {
+                _this.openTab(TabController._getTargetTabId(tabLink));
+            };
+        });
+    }
+
+    _createClass(TabController, [{
+        key: 'openTab',
+        value: function openTab(targetTabId) {
+            var toggleActive = function toggleActive(tabId, el) {
+                if (tabId === targetTabId) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            };
+            this.tabLinks.forEach(function (tabLink) {
+                toggleActive(TabController._getTargetTabId(tabLink), tabLink);
+            });
+            this.tabPanes.forEach(function (tabContents) {
+                toggleActive(tabContents.id, tabContents);
+            });
+        }
+    }], [{
+        key: '_getTargetTabId',
+        value: function _getTargetTabId(tabLink) {
+            return tabLink.getAttribute('href').substring(1);
+        }
+    }]);
+
+    return TabController;
+}();
+
+exports.default = TabController;
 
 /***/ })
 /******/ ]);
