@@ -1435,7 +1435,7 @@ var WakeWordHandler = function () {
 
         this.commandParser = new _commandParser2.default({
             synonyms: {
-                'barkeep': ['bar keep', 'party', 'barking', 'barky', 'barbie', 'turkey', 'perky']
+                'barkeep': ['bar keep', 'party', 'barking', 'barky', 'barbie', 'turkey', 'perky', 'marquee', 'martin', 'body']
             },
             commands: {
                 '[barkeep]': function barkeep() {
