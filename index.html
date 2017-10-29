@@ -32,9 +32,10 @@
 
     <div class="tab-pane" id="loadSongs">
         <h2>Load files from your computer</h2>
-        <p>Use the file select control below to select audio files from your local machine:</p>
-        <input type="file" id="files" name="files[]" multiple />
-        <p>Alternatively, you can drag &amp; drop your files anywhere onto this page.</p>
+        <div id="filesDropArea">
+            <p>Drag audio files here or click in this area.</p>
+            <input type="file" id="files" name="files[]" multiple />
+        </div>
 
         <h2>Demo track</h2>
         <p>If you want to try out a demo first, <button id="loadDemoSongButton">click here!</button></p>

@@ -28,7 +28,7 @@ function init() {
     const enableMicButton = document.getElementById('enableMicButton');
     const loadDemoSongButton = document.getElementById('loadDemoSongButton');
     const filesInput = document.getElementById('files');
-    const filesDropArea = document.body;
+    const filesDropArea = document.getElementById('filesDropArea');
 
     const noSongsContainer = document.getElementById('noSongsContainer');
     const someSongsContainer = document.getElementById('someSongsContainer');

@@ -32,10 +32,6 @@ h4 {
     float: right;
 }
 
-.droppable {
-    background-color: hotpink;
-}
-
 input.bar-number {
     width: 50px;
 }
@@ -104,6 +100,35 @@ ul.tab-links {
     top: 30px;
     opacity: 1;
 }
+
+/* files drag & drop - NOTE: this doesn't perform well on lower-width screens */
+#filesDropArea {
+    width: 100%;
+    height: 150px;
+    border: 1px dashed darkgray;
+}
+#filesDropArea.droppable, #filesDropArea:active {
+    border: 1px dashed hotpink;
+}
+#filesDropArea * {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+#filesDropArea p {
+    /* 150px to match height of parent */
+    line-height: 150px;
+    text-align: center;
+}
+#filesDropArea input {
+    /* relative with negative top so it overlays the p element */
+    position: relative;
+    /* 150px to match height of parent */
+    top: -150px;
+    opacity: 0;
+}
+
 
 .info {
     border: 1px solid darkgray;

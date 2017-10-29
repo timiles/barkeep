@@ -60,11 +60,105 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _noteConverter = __webpack_require__(4);
+
+var _noteConverter2 = _interopRequireDefault(_noteConverter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Beeper = function () {
+    function Beeper(context) {
+        _classCallCheck(this, Beeper);
+
+        this.context = context;
+    }
+
+    _createClass(Beeper, [{
+        key: 'beep',
+        value: function beep() {
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+            var defaults = {
+                startSecondsFromNow: 0,
+                durationSeconds: .1,
+                note: 108
+            };
+            options = Object.assign({}, defaults, options);
+
+            var gainNode = this.context.createGain();
+            gainNode.gain.value = .1;
+            gainNode.connect(this.context.destination);
+
+            var oscillator = this.context.createOscillator();
+            oscillator.frequency.value = _noteConverter2.default.getFrequencyFromNote(options.note);
+            oscillator.connect(gainNode);
+
+            var startWhen = options.startSecondsFromNow + this.context.currentTime;
+            oscillator.start(startWhen);
+            oscillator.stop(startWhen + options.durationSeconds);
+        }
+    }, {
+        key: 'doubleBeep',
+        value: function doubleBeep() {
+            this.beep({ startSecondsFromNow: 0, durationSeconds: .05 });
+            this.beep({ startSecondsFromNow: .1, durationSeconds: .05 });
+        }
+    }, {
+        key: 'respond',
+        value: function respond() {
+            var startFrequency = _noteConverter2.default.getFrequencyFromNote(101);
+            var endFrequency = _noteConverter2.default.getFrequencyFromNote(108);
+            var durationSeconds = .3;
+            var numberOfIntervals = 10;
+
+            var intervalSeconds = durationSeconds / numberOfIntervals;
+            var intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
+
+            var gainNode = this.context.createGain();
+            gainNode.gain.value = .1;
+            gainNode.connect(this.context.destination);
+
+            var oscillator = this.context.createOscillator();
+            oscillator.frequency.value = startFrequency;
+            oscillator.connect(gainNode);
+
+            var intervalNumber = 0;
+            oscillator.start();
+            var intervalId = setInterval(function () {
+                oscillator.frequency.value += intervalFrequency;
+                if (intervalNumber++ >= numberOfIntervals) {
+                    oscillator.stop();
+                    clearInterval(intervalId);
+                }
+            }, intervalSeconds * 1000);
+        }
+    }]);
+
+    return Beeper;
+}();
+
+exports.default = Beeper;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -100,7 +194,7 @@ var SongInfo = function () {
 exports.default = SongInfo;
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -293,25 +387,25 @@ var CommandParser = function () {
 exports.default = CommandParser;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _beeper = __webpack_require__(6);
+var _beeper = __webpack_require__(0);
 
 var _beeper2 = _interopRequireDefault(_beeper);
 
-var _fileHelpers = __webpack_require__(3);
+var _fileHelpers = __webpack_require__(5);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
 
-var _logger = __webpack_require__(20);
+var _logger = __webpack_require__(6);
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var _playlistManager = __webpack_require__(5);
+var _playlistManager = __webpack_require__(7);
 
 var _playlistManager2 = _interopRequireDefault(_playlistManager);
 
@@ -319,7 +413,7 @@ var _songFile = __webpack_require__(11);
 
 var _songFile2 = _interopRequireDefault(_songFile);
 
-var _songInfo = __webpack_require__(0);
+var _songInfo = __webpack_require__(1);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -327,27 +421,27 @@ var _songLibrary = __webpack_require__(12);
 
 var _songLibrary2 = _interopRequireDefault(_songLibrary);
 
-var _tabController = __webpack_require__(19);
+var _tabController = __webpack_require__(13);
 
 var _tabController2 = _interopRequireDefault(_tabController);
 
-var _toastController = __webpack_require__(18);
+var _toastController = __webpack_require__(14);
 
 var _toastController2 = _interopRequireDefault(_toastController);
 
-var _commandHandler = __webpack_require__(14);
+var _commandHandler = __webpack_require__(15);
 
 var _commandHandler2 = _interopRequireDefault(_commandHandler);
 
-var _wakeWordHandler = __webpack_require__(15);
+var _wakeWordHandler = __webpack_require__(16);
 
 var _wakeWordHandler2 = _interopRequireDefault(_wakeWordHandler);
 
-var _voiceCommandListener = __webpack_require__(16);
+var _voiceCommandListener = __webpack_require__(17);
 
 var _voiceCommandListener2 = _interopRequireDefault(_voiceCommandListener);
 
-__webpack_require__(17);
+__webpack_require__(18);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -369,7 +463,7 @@ function init() {
     var enableMicButton = document.getElementById('enableMicButton');
     var loadDemoSongButton = document.getElementById('loadDemoSongButton');
     var filesInput = document.getElementById('files');
-    var filesDropArea = document.body;
+    var filesDropArea = document.getElementById('filesDropArea');
 
     var noSongsContainer = document.getElementById('noSongsContainer');
     var someSongsContainer = document.getElementById('someSongsContainer');
@@ -593,7 +687,44 @@ function init() {
 }
 
 /***/ }),
-/* 3 */
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NoteConverter = function () {
+    function NoteConverter() {
+        _classCallCheck(this, NoteConverter);
+    }
+
+    _createClass(NoteConverter, null, [{
+        key: "getFrequencyFromNote",
+        value: function getFrequencyFromNote(note) {
+            return 440 * Math.pow(2, (note - 69) / 12);
+        }
+    }, {
+        key: "getNoteFromFrequency",
+        value: function getNoteFromFrequency(frequency) {
+            return Math.round(12 * (Math.log(frequency / 440) / Math.log(2))) + 69;
+        }
+    }]);
+
+    return NoteConverter;
+}();
+
+exports.default = NoteConverter;
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -679,8 +810,7 @@ var FileHelpers = function () {
 exports.default = FileHelpers;
 
 /***/ }),
-/* 4 */,
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -692,7 +822,46 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _beeper = __webpack_require__(6);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Logger = function () {
+    function Logger(outputElement) {
+        _classCallCheck(this, Logger);
+
+        this.outputElement = outputElement;
+    }
+
+    _createClass(Logger, [{
+        key: 'log',
+        value: function log(level, message) {
+            var el = document.createElement('p');
+            el.classList.add('log');
+            el.classList.add('log-' + level);
+            el.innerText = message;
+            // prepend so latest message is always on top. better way?
+            this.outputElement.prepend(el);
+        }
+    }]);
+
+    return Logger;
+}();
+
+exports.default = Logger;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _beeper = __webpack_require__(0);
 
 var _beeper2 = _interopRequireDefault(_beeper);
 
@@ -782,137 +951,6 @@ var PlaylistManager = function () {
 }();
 
 exports.default = PlaylistManager;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _noteConverter = __webpack_require__(7);
-
-var _noteConverter2 = _interopRequireDefault(_noteConverter);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Beeper = function () {
-    function Beeper(context) {
-        _classCallCheck(this, Beeper);
-
-        this.context = context;
-    }
-
-    _createClass(Beeper, [{
-        key: 'beep',
-        value: function beep() {
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            var defaults = {
-                startSecondsFromNow: 0,
-                durationSeconds: .1,
-                note: 108
-            };
-            options = Object.assign({}, defaults, options);
-
-            var gainNode = this.context.createGain();
-            gainNode.gain.value = .1;
-            gainNode.connect(this.context.destination);
-
-            var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = _noteConverter2.default.getFrequencyFromNote(options.note);
-            oscillator.connect(gainNode);
-
-            var startWhen = options.startSecondsFromNow + this.context.currentTime;
-            oscillator.start(startWhen);
-            oscillator.stop(startWhen + options.durationSeconds);
-        }
-    }, {
-        key: 'doubleBeep',
-        value: function doubleBeep() {
-            this.beep({ startSecondsFromNow: 0, durationSeconds: .05 });
-            this.beep({ startSecondsFromNow: .1, durationSeconds: .05 });
-        }
-    }, {
-        key: 'respond',
-        value: function respond() {
-            var startFrequency = _noteConverter2.default.getFrequencyFromNote(101);
-            var endFrequency = _noteConverter2.default.getFrequencyFromNote(108);
-            var durationSeconds = .3;
-            var numberOfIntervals = 10;
-
-            var intervalSeconds = durationSeconds / numberOfIntervals;
-            var intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
-
-            var gainNode = this.context.createGain();
-            gainNode.gain.value = .1;
-            gainNode.connect(this.context.destination);
-
-            var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = startFrequency;
-            oscillator.connect(gainNode);
-
-            var intervalNumber = 0;
-            oscillator.start();
-            var intervalId = setInterval(function () {
-                oscillator.frequency.value += intervalFrequency;
-                if (intervalNumber++ >= numberOfIntervals) {
-                    oscillator.stop();
-                    clearInterval(intervalId);
-                }
-            }, intervalSeconds * 1000);
-        }
-    }]);
-
-    return Beeper;
-}();
-
-exports.default = Beeper;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var NoteConverter = function () {
-    function NoteConverter() {
-        _classCallCheck(this, NoteConverter);
-    }
-
-    _createClass(NoteConverter, null, [{
-        key: "getFrequencyFromNote",
-        value: function getFrequencyFromNote(note) {
-            return 440 * Math.pow(2, (note - 69) / 12);
-        }
-    }, {
-        key: "getNoteFromFrequency",
-        value: function getNoteFromFrequency(frequency) {
-            return Math.round(12 * (Math.log(frequency / 440) / Math.log(2))) + 69;
-        }
-    }]);
-
-    return NoteConverter;
-}();
-
-exports.default = NoteConverter;
 
 /***/ }),
 /* 8 */
@@ -1283,7 +1321,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _songInfo = __webpack_require__(0);
+var _songInfo = __webpack_require__(1);
 
 var _songInfo2 = _interopRequireDefault(_songInfo);
 
@@ -1389,7 +1427,66 @@ var SongLibrary = function () {
 exports.default = SongLibrary;
 
 /***/ }),
-/* 13 */,
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TabController = function () {
+    function TabController(document) {
+        var _this = this;
+
+        _classCallCheck(this, TabController);
+
+        this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
+        this.tabPanes = Array.from(document.getElementsByClassName('tab-pane'));
+
+        this.tabLinks.forEach(function (tabLink) {
+            tabLink.onclick = function () {
+                _this.openTab(TabController._getTargetTabId(tabLink));
+            };
+        });
+    }
+
+    _createClass(TabController, [{
+        key: 'openTab',
+        value: function openTab(targetTabId) {
+            var toggleActive = function toggleActive(tabId, el) {
+                if (tabId === targetTabId) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            };
+            this.tabLinks.forEach(function (tabLink) {
+                toggleActive(TabController._getTargetTabId(tabLink), tabLink);
+            });
+            this.tabPanes.forEach(function (tabContents) {
+                toggleActive(tabContents.id, tabContents);
+            });
+        }
+    }], [{
+        key: '_getTargetTabId',
+        value: function _getTargetTabId(tabLink) {
+            return tabLink.getAttribute('href').substring(1);
+        }
+    }]);
+
+    return TabController;
+}();
+
+exports.default = TabController;
+
+/***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1402,7 +1499,52 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _commandParser = __webpack_require__(1);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ToastController = function () {
+    function ToastController(document) {
+        _classCallCheck(this, ToastController);
+
+        var toastElement = document.createElement('div');
+        toastElement.classList.add('toast');
+        document.body.appendChild(toastElement);
+        this.toastElement = toastElement;
+    }
+
+    _createClass(ToastController, [{
+        key: 'show',
+        value: function show(message) {
+            var _this = this;
+
+            var durationMilliseconds = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3000;
+
+            this.toastElement.innerHTML = message;
+            this.toastElement.classList.add('show');
+            setTimeout(function () {
+                _this.toastElement.classList.remove('show');
+            }, durationMilliseconds);
+        }
+    }]);
+
+    return ToastController;
+}();
+
+exports.default = ToastController;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _commandParser = __webpack_require__(2);
 
 var _commandParser2 = _interopRequireDefault(_commandParser);
 
@@ -1476,7 +1618,7 @@ var CommandHandler = function () {
 exports.default = CommandHandler;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1488,7 +1630,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _commandParser = __webpack_require__(1);
+var _commandParser = __webpack_require__(2);
 
 var _commandParser2 = _interopRequireDefault(_commandParser);
 
@@ -1530,7 +1672,7 @@ var WakeWordHandler = function () {
 exports.default = WakeWordHandler;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1671,7 +1813,7 @@ var VoiceCommandListener = function () {
 exports.default = VoiceCommandListener;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2100,150 +2242,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
     }, {}] }, {}, [5])(5);
 });
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var ToastController = function () {
-    function ToastController(document) {
-        _classCallCheck(this, ToastController);
-
-        var toastElement = document.createElement('div');
-        toastElement.classList.add('toast');
-        document.body.appendChild(toastElement);
-        this.toastElement = toastElement;
-    }
-
-    _createClass(ToastController, [{
-        key: 'show',
-        value: function show(message) {
-            var _this = this;
-
-            var durationMilliseconds = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3000;
-
-            this.toastElement.innerHTML = message;
-            this.toastElement.classList.add('show');
-            setTimeout(function () {
-                _this.toastElement.classList.remove('show');
-            }, durationMilliseconds);
-        }
-    }]);
-
-    return ToastController;
-}();
-
-exports.default = ToastController;
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var TabController = function () {
-    function TabController(document) {
-        var _this = this;
-
-        _classCallCheck(this, TabController);
-
-        this.tabLinks = Array.from(document.getElementsByClassName('tab-link'));
-        this.tabPanes = Array.from(document.getElementsByClassName('tab-pane'));
-
-        this.tabLinks.forEach(function (tabLink) {
-            tabLink.onclick = function () {
-                _this.openTab(TabController._getTargetTabId(tabLink));
-            };
-        });
-    }
-
-    _createClass(TabController, [{
-        key: 'openTab',
-        value: function openTab(targetTabId) {
-            var toggleActive = function toggleActive(tabId, el) {
-                if (tabId === targetTabId) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                }
-            };
-            this.tabLinks.forEach(function (tabLink) {
-                toggleActive(TabController._getTargetTabId(tabLink), tabLink);
-            });
-            this.tabPanes.forEach(function (tabContents) {
-                toggleActive(tabContents.id, tabContents);
-            });
-        }
-    }], [{
-        key: '_getTargetTabId',
-        value: function _getTargetTabId(tabLink) {
-            return tabLink.getAttribute('href').substring(1);
-        }
-    }]);
-
-    return TabController;
-}();
-
-exports.default = TabController;
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Logger = function () {
-    function Logger(outputElement) {
-        _classCallCheck(this, Logger);
-
-        this.outputElement = outputElement;
-    }
-
-    _createClass(Logger, [{
-        key: 'log',
-        value: function log(level, message) {
-            var el = document.createElement('p');
-            el.classList.add('log');
-            el.classList.add('log-' + level);
-            el.innerText = message;
-            // prepend so latest message is always on top. better way?
-            this.outputElement.prepend(el);
-        }
-    }]);
-
-    return Logger;
-}();
-
-exports.default = Logger;
 
 /***/ })
 /******/ ]);
