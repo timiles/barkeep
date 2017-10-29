@@ -28,7 +28,9 @@ export default class CommandHandler {
                 '[loop] from [bar] {number} through to [bar] {number}':
                 (loopSynonym, barSynonym1, fromBarNumber, barSynonym2, toBarNumber) => this.onLoopBarsCommand(fromBarNumber, toBarNumber),
                 '[loop] [bar] {number}':
-                (loopSynonym, barSynonym, barNumber) => this.onLoopBarCommand(barNumber)
+                (loopSynonym, barSynonym, barNumber) => this.onLoopBarCommand(barNumber),
+                'nothing':
+                () => this.onNothingCommand()
             }
         });
     }

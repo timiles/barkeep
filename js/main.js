@@ -207,6 +207,11 @@ function init() {
             voiceCommandListener.stopListening();
             return 'Invoked StopListening command';
         };
+
+        commandHandler.onNothingCommand = () => {
+            // no effect, but a successful command
+            return 'Invoked Nothing command';
+        };
     };
 
     importSongLibraryInput.onchange = (evt) => {

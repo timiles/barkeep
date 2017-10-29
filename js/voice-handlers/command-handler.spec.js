@@ -12,6 +12,7 @@ describe('CommandHandler', () => {
         commandHandler.onStopListeningCommand = () => true;
         commandHandler.onBarCommand = () => true;
         commandHandler.onLoopBarsCommand = () => true;
+        commandHandler.onNothingCommand = () => true;
     });
 
     it('Play My Test Song', () => {
@@ -134,5 +135,12 @@ describe('CommandHandler', () => {
 
         const result = commandHandler.handle('stop listening');
         expect(result).toBe('stopped listening');
+    });
+
+    it('nothing', () => {
+        commandHandler.onNothingCommand = () => { return 'nothing'; };
+
+        const result = commandHandler.handle('nothing');
+        expect(result).toBe('nothing');
     });
 });

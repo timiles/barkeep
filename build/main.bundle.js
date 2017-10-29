@@ -570,6 +570,11 @@ function init() {
             voiceCommandListener.stopListening();
             return 'Invoked StopListening command';
         };
+
+        commandHandler.onNothingCommand = function () {
+            // no effect, but a successful command
+            return 'Invoked Nothing command';
+        };
     };
 
     importSongLibraryInput.onchange = function (evt) {
@@ -1422,6 +1427,9 @@ var CommandHandler = function () {
                 },
                 '[loop] [bar] {number}': function loopBarNumber(loopSynonym, barSynonym, barNumber) {
                     return _this.onLoopBarCommand(barNumber);
+                },
+                'nothing': function nothing() {
+                    return _this.onNothingCommand();
                 }
             }
         });
