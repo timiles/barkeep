@@ -39,7 +39,7 @@ export default class PlaylistManager {
             this.currentSongPlayer.play(barNumber);
         }
     }
-    
+
     loopBars(fromBarNumber, toBarNumber) {
         if (this.currentSongPlayer) {
             this.beeper.doubleBeep();
@@ -50,6 +50,12 @@ export default class PlaylistManager {
     stop() {
         if (this.currentSongPlayer) {
             this.currentSongPlayer.stop();
+        }
+    }
+
+    setVolume(volume) {
+        if (this.currentSongPlayer) {
+            this.currentSongPlayer.setVolume(volume);
         }
     }
 }

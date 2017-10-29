@@ -519,6 +519,9 @@ function init() {
             });
             if (activated) {
                 beeper.respond();
+                playlistManager.setVolume(.1);
+            } else {
+                playlistManager.setVolume(1);
             }
             return true;
         };
@@ -764,6 +767,13 @@ var PlaylistManager = function () {
         value: function stop() {
             if (this.currentSongPlayer) {
                 this.currentSongPlayer.stop();
+            }
+        }
+    }, {
+        key: 'setVolume',
+        value: function setVolume(volume) {
+            if (this.currentSongPlayer) {
+                this.currentSongPlayer.setVolume(volume);
             }
         }
     }]);
@@ -1183,9 +1193,16 @@ var SongPlayer = function () {
         key: "play",
         value: function play(barNumber) {
             this.stop();
+
+            var gainNode = this.context.createGain();
+            gainNode.gain.value = 1;
+            gainNode.connect(this.context.destination);
+            this.gainNode = gainNode;
+
             var source = this.context.createBufferSource();
             source.buffer = this.buffer;
-            source.connect(this.context.destination);
+            source.connect(gainNode);
+
             var startTime = this.getStartTimeInSeconds(barNumber || 0);
             source.start(0, startTime);
             this.currentSource = source;
@@ -1203,6 +1220,13 @@ var SongPlayer = function () {
             source.loopEnd = this.getStartTimeInSeconds(toBarNumber + 1);
             source.start(0, source.loopStart);
             this.currentSource = source;
+        }
+    }, {
+        key: "setVolume",
+        value: function setVolume(volume) {
+            if (this.gainNode) {
+                this.gainNode.gain.value = volume;
+            }
         }
     }, {
         key: "stop",

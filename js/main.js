@@ -38,7 +38,7 @@ function init() {
     const fromBarNumberInput = document.getElementById('fromBarNumber');
     const toBarNumberInput = document.getElementById('toBarNumber');
     const loopBarsButton = document.getElementById('loopBarsButton');
-    
+
     const importSongLibraryInput = document.getElementById('importSongLibraryInput');
     const exportSongLibraryButton = document.getElementById('exportSongLibraryButton');
 
@@ -48,9 +48,9 @@ function init() {
     tabController.openTab('loadSongs');
 
     const toastController = new ToastController(document);
-    
+
     const context = new (window.AudioContext || window.webkitAudioContext)();
-    
+
     const songLibrary = new SongLibrary();
     const playlistManager = new PlaylistManager(context);
     const jtmplModel = { playlist: [] };
@@ -155,7 +155,11 @@ function init() {
                 .forEach(el => setElementClass(el, 'wake-word-indicator-on', activated));
             if (activated) {
                 beeper.respond();
-            }    
+                playlistManager.setVolume(.1);
+            }
+            else {
+                playlistManager.setVolume(1);
+            }
             return true;
         };
 

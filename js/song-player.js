@@ -10,9 +10,16 @@ export default class SongPlayer {
 
     play(barNumber) {
         this.stop();
+
+        const gainNode = this.context.createGain();
+        gainNode.gain.value = 1;
+        gainNode.connect(this.context.destination);
+        this.gainNode = gainNode;
+
         const source = this.context.createBufferSource();
         source.buffer = this.buffer;
-        source.connect(this.context.destination);
+        source.connect(gainNode);
+
         const startTime = this.getStartTimeInSeconds(barNumber || 0);
         source.start(0, startTime);
         this.currentSource = source;
@@ -29,6 +36,12 @@ export default class SongPlayer {
         source.loopEnd = this.getStartTimeInSeconds(toBarNumber + 1);
         source.start(0, source.loopStart);
         this.currentSource = source;
+    }
+
+    setVolume(volume) {
+        if (this.gainNode) {
+            this.gainNode.gain.value = volume;
+        }
     }
 
     stop() {
