@@ -299,6 +299,10 @@ exports.default = CommandParser;
 "use strict";
 
 
+var _beeper = __webpack_require__(6);
+
+var _beeper2 = _interopRequireDefault(_beeper);
+
 var _fileHelpers = __webpack_require__(3);
 
 var _fileHelpers2 = _interopRequireDefault(_fileHelpers);
@@ -507,11 +511,15 @@ function init() {
     };
 
     enableMicButton.onclick = function () {
+        var beeper = new _beeper2.default(context);
         var wakeWordHandler = new _wakeWordHandler2.default();
         wakeWordHandler.onWakeWord = function (activated) {
             Array.from(document.getElementsByClassName('wake-word-indicator')).forEach(function (el) {
                 return setElementClass(el, 'wake-word-indicator-on', activated);
             });
+            if (activated) {
+                beeper.respond();
+            }
             return true;
         };
 
@@ -817,6 +825,35 @@ var Beeper = function () {
         value: function doubleBeep() {
             this.beep({ startSecondsFromNow: 0, durationSeconds: .05 });
             this.beep({ startSecondsFromNow: .1, durationSeconds: .05 });
+        }
+    }, {
+        key: 'respond',
+        value: function respond() {
+            var startFrequency = _noteConverter2.default.getFrequencyFromNote(101);
+            var endFrequency = _noteConverter2.default.getFrequencyFromNote(108);
+            var durationSeconds = .3;
+            var numberOfIntervals = 10;
+
+            var intervalSeconds = durationSeconds / numberOfIntervals;
+            var intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
+
+            var gainNode = this.context.createGain();
+            gainNode.gain.value = .1;
+            gainNode.connect(this.context.destination);
+
+            var oscillator = this.context.createOscillator();
+            oscillator.frequency.value = startFrequency;
+            oscillator.connect(gainNode);
+
+            var intervalNumber = 0;
+            oscillator.start();
+            var intervalId = setInterval(function () {
+                oscillator.frequency.value += intervalFrequency;
+                if (intervalNumber++ >= numberOfIntervals) {
+                    oscillator.stop();
+                    clearInterval(intervalId);
+                }
+            }, intervalSeconds * 1000);
         }
     }]);
 

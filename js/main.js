@@ -1,3 +1,4 @@
+import Beeper from './beeper';
 import FileHelpers from './file-helpers';
 import Logger from './ui/logger';
 import PlaylistManager from './playlist-manager';
@@ -49,7 +50,7 @@ function init() {
     const toastController = new ToastController(document);
     
     const context = new (window.AudioContext || window.webkitAudioContext)();
-
+    
     const songLibrary = new SongLibrary();
     const playlistManager = new PlaylistManager(context);
     const jtmplModel = { playlist: [] };
@@ -147,10 +148,14 @@ function init() {
     };
 
     enableMicButton.onclick = () => {
+        const beeper = new Beeper(context);
         const wakeWordHandler = new WakeWordHandler();
         wakeWordHandler.onWakeWord = (activated) => {
             Array.from(document.getElementsByClassName('wake-word-indicator'))
                 .forEach(el => setElementClass(el, 'wake-word-indicator-on', activated));
+            if (activated) {
+                beeper.respond();
+            }    
             return true;
         };
 

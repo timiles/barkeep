@@ -31,4 +31,32 @@ export default class Beeper {
         this.beep({ startSecondsFromNow: 0, durationSeconds: .05 });
         this.beep({ startSecondsFromNow: .1, durationSeconds: .05 });
     }
+
+    respond() {
+        const startFrequency = NoteConverter.getFrequencyFromNote(101);
+        const endFrequency = NoteConverter.getFrequencyFromNote(108);
+        const durationSeconds = .3;
+        const numberOfIntervals = 10;
+
+        const intervalSeconds = durationSeconds / numberOfIntervals;
+        const intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
+
+        const gainNode = this.context.createGain();
+        gainNode.gain.value = .1;
+        gainNode.connect(this.context.destination);
+
+        const oscillator = this.context.createOscillator();
+        oscillator.frequency.value = startFrequency;
+        oscillator.connect(gainNode);
+
+        let intervalNumber = 0;
+        oscillator.start();
+        const intervalId = setInterval(() => {
+            oscillator.frequency.value += intervalFrequency;
+            if (intervalNumber++ >= numberOfIntervals) {
+                oscillator.stop();
+                clearInterval(intervalId);
+            }
+        }, intervalSeconds * 1000);
+    }
 }
