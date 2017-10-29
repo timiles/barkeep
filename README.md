@@ -11,6 +11,7 @@ Inspiration had struck, and a couple hours later I had knocked together a protot
 
 ## TODO
 - [ ] Customisable wake word & language
+- [ ] Multi-part commands
 - [ ] UI overhaul
 
 ## Credits
