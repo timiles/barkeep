@@ -104,11 +104,12 @@ var Beeper = function () {
             options = Object.assign({}, defaults, options);
 
             var gainNode = this.context.createGain();
-            gainNode.gain.value = .1;
+            gainNode.gain.setValueAtTime(.1, this.context.currentTime);
             gainNode.connect(this.context.destination);
 
             var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = _noteConverter2.default.getFrequencyFromNote(options.note);
+            var frequency = _noteConverter2.default.getFrequencyFromNote(options.note);
+            oscillator.frequency.setValueAtTime(frequency, this.context.currentTime);
             oscillator.connect(gainNode);
 
             var startWhen = options.startSecondsFromNow + this.context.currentTime;
@@ -127,28 +128,18 @@ var Beeper = function () {
             var startFrequency = _noteConverter2.default.getFrequencyFromNote(101);
             var endFrequency = _noteConverter2.default.getFrequencyFromNote(108);
             var durationSeconds = .3;
-            var numberOfIntervals = 10;
-
-            var intervalSeconds = durationSeconds / numberOfIntervals;
-            var intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
 
             var gainNode = this.context.createGain();
-            gainNode.gain.value = .1;
+            gainNode.gain.setValueAtTime(.1, this.context.currentTime);
             gainNode.connect(this.context.destination);
 
             var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = startFrequency;
             oscillator.connect(gainNode);
 
-            var intervalNumber = 0;
+            oscillator.frequency.setValueAtTime(startFrequency, this.context.currentTime);
+            oscillator.frequency.setTargetAtTime(endFrequency, this.context.currentTime, durationSeconds);
             oscillator.start();
-            var intervalId = setInterval(function () {
-                oscillator.frequency.value += intervalFrequency;
-                if (intervalNumber++ >= numberOfIntervals) {
-                    oscillator.stop();
-                    clearInterval(intervalId);
-                }
-            }, intervalSeconds * 1000);
+            oscillator.stop(this.context.currentTime + durationSeconds);
         }
     }]);
 

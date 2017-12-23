@@ -15,11 +15,12 @@ export default class Beeper {
         options = Object.assign({}, defaults, options);
 
         const gainNode = this.context.createGain();
-        gainNode.gain.value = .1;
+        gainNode.gain.setValueAtTime(.1, this.context.currentTime);
         gainNode.connect(this.context.destination);
 
         const oscillator = this.context.createOscillator();
-        oscillator.frequency.value = NoteConverter.getFrequencyFromNote(options.note);
+        const frequency = NoteConverter.getFrequencyFromNote(options.note);
+        oscillator.frequency.setValueAtTime(frequency, this.context.currentTime);
         oscillator.connect(gainNode);
 
         const startWhen = options.startSecondsFromNow + this.context.currentTime;
@@ -36,27 +37,17 @@ export default class Beeper {
         const startFrequency = NoteConverter.getFrequencyFromNote(101);
         const endFrequency = NoteConverter.getFrequencyFromNote(108);
         const durationSeconds = .3;
-        const numberOfIntervals = 10;
-
-        const intervalSeconds = durationSeconds / numberOfIntervals;
-        const intervalFrequency = (endFrequency - startFrequency) / numberOfIntervals;
 
         const gainNode = this.context.createGain();
-        gainNode.gain.value = .1;
+        gainNode.gain.setValueAtTime(.1, this.context.currentTime);
         gainNode.connect(this.context.destination);
 
         const oscillator = this.context.createOscillator();
-        oscillator.frequency.value = startFrequency;
         oscillator.connect(gainNode);
 
-        let intervalNumber = 0;
+        oscillator.frequency.setValueAtTime(startFrequency, this.context.currentTime);
+        oscillator.frequency.setTargetAtTime(endFrequency, this.context.currentTime, durationSeconds);
         oscillator.start();
-        const intervalId = setInterval(() => {
-            oscillator.frequency.value += intervalFrequency;
-            if (intervalNumber++ >= numberOfIntervals) {
-                oscillator.stop();
-                clearInterval(intervalId);
-            }
-        }, intervalSeconds * 1000);
+        oscillator.stop(this.context.currentTime + durationSeconds);
     }
 }
