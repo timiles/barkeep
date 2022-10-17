@@ -7,7 +7,7 @@ I just wished I could shout out a bar number and have the CD pick back up from t
 Inspiration had struck, and a couple hours later I had knocked together a prototype using
 [AudioContext](https://developer.mozilla.org/en/docs/Web/API/AudioContext) and
 [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) APIs.
-[Click here for a demo!](https://barkeep.github.io)
+[Click here for a demo!](https://timiles.github.io/barkeep/)
 
 ## TODO
 - [ ] Customisable wake word & language
