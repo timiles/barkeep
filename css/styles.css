@@ -140,7 +140,7 @@ ul.tab-links {
     width: 100%;
 }
 .playlist .name {
-    white-space: nowrap;
+    width: 25%;
 }
 .playlist input[type=number] {
     width: 100%;
